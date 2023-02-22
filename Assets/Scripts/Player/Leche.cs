@@ -4,15 +4,55 @@ using UnityEngine;
 
 public class Leche : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private Rigidbody2D rb = null;
+
+    [SerializeField]
+    private Strawberry strawberry = null;
+
+    [SerializeField]
+    private GameObject projectile = null;
+
+    [SerializeField]
+    private float attackDelay = 0.25f;
+    private float attackTimer = 0f;
+
+    [SerializeField]
+    private float maxDistance = 2f;
+
+    [SerializeField]
+    private float walkSpeed = 5f;
+
+    [SerializeField]
+    private float sprintSpeed = 10f;
+
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKey(KeyCode.C) && attackTimer <= 0f)
+        {
+            Projectile createdProjectile = Instantiate(projectile).GetComponent<Projectile>();
+
+            attackTimer = attackDelay;    
+        }
+
+        if (attackTimer > 0f)
+        {
+            attackTimer -= Time.deltaTime;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        Vector2 directionToStrawberry = strawberry.transform.position - transform.position;
+        float distanceFromStrawberry = directionToStrawberry.magnitude;
+
+        if (distanceFromStrawberry > maxDistance)
+        {
+
+        }
     }
 }
