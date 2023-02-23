@@ -33,6 +33,13 @@ public class Strawberry : MonoBehaviour
     private float groundedBuffer = 0.15f;
     private float groundedTimer = 0f;
 
+    private bool grabbingWall = false;
+    [SerializeField]
+    private float wallGrabDuration = 2.5f;
+    [SerializeField]
+    private float wallSlideSpeed = 0.4f;
+    private float wallGrabTimer = 0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -66,25 +73,46 @@ public class Strawberry : MonoBehaviour
     void FixedUpdate()
     {
         bool grounded = GetGrounded();
+        bool onWall = GetOnWall();
+
+        movement.y = 0f;
+
+        if (grabbingWall && grabbingWall != onWall || grounded)
+        {
+            grabbingWall = false;
+        }
 
         if (grounded)
         {
             groundedTimer = groundedBuffer;
         }
 
-        Debug.Log(groundedTimer + " " + inputTimer);
-
         movement.y = rb.velocity.y;
 
-        if (rb.velocity.y < 0f)
+        if (!grabbingWall)
         {
-            rb.gravityScale = fallSpeed;
-        }
-        else if ((rb.velocity.y > 0f) && !holdingJump)
-        {
-            rb.gravityScale = lowJumpSpeed;
+            if (rb.velocity.y <= 0f && !grounded)
+            {
+                rb.gravityScale = fallSpeed;
+            }
+            else if ((rb.velocity.y > 0f) && !holdingJump)
+            {
+                rb.gravityScale = lowJumpSpeed;
+            }
         }
         else
+        {
+            if (wallGrabTimer <= 0f)
+            {
+                rb.gravityScale = wallSlideSpeed;
+            }
+            else
+            {
+                rb.gravityScale = 0f;
+            }
+        }
+
+        if (grounded)
         {
             rb.gravityScale = 1f;
         }
@@ -93,6 +121,14 @@ public class Strawberry : MonoBehaviour
         {
             movement.y = jumpStrength;
             inputTimer = 0f;
+        }
+
+        if (onWall && !grounded && movement.x != 0f && !grabbingWall)
+        {
+            wallGrabTimer = wallGrabDuration;
+            grabbingWall = true;
+            movement.y = 0f;
+            rb.gravityScale = 0f;
         }
 
         rb.velocity = movement;
@@ -105,6 +141,11 @@ public class Strawberry : MonoBehaviour
         if (inputTimer > 0f)
         {
             inputTimer -= Time.fixedDeltaTime;
+        }
+
+        if (wallGrabTimer > 0f)
+        {
+            wallGrabTimer -= Time.fixedDeltaTime;
         }
     }
 
@@ -132,6 +173,12 @@ public class Strawberry : MonoBehaviour
 
     private bool GetOnWall()
     {
-        return false;
+        float boxWidth = 0.01f;
+        Vector2 boxCheckPosition = new Vector2(transform.position.x + spriteDimensions.x * Mathf.Sign(transform.localScale.x) + boxWidth * 0.5f, transform.position.y);
+        Vector2 boxCheckSize = new Vector2(boxWidth, spriteDimensions.y);
+
+        Collider2D platform = Physics2D.OverlapBox(boxCheckPosition, boxCheckSize, 0f, platformMask);
+
+        return platform != null;
     }
 }

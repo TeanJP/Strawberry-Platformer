@@ -19,12 +19,6 @@ public class Leche : MonoBehaviour
     [SerializeField]
     private float maxDistance = 2f;
 
-    [SerializeField]
-    private float walkSpeed = 5f;
-
-    [SerializeField]
-    private float sprintSpeed = 10f;
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
