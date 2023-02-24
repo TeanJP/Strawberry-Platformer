@@ -393,8 +393,6 @@ MonoBehaviour:
   projectile: {fileID: 0}
   attackDelay: 0.25
   maxDistance: 2
-  walkSpeed: 5
-  sprintSpeed: 10
 --- !u!212 &611314526
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1147,6 +1145,10 @@ MonoBehaviour:
   jumpStrength: 6
   inputBuffer: 0.2
   groundedBuffer: 0.15
+  wallGrabDuration: 2.5
+  wallSlideSpeed: 0.4
+  wallJumpDirection: {x: 0.4, y: 0.6}
+  wallJumpStrength: 6
 --- !u!61 &1990224995
 BoxCollider2D:
   m_ObjectHideFlags: 0

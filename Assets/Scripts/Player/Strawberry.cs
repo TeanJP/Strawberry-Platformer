@@ -40,12 +40,20 @@ public class Strawberry : MonoBehaviour
     private float wallSlideSpeed = 0.4f;
     private float wallGrabTimer = 0f;
 
+    [SerializeField]
+    private Vector2 wallJumpDirection = Vector2.one;
+    [SerializeField]
+    private float wallJumpStrength = 6f;
+    private bool wallJumping = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         spriteDimensions = spriteRenderer.bounds.extents;
+
+        wallJumpDirection.Normalize();
     }
 
     void Update()
@@ -89,20 +97,43 @@ public class Strawberry : MonoBehaviour
 
         movement.y = rb.velocity.y;
 
+        if (onWall && !grounded && (movement.x != 0f || wallJumping) && !grabbingWall)
+        {
+            if (wallJumping)
+            {
+                wallJumping = false;
+            }
+
+            wallGrabTimer = wallGrabDuration;
+            grabbingWall = true;
+            movement.y = 0f;
+        }
+
         if (!grabbingWall)
         {
             if (rb.velocity.y <= 0f && !grounded)
             {
                 rb.gravityScale = fallSpeed;
             }
-            else if ((rb.velocity.y > 0f) && !holdingJump)
+            else if ((rb.velocity.y > 0f) && !holdingJump && !wallJumping)
             {
                 rb.gravityScale = lowJumpSpeed;
             }
         }
         else
         {
-            if (wallGrabTimer <= 0f)
+            if (inputTimer > 0f)
+            {
+                inputTimer = 0f;
+
+                wallJumping = true;
+                rb.gravityScale = 1f;
+
+                transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
+
+                movement = wallJumpDirection * new Vector2(Mathf.Sign(transform.localScale.x), 1f) * wallJumpStrength;
+            }
+            else if (wallGrabTimer <= 0f)
             {
                 rb.gravityScale = wallSlideSpeed;
             }
@@ -114,6 +145,7 @@ public class Strawberry : MonoBehaviour
 
         if (grounded)
         {
+            wallJumping = false;
             rb.gravityScale = 1f;
         }
 
@@ -123,12 +155,9 @@ public class Strawberry : MonoBehaviour
             inputTimer = 0f;
         }
 
-        if (onWall && !grounded && movement.x != 0f && !grabbingWall)
+        if (wallJumping && movement.x == 0f)
         {
-            wallGrabTimer = wallGrabDuration;
-            grabbingWall = true;
-            movement.y = 0f;
-            rb.gravityScale = 0f;
+            movement.x = rb.velocity.x;
         }
 
         rb.velocity = movement;
@@ -161,7 +190,7 @@ public class Strawberry : MonoBehaviour
         {
             for (int i = 0; i < platforms.Length; i++)
             {
-                if ((platforms[i].transform.position.y + platforms[i].bounds.extents.y) < transform.position.y)
+                if ((platforms[i].transform.position.y + platforms[i].bounds.extents.y) < transform.position.y - spriteDimensions.y)
                 {
                     return true;
                 }
