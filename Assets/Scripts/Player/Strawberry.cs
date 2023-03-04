@@ -32,6 +32,10 @@ public class Strawberry : MonoBehaviour
     #region States
     private MovementState movementState = MovementState.Default;
     private RunState runState = RunState.Default;
+
+    private bool movementApplied = false;
+
+    private bool bouncing = false;
     #endregion
 
     #region Components
@@ -56,60 +60,82 @@ public class Strawberry : MonoBehaviour
     private float groundedTimer = 0f;
     #endregion
 
+    #region Movement Values
     private float currentSpeed = 0f;
     private float previousSpeed;
 
-    private float initialWalkSpeed;
-    private float maxWalkSpeed;
-    private float walkAcceleration;
+    private float initialWalkSpeed = 2f;
+    private float maxWalkSpeed = 5f;
+    private float walkAcceleration = 1f;
 
-    private float initialRunSpeed;
-    private float maxRunSpeed;
-    private float runAcceleration;
-    private float runDamping;
+    private float initialRunSpeed = 5f;
+    private float maxRunSpeed = 10f;
+    private float runAcceleration = 2f;
+    private float runDamping = 1f;
 
-    private float jumpStrength;
-    private float fallSpeed;
-    private float incompleteJumpStrength;
+    private float jumpStrength = 6f;
+    private float fallSpeed = 2.5f;
+    private float incompleteJumpStrength = 0.5f;
 
-    private float crawlSpeed;
-    private float crawlJumpStrength;
+    private float crawlSpeed = 3f;
+    private float crawlJumpStrength = 4f;
 
-    private float bellyFlopStrength;
+    private float bellyFlopStrength = 8f;
 
-    private float turnDeceleration;
+    private float turnDeceleration = 1f;
 
-    private float slideDeceleration;
+    private float slideDeceleration = 1f;
 
-    private float diveSpeed;
-    private Vector2 diveDirection;
+    private float diveSpeed = 10f;
+    private Vector2 diveDirection = new Vector2(1f, -1f);
 
-    private float wallRunSpeed;
+    private float wallRunSpeed = 6f;
 
-    private float wallJumpStrength;
-    private Vector2 wallJumpDirection;
+    private float wallJumpStrength = 6f;
+    private Vector2 wallJumpDirection = new Vector2(1f ,1f);
 
-    private float superJumpSpeed;
-    private float superJumpChargeSpeed;
+    private float superJumpSpeed = 10f;
+    private float superJumpChargeSpeed = 3f;
 
-    private float superJumpCancelSpeed;
-    private Vector2 superJumpCancelDirection;
+    private float superJumpCancelSpeed = 10f;
+    private Vector2 superJumpCancelDirection = new Vector2(1f, 0f);
+    #endregion
 
+    #region Health
+    private int maxHearts = 100;
+    private int hearts = 0;
+    #endregion
+
+    [SerializeField]
+    private LayerMask platformMask;
 
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        activeCollider = GetComponent<BoxCollider2D>();
+
+        diveDirection.Normalize();
+        wallJumpDirection.Normalize();
+        superJumpCancelDirection.Normalize();
     }
 
     void Update()
     {
         bool grounded = GetGrounded();
+        
+        if (grounded)
+        {
+            groundedTimer = groundedBuffer;
+        }
+        
         bool hittingWall = GetHittingWall();
         bool hittingCeiling = GetHittingCeiling();
 
         GetInputs();
         ApplyInputs(grounded, hittingWall, hittingCeiling);
         Move(grounded);
+        DecrementTimers(Time.deltaTime);
     }
 
     void OnCollisionEnter2D(Collision2D other)
@@ -165,6 +191,17 @@ public class Strawberry : MonoBehaviour
         switch (movementState)
         {
             case MovementState.Default:
+                if (GetFacingIncorrectDirection())
+                {
+                    FlipPlayerDirection();
+                }
+
+                if (grounded && runInput)
+                {
+                    movementState = MovementState.Running;
+                    runState = RunState.Default;
+                }
+
                 if (downInput)
                 {
                     if (grounded)
@@ -181,6 +218,12 @@ public class Strawberry : MonoBehaviour
                 switch (runState)
                 {
                     case RunState.Default:
+                        if (GetFacingIncorrectDirection())
+                        {
+                            FlipPlayerDirection();
+                            runState = RunState.Turning;
+                        }
+                        
                         if (downInput)
                         {
                             if (grounded)
@@ -192,21 +235,50 @@ public class Strawberry : MonoBehaviour
                                 runState = RunState.Diving;
                             }
                         }
+
+                        if (!grounded && hittingWall)
+                        {
+                            runState = RunState.WallRunning;
+                        }
                         break;
                     case RunState.Rolling:
+                        if (!downInput && !hittingCeiling)
+                        {
+                            if (runInput)
+                            {
+                                runState = RunState.Default;
+                            }
+                            else
+                            {
+                                runState = RunState.Stopping;
+                            }
+                        }
 
-                        break;
-                    case RunState.Turning:
-
-                        break;
-                    case RunState.Stopping:
-
+                        if (downInput && !grounded)
+                        {
+                            runState = RunState.Diving;
+                        }
                         break;
                     case RunState.WallRunning:
-                        if (jumpTimer > 0f)
+                        if (runInput)
                         {
-                            runState = RunState.WallJumping;
+                            if (hittingWall)
+                            {
+                                if (jumpTimer > 0f)
+                                {
+                                    runState = RunState.WallJumping;
+                                }
+                            }
+                            else
+                            {
+                                runState = RunState.Default;
+                            }
                         }
+                        else
+                        {
+                            movementState = MovementState.Default;
+                            runState = RunState.Default;
+                        }                      
                         break;
                     case RunState.WallJumping:
                         if (downInput)
@@ -224,6 +296,11 @@ public class Strawberry : MonoBehaviour
                     case RunState.SuperJumping:
                         if (jumpTimer > 0f)
                         {
+                            if (GetFacingIncorrectDirection())
+                            {
+                                FlipPlayerDirection();
+                            }
+
                             runState = RunState.CancellingSuperJump;
                         }
                         break;
@@ -233,9 +310,6 @@ public class Strawberry : MonoBehaviour
                             runState = RunState.SuperJumping;
                         }
                         break;
-                    case RunState.CancellingSuperJump:
-
-                        break;
                 }
                 break;
             case MovementState.Crawling:
@@ -244,33 +318,64 @@ public class Strawberry : MonoBehaviour
                     movementState = MovementState.Default;
                 }
                 break;
-            case MovementState.BellyFlopping:
-
-                break;
         }
     }
 
     private void Move(bool grounded)
     {
+        Vector2 movement = rb.velocity;
+
         switch (movementState)
         {
             case MovementState.Default:
+                if (horizontalInput == 0f)
+                {
+                    currentSpeed = initialWalkSpeed;
+                }
+                else
+                {
+                    currentSpeed = Mathf.Min(currentSpeed + walkAcceleration * Time.deltaTime, maxWalkSpeed);
+                }
 
+                movement.x = horizontalInput * currentSpeed;          
+
+                if (jumpTimer > 0f && groundedTimer > 0f)
+                {
+                    movement.y = jumpStrength;
+                }
+
+                if (rb.velocity.y < 0f)
+                {
+                    rb.gravityScale = fallSpeed;
+                }
+                else
+                {
+                    rb.gravityScale = 1f;
+                }
                 break;
             case MovementState.Running:
                 switch (runState)
                 {
                     case RunState.Default:
+                        if (grounded)
+                        {
+                            currentSpeed = Mathf.Min(currentSpeed + runAcceleration * Time.deltaTime, maxRunSpeed);
+                        }
+
+                        if (jumpTimer > 0f && groundedTimer > 0f)
+                        {
+                            movement.y = jumpStrength;
+                        }
 
                         break;
                     case RunState.Rolling:
 
                         break;
                     case RunState.Turning:
-
+                        //Change state when turn complete.
                         break;
                     case RunState.Stopping:
-
+                        //Change state when speed fully reduced.
                         break;
                     case RunState.WallRunning:
 
@@ -282,7 +387,7 @@ public class Strawberry : MonoBehaviour
 
                         break;
                     case RunState.SuperJumping:
-
+                        movement = new Vector2(0f, superJumpSpeed);
                         break;
                     case RunState.ChargingSuperJump:
 
@@ -302,19 +407,39 @@ public class Strawberry : MonoBehaviour
 
                 break;
         }
+
+        rb.velocity = movement;
     }
 
-    private void Run()
+    private bool GetFacingIncorrectDirection()
     {
-
+        return horizontalInput != 0f && horizontalInput != Mathf.Sign(transform.localScale.x);
     }
 
+    private void FlipPlayerDirection()
+    {
+        transform.localPosition = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
+    }
+
+    private void DecrementTimers(float deltaTime)
+    {
+        if (jumpTimer > 0f)
+        {
+            jumpTimer -= deltaTime;
+        }
+
+        if (groundedTimer > 0f)
+        {
+            groundedTimer -= deltaTime;
+        }
+    }
+
+    #region Collision Checks
     private bool GetGrounded()
-    {
-        /*
+    { 
         float boxHeight = 0.01f;
-        Vector2 boxCheckPosition =  new Vector2(transform.position.x, transform.position.y - spriteDimensions.y - boxHeight * 0.5f);
-        Vector2 boxCheckSize = new Vector2(spriteDimensions.x * 2f, boxHeight);
+        Vector2 boxCheckPosition =  new Vector2(transform.position.x, activeCollider.bounds.min.y - boxHeight * 0.5f);
+        Vector2 boxCheckSize = new Vector2(activeCollider.bounds.extents.x * 2f, boxHeight);
 
         Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
 
@@ -322,32 +447,75 @@ public class Strawberry : MonoBehaviour
         {
             for (int i = 0; i < platforms.Length; i++)
             {
-                if ((platforms[i].transform.position.y + platforms[i].bounds.extents.y) < transform.position.y - spriteDimensions.y)
+                if (GetAboveCollider(platforms[i]))
                 {
                     return true;
                 }
             }
         }
-        */
+        
         return false;
     }
 
     private bool GetHittingWall()
-    {
-        /*
+    {   
         float boxWidth = 0.01f;
-        Vector2 boxCheckPosition = new Vector2(transform.position.x + spriteDimensions.x * Mathf.Sign(transform.localScale.x) + boxWidth * 0.5f, transform.position.y);
-        Vector2 boxCheckSize = new Vector2(boxWidth, spriteDimensions.y);
+        Vector2 boxCheckPosition = new Vector2(activeCollider.bounds.max.x * Mathf.Sign(transform.localScale.x) + boxWidth * 0.5f, transform.position.y);
+        Vector2 boxCheckSize = new Vector2(boxWidth, activeCollider.bounds.extents.y * 2f);
 
-        Collider2D platform = Physics2D.OverlapBox(boxCheckPosition, boxCheckSize, 0f, platformMask);
+        Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
 
-        return platform != null;
-        */
+        if (platforms.Length != 0)
+        {
+            for (int i = 0; i < platforms.Length; i++)
+            {
+                if (GetParallelToCollider(platforms[i]))
+                {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
         
     private bool GetHittingCeiling()
     {
+        float boxHeight = 0.01f;
+        Vector2 boxCheckPosition = new Vector2(transform.position.x, activeCollider.bounds.max.y + boxHeight * 0.5f);
+        Vector2 boxCheckSize = new Vector2(activeCollider.bounds.extents.x * 2f, boxHeight);
+
+        Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
+
+        if (platforms.Length != 0)
+        {
+            for (int i = 0; i < platforms.Length; i++)
+            {
+                if (GetBelowCollider(platforms[i]))
+                {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
+    #endregion
+
+    #region Collider Position Comparisons
+    private bool GetAboveCollider(Collider2D other)
+    {
+        return activeCollider.bounds.min.y > other.bounds.max.y;
+    }
+
+    private bool GetParallelToCollider(Collider2D other)
+    {
+        return activeCollider.bounds.min.y < other.bounds.max.y && activeCollider.bounds.max.y > other.bounds.min.y;
+    }
+
+    private bool GetBelowCollider(Collider2D other)
+    {
+        return activeCollider.bounds.max.y < other.bounds.min.y;
+    }
+    #endregion
 }
