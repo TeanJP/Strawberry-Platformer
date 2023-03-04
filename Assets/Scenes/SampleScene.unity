@@ -1136,19 +1136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aa2c6568a2b5d244b910fc5a355e571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platformMask:
-    serializedVersion: 2
-    m_Bits: 64
-  walkSpeed: 5
-  fallSpeed: 2.5
-  lowJumpSpeed: 2
-  jumpStrength: 6
-  inputBuffer: 0.2
-  groundedBuffer: 0.15
-  wallGrabDuration: 2.5
-  wallSlideSpeed: 0.4
-  wallJumpDirection: {x: 0.4, y: 0.6}
-  wallJumpStrength: 6
 --- !u!61 &1990224995
 BoxCollider2D:
   m_ObjectHideFlags: 0

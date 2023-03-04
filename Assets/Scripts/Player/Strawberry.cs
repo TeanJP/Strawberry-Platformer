@@ -4,182 +4,314 @@ using UnityEngine;
 
 public class Strawberry : MonoBehaviour
 {
+    #region State Enums
+    private enum MovementState
+    {
+        Default,
+        Running,
+        Crawling,
+        BellyFlopping,
+        Stunned
+    }
+
+    private enum RunState
+    {
+        Default,
+        Rolling,
+        Turning,
+        Stopping,
+        WallRunning,
+        WallJumping,
+        Diving,
+        SuperJumping,
+        ChargingSuperJump,
+        CancellingSuperJump
+    }
+    #endregion
+
+    #region States
+    private MovementState movementState = MovementState.Default;
+    private RunState runState = RunState.Default;
+    #endregion
+
+    #region Components
     private Rigidbody2D rb = null;
     private SpriteRenderer spriteRenderer = null;
-    private Vector2 spriteDimensions;
+    private BoxCollider2D activeCollider = null;
+    #endregion
 
-    [SerializeField]
-    private LayerMask platformMask;
+    #region Inputs
+    private float horizontalInput = 0f;
+    private bool releasedJumpInput = false;
+    private bool runInput = false;
+    private bool upInput = false;
+    private bool downInput = false;
+    #endregion
 
-    [SerializeField]
-    float walkSpeed = 5f;
+    #region Buffers
+    private float jumpBuffer = 0.2f;
+    private float jumpTimer = 0f;
 
-    Vector2 movement = Vector2.zero;
-
-    [SerializeField]
-    private float fallSpeed = 2.5f;
-    [SerializeField]
-    private float lowJumpSpeed = 2f;
-
-    [SerializeField]
-    private float jumpStrength = 6f;
-    private bool holdingJump = false;
-
-    [SerializeField]
-    private float inputBuffer = 0.2f;
-    private float inputTimer = 0f;
-
-    [SerializeField]
     private float groundedBuffer = 0.15f;
     private float groundedTimer = 0f;
+    #endregion
 
-    private bool grabbingWall = false;
-    [SerializeField]
-    private float wallGrabDuration = 2.5f;
-    [SerializeField]
-    private float wallSlideSpeed = 0.4f;
-    private float wallGrabTimer = 0f;
+    private float currentSpeed = 0f;
+    private float previousSpeed;
 
-    [SerializeField]
-    private Vector2 wallJumpDirection = Vector2.one;
-    [SerializeField]
-    private float wallJumpStrength = 6f;
-    private bool wallJumping = false;
+    private float initialWalkSpeed;
+    private float maxWalkSpeed;
+    private float walkAcceleration;
+
+    private float initialRunSpeed;
+    private float maxRunSpeed;
+    private float runAcceleration;
+    private float runDamping;
+
+    private float jumpStrength;
+    private float fallSpeed;
+    private float incompleteJumpStrength;
+
+    private float crawlSpeed;
+    private float crawlJumpStrength;
+
+    private float bellyFlopStrength;
+
+    private float turnDeceleration;
+
+    private float slideDeceleration;
+
+    private float diveSpeed;
+    private Vector2 diveDirection;
+
+    private float wallRunSpeed;
+
+    private float wallJumpStrength;
+    private Vector2 wallJumpDirection;
+
+    private float superJumpSpeed;
+    private float superJumpChargeSpeed;
+
+    private float superJumpCancelSpeed;
+    private Vector2 superJumpCancelDirection;
+
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-
-        spriteDimensions = spriteRenderer.bounds.extents;
-
-        wallJumpDirection.Normalize();
+        
     }
 
     void Update()
     {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        bool grounded = GetGrounded();
+        bool hittingWall = GetHittingWall();
+        bool hittingCeiling = GetHittingCeiling();
 
-        if (Mathf.Sign(horizontalInput) != Mathf.Sign(transform.localScale.x) && horizontalInput != 0f)
-        {
-            transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
-        }
+        GetInputs();
+        ApplyInputs(grounded, hittingWall, hittingCeiling);
+        Move(grounded);
+    }
 
-        movement.x = horizontalInput * walkSpeed;
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        //Check if the player crashes into the ceiling or a wall whilst running, belly flopping, super jumping or diving.
+        //If so stun the player and bounce them away, putting them back into the default state.
+    }
+
+    private void GetInputs()
+    {
+        horizontalInput = Input.GetAxisRaw("Horizontal");
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            holdingJump = true;
-            inputTimer = inputBuffer;
+            jumpTimer = jumpBuffer;
+            releasedJumpInput = false;
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
-            holdingJump = false;
+            releasedJumpInput = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            runInput = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.X))
+        {
+            runInput = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            downInput = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            downInput = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            upInput = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.UpArrow))
+        {
+            upInput = false;
         }
     }
 
-    void FixedUpdate()
+    private void ApplyInputs(bool grounded, bool hittingWall, bool hittingCeiling)
     {
-        bool grounded = GetGrounded();
-        bool onWall = GetOnWall();
-
-        movement.y = 0f;
-
-        if (grabbingWall && grabbingWall != onWall || grounded)
+        switch (movementState)
         {
-            grabbingWall = false;
-        }
+            case MovementState.Default:
+                if (downInput)
+                {
+                    if (grounded)
+                    {
+                        movementState = MovementState.Crawling;
+                    }
+                    else
+                    {
+                        movementState = MovementState.BellyFlopping;
+                    }
+                }
+                break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Default:
+                        if (downInput)
+                        {
+                            if (grounded)
+                            {
+                                runState = RunState.Rolling;
+                            }
+                            else
+                            {
+                                runState = RunState.Diving;
+                            }
+                        }
+                        break;
+                    case RunState.Rolling:
 
-        if (grounded)
+                        break;
+                    case RunState.Turning:
+
+                        break;
+                    case RunState.Stopping:
+
+                        break;
+                    case RunState.WallRunning:
+                        if (jumpTimer > 0f)
+                        {
+                            runState = RunState.WallJumping;
+                        }
+                        break;
+                    case RunState.WallJumping:
+                        if (downInput)
+                        {
+                            runState = RunState.Diving;
+                        }
+                        break;
+                    case RunState.Diving:
+                        if (downInput)
+                        {
+                            movementState = MovementState.BellyFlopping;
+                            runState = RunState.Default;
+                        }
+                        break;
+                    case RunState.SuperJumping:
+                        if (jumpTimer > 0f)
+                        {
+                            runState = RunState.CancellingSuperJump;
+                        }
+                        break;
+                    case RunState.ChargingSuperJump:
+                        if (!upInput)
+                        {
+                            runState = RunState.SuperJumping;
+                        }
+                        break;
+                    case RunState.CancellingSuperJump:
+
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+                if (!downInput && !hittingCeiling)
+                {
+                    movementState = MovementState.Default;
+                }
+                break;
+            case MovementState.BellyFlopping:
+
+                break;
+        }
+    }
+
+    private void Move(bool grounded)
+    {
+        switch (movementState)
         {
-            groundedTimer = groundedBuffer;
+            case MovementState.Default:
+
+                break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Default:
+
+                        break;
+                    case RunState.Rolling:
+
+                        break;
+                    case RunState.Turning:
+
+                        break;
+                    case RunState.Stopping:
+
+                        break;
+                    case RunState.WallRunning:
+
+                        break;
+                    case RunState.WallJumping:
+
+                        break;
+                    case RunState.Diving:
+
+                        break;
+                    case RunState.SuperJumping:
+
+                        break;
+                    case RunState.ChargingSuperJump:
+
+                        break;
+                    case RunState.CancellingSuperJump:
+
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+
+                break;
+            case MovementState.BellyFlopping:
+
+                break;
+            case MovementState.Stunned:
+
+                break;
         }
+    }
 
-        movement.y = rb.velocity.y;
+    private void Run()
+    {
 
-        if (onWall && !grounded && (movement.x != 0f || wallJumping) && !grabbingWall)
-        {
-            if (wallJumping)
-            {
-                wallJumping = false;
-            }
-
-            wallGrabTimer = wallGrabDuration;
-            grabbingWall = true;
-            movement.y = 0f;
-        }
-
-        if (!grabbingWall)
-        {
-            if (rb.velocity.y <= 0f && !grounded)
-            {
-                rb.gravityScale = fallSpeed;
-            }
-            else if ((rb.velocity.y > 0f) && !holdingJump && !wallJumping)
-            {
-                rb.gravityScale = lowJumpSpeed;
-            }
-        }
-        else
-        {
-            if (inputTimer > 0f)
-            {
-                inputTimer = 0f;
-
-                wallJumping = true;
-                rb.gravityScale = 1f;
-
-                transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
-
-                movement = wallJumpDirection * new Vector2(Mathf.Sign(transform.localScale.x), 1f) * wallJumpStrength;
-            }
-            else if (wallGrabTimer <= 0f)
-            {
-                rb.gravityScale = wallSlideSpeed;
-            }
-            else
-            {
-                rb.gravityScale = 0f;
-            }
-        }
-
-        if (grounded)
-        {
-            wallJumping = false;
-            rb.gravityScale = 1f;
-        }
-
-        if (inputTimer > 0f && groundedTimer > 0f)
-        {
-            movement.y = jumpStrength;
-            inputTimer = 0f;
-        }
-
-        if (wallJumping && movement.x == 0f)
-        {
-            movement.x = rb.velocity.x;
-        }
-
-        rb.velocity = movement;
-
-        if (groundedTimer > 0f)
-        {
-            groundedTimer -= Time.fixedDeltaTime;
-        }
-
-        if (inputTimer > 0f)
-        {
-            inputTimer -= Time.fixedDeltaTime;
-        }
-
-        if (wallGrabTimer > 0f)
-        {
-            wallGrabTimer -= Time.fixedDeltaTime;
-        }
     }
 
     private bool GetGrounded()
     {
+        /*
         float boxHeight = 0.01f;
         Vector2 boxCheckPosition =  new Vector2(transform.position.x, transform.position.y - spriteDimensions.y - boxHeight * 0.5f);
         Vector2 boxCheckSize = new Vector2(spriteDimensions.x * 2f, boxHeight);
@@ -196,12 +328,13 @@ public class Strawberry : MonoBehaviour
                 }
             }
         }
-
+        */
         return false;
     }
 
-    private bool GetOnWall()
+    private bool GetHittingWall()
     {
+        /*
         float boxWidth = 0.01f;
         Vector2 boxCheckPosition = new Vector2(transform.position.x + spriteDimensions.x * Mathf.Sign(transform.localScale.x) + boxWidth * 0.5f, transform.position.y);
         Vector2 boxCheckSize = new Vector2(boxWidth, spriteDimensions.y);
@@ -209,5 +342,12 @@ public class Strawberry : MonoBehaviour
         Collider2D platform = Physics2D.OverlapBox(boxCheckPosition, boxCheckSize, 0f, platformMask);
 
         return platform != null;
+        */
+        return false;
+    }
+        
+    private bool GetHittingCeiling()
+    {
+        return false;
     }
 }
