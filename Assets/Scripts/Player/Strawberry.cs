@@ -33,6 +33,8 @@ public class Strawberry : MonoBehaviour
     private MovementState movementState = MovementState.Default;
     private RunState runState = RunState.Default;
 
+    private bool grounded = false;
+
     private bool movementApplied = false;
 
     private bool bouncing = false;
@@ -62,16 +64,16 @@ public class Strawberry : MonoBehaviour
 
     #region Movement Values
     private float currentSpeed = 0f;
-    private float previousSpeed;
 
     private float initialWalkSpeed = 2f;
     private float maxWalkSpeed = 5f;
-    private float walkAcceleration = 1f;
+    private float walkAcceleration = 6f;
 
     private float initialRunSpeed = 5f;
     private float maxRunSpeed = 10f;
-    private float runAcceleration = 2f;
-    private float runDamping = 1f;
+    private float runAcceleration = 5f;
+    
+    private float speedReduction = 1f;
 
     private float jumpStrength = 6f;
     private float fallSpeed = 2.5f;
@@ -99,11 +101,20 @@ public class Strawberry : MonoBehaviour
 
     private float superJumpCancelSpeed = 10f;
     private Vector2 superJumpCancelDirection = new Vector2(1f, 0f);
+
+    private float knockBackStrength = 1f;
+    private Vector2 knockBackDirection = new Vector2(-1f, 1f);
     #endregion
 
     #region Health
     private int maxHearts = 100;
     private int hearts = 0;
+
+    private float stunDuration = 0.5f;
+    private float stunTimer = 0f;
+
+    private float invincibilityDuratrion = 3f;
+    private float invincibilityTimer = 0f;
     #endregion
 
     [SerializeField]
@@ -122,7 +133,7 @@ public class Strawberry : MonoBehaviour
 
     void Update()
     {
-        bool grounded = GetGrounded();
+        grounded = GetGrounded();
         
         if (grounded)
         {
@@ -142,6 +153,35 @@ public class Strawberry : MonoBehaviour
     {
         //Check if the player crashes into the ceiling or a wall whilst running, belly flopping, super jumping or diving.
         //If so stun the player and bounce them away, putting them back into the default state.
+        //Use normal of contact points;
+
+        if (movementState == MovementState.Running)
+        {
+            switch (runState)
+            {
+                case RunState.Default:
+                    //When grounded and hitting a wall to the side.
+                    break;
+                case RunState.Rolling:
+                    //When hitting a wall to the side.
+                    break;
+                case RunState.WallRunning:
+                    //When hitting the ceiling.
+                    break;
+                case RunState.Diving:
+                    //When hitting a wall to the side.
+                    break;
+                case RunState.SuperJumping:
+                    //When hitting the ceiling.
+                    break;
+
+            }
+        }
+        else if (movementState == MovementState.BellyFlopping)
+        {
+            //If hitting the ground.
+        }
+
     }
 
     private void GetInputs()
@@ -211,6 +251,7 @@ public class Strawberry : MonoBehaviour
                     else
                     {
                         movementState = MovementState.BellyFlopping;
+                        movementApplied = false;
                     }
                 }
                 break;
@@ -240,6 +281,11 @@ public class Strawberry : MonoBehaviour
                         {
                             runState = RunState.WallRunning;
                         }
+
+                        if (!runInput)
+                        {
+                            runState = RunState.Stopping;
+                        }
                         break;
                     case RunState.Rolling:
                         if (!downInput && !hittingCeiling)
@@ -266,7 +312,9 @@ public class Strawberry : MonoBehaviour
                             {
                                 if (jumpTimer > 0f)
                                 {
+                                    FlipPlayerDirection();                                  
                                     runState = RunState.WallJumping;
+                                    movementApplied = false;
                                 }
                             }
                             else
@@ -285,12 +333,57 @@ public class Strawberry : MonoBehaviour
                         {
                             runState = RunState.Diving;
                         }
+
+                        if (grounded)
+                        {
+                            if (runInput)
+                            {
+                                runState = RunState.Default;
+                            }
+                            else
+                            {
+                                runState = RunState.Stopping;
+                            }
+                        }
+
+                        if (hittingWall)
+                        {
+                            if (runInput)
+                            {
+                                runState = RunState.WallRunning;
+                            }
+                            else
+                            {
+                                movementState = MovementState.Default;
+                                runState = RunState.Default;
+                            }
+                        }
                         break;
                     case RunState.Diving:
-                        if (downInput)
+                        if (jumpTimer > 0f)
                         {
                             movementState = MovementState.BellyFlopping;
                             runState = RunState.Default;
+                            movementApplied = false;
+                        }
+
+                        if (grounded && !hittingWall)
+                        {
+                            if (runInput)
+                            {
+                                if (downInput)
+                                {
+                                    runState = RunState.Rolling;
+                                }
+                                else
+                                {
+                                    runState = RunState.Default;
+                                }
+                            }
+                            else
+                            {
+                                runState = RunState.Rolling;
+                            }
                         }
                         break;
                     case RunState.SuperJumping:
@@ -302,12 +395,31 @@ public class Strawberry : MonoBehaviour
                             }
 
                             runState = RunState.CancellingSuperJump;
+                            movementApplied = false;
                         }
                         break;
                     case RunState.ChargingSuperJump:
                         if (!upInput)
                         {
                             runState = RunState.SuperJumping;
+                        }
+                        break;
+                    case RunState.CancellingSuperJump:
+                        if (grounded)
+                        {
+                            if (runInput)
+                            {
+                                runState = RunState.Default;
+                            }
+                            else
+                            {
+                                runState = RunState.Stopping;
+                            }
+                        }
+
+                        if (hittingWall && runInput)
+                        {
+                            runState = RunState.WallRunning;
                         }
                         break;
                 }
@@ -323,6 +435,8 @@ public class Strawberry : MonoBehaviour
 
     private void Move(bool grounded)
     {
+        float horizontalDirection = GetPlayerDirection();
+
         Vector2 movement = rb.velocity;
 
         switch (movementState)
@@ -337,20 +451,11 @@ public class Strawberry : MonoBehaviour
                     currentSpeed = Mathf.Min(currentSpeed + walkAcceleration * Time.deltaTime, maxWalkSpeed);
                 }
 
-                movement.x = horizontalInput * currentSpeed;          
+                movement.x = horizontalDirection * currentSpeed;
 
                 if (jumpTimer > 0f && groundedTimer > 0f)
                 {
                     movement.y = jumpStrength;
-                }
-
-                if (rb.velocity.y < 0f)
-                {
-                    rb.gravityScale = fallSpeed;
-                }
-                else
-                {
-                    rb.gravityScale = 1f;
                 }
                 break;
             case MovementState.Running:
@@ -359,8 +464,17 @@ public class Strawberry : MonoBehaviour
                     case RunState.Default:
                         if (grounded)
                         {
-                            currentSpeed = Mathf.Min(currentSpeed + runAcceleration * Time.deltaTime, maxRunSpeed);
+                            if (currentSpeed < initialRunSpeed)
+                            {
+                                currentSpeed = initialRunSpeed;
+                            }
+                            else
+                            {
+                                currentSpeed = Mathf.Min(currentSpeed + runAcceleration * Time.deltaTime, maxRunSpeed);
+                            }
                         }
+
+                        movement.x = horizontalDirection * currentSpeed;
 
                         if (jumpTimer > 0f && groundedTimer > 0f)
                         {
@@ -369,43 +483,90 @@ public class Strawberry : MonoBehaviour
 
                         break;
                     case RunState.Rolling:
-
+                        movement.x = horizontalDirection * currentSpeed;
                         break;
                     case RunState.Turning:
-                        //Change state when turn complete.
+                        currentSpeed = Mathf.Max(currentSpeed - turnDeceleration * Time.deltaTime, 0f);
+
+                        movement.x = horizontalDirection * -1f * currentSpeed;
+
+                        if (currentSpeed == 0f)
+                        {
+                            runState = RunState.Default;
+                        }
                         break;
                     case RunState.Stopping:
-                        //Change state when speed fully reduced.
+                        currentSpeed = Mathf.Max(currentSpeed - slideDeceleration * Time.deltaTime, 0f);
+
+                        movement.x = horizontalDirection * currentSpeed;
+
+                        if (currentSpeed == 0f)
+                        {
+                            movementState = MovementState.Default;
+                            runState = RunState.Default;
+                        }
                         break;
                     case RunState.WallRunning:
-
+                        movement = new Vector2(0f, wallRunSpeed);
                         break;
                     case RunState.WallJumping:
-
+                        if (!movementApplied)
+                        {
+                            movement = horizontalDirection * wallJumpDirection * wallJumpStrength;
+                            movementApplied = true;
+                        }
                         break;
                     case RunState.Diving:
-
+                        movement = diveDirection * new Vector2(horizontalDirection, 1f) * diveSpeed;
                         break;
                     case RunState.SuperJumping:
                         movement = new Vector2(0f, superJumpSpeed);
                         break;
                     case RunState.ChargingSuperJump:
-
+                        movement.x = horizontalInput * superJumpChargeSpeed;
                         break;
                     case RunState.CancellingSuperJump:
+                        if (!movementApplied)
+                        {
+                            movement.y = 0f;
+                            movementApplied = true;
+                        }
 
+                        movement.x = horizontalDirection * superJumpCancelSpeed;
                         break;
                 }
                 break;
             case MovementState.Crawling:
+                movement.x = horizontalDirection * crawlSpeed;
 
+                if (jumpTimer > 0f && groundedTimer > 0f)
+                {
+                    movement.y = crawlJumpStrength;
+                }
                 break;
             case MovementState.BellyFlopping:
-
+                if (!movementApplied)
+                {
+                    movement = new Vector2(0f, bellyFlopStrength);
+                    movementApplied = true;
+                }
                 break;
-            case MovementState.Stunned:
+        }
 
-                break;
+        if (movementState == MovementState.Running && (runState == RunState.Diving || runState == RunState.WallRunning || runState == RunState.SuperJumping))
+        {
+            rb.gravityScale = 0f;
+        }
+        else
+        {
+            if (rb.velocity.y < 0f)
+            {
+                rb.gravityScale = fallSpeed;
+            }
+            else
+            {
+                rb.gravityScale = 1f;
+            }
         }
 
         rb.velocity = movement;
@@ -418,7 +579,12 @@ public class Strawberry : MonoBehaviour
 
     private void FlipPlayerDirection()
     {
-        transform.localPosition = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
+        transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
+    }
+
+    private float GetPlayerDirection()
+    {
+        return Mathf.Sign(transform.localScale.x);
     }
 
     private void DecrementTimers(float deltaTime)
@@ -431,6 +597,21 @@ public class Strawberry : MonoBehaviour
         if (groundedTimer > 0f)
         {
             groundedTimer -= deltaTime;
+        }
+
+        if (stunTimer > 0f)
+        {
+            stunTimer -= deltaTime;
+
+            if (stunTimer <= 0f)
+            {
+                movementState = MovementState.Default;
+            }
+        }
+
+        if (invincibilityTimer > 0f)
+        {
+            invincibilityTimer -= deltaTime;
         }
     }
 
