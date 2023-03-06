@@ -64,6 +64,7 @@ public class Strawberry : MonoBehaviour
 
     #region Movement Values
     private float currentSpeed = 0f;
+    private float previousSpeed;
 
     private float initialWalkSpeed = 2f;
     private float maxWalkSpeed = 5f;
@@ -115,6 +116,8 @@ public class Strawberry : MonoBehaviour
 
     private float invincibilityDuratrion = 3f;
     private float invincibilityTimer = 0f;
+
+    private GameObject heart = null;
     #endregion
 
     [SerializeField]
@@ -151,37 +154,63 @@ public class Strawberry : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        //Check if the player crashes into the ceiling or a wall whilst running, belly flopping, super jumping or diving.
-        //If so stun the player and bounce them away, putting them back into the default state.
-        //Use normal of contact points;
+        bool applyStun = false, isWall = false, isFloor = false, isCeiling = false;
+
+        ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
+        other.GetContacts(contacts);
+
+        for (int i = 0; i < contacts.Length; i++)
+        {       
+            if (contacts[i].normal.x == GetPlayerDirection() * -1f)
+            {
+                isWall = true;
+            }
+            else if (contacts[i].normal.y == 1f)
+            {
+                isFloor = true;
+            }
+            else if (contacts[i].normal.y == -1f)
+            {
+                isCeiling = true;
+            }   
+        }
 
         if (movementState == MovementState.Running)
         {
-            switch (runState)
+            if (runState == RunState.Default && grounded && isWall)
             {
-                case RunState.Default:
-                    //When grounded and hitting a wall to the side.
-                    break;
-                case RunState.Rolling:
-                    //When hitting a wall to the side.
-                    break;
-                case RunState.WallRunning:
-                    //When hitting the ceiling.
-                    break;
-                case RunState.Diving:
-                    //When hitting a wall to the side.
-                    break;
-                case RunState.SuperJumping:
-                    //When hitting the ceiling.
-                    break;
-
+                applyStun = true;
+            }
+            else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall)
+            {
+                applyStun = true;
+            }
+            else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling)
+            {
+                movementState = MovementState.Default;
+                runState = RunState.Default;
+                rb.velocity = Vector2.zero;
             }
         }
-        else if (movementState == MovementState.BellyFlopping)
+        else if (movementState == MovementState.BellyFlopping && isFloor)
         {
-            //If hitting the ground.
+            if (downInput)
+            {
+                movementState = MovementState.Crawling;
+            }
+            else
+            {
+                movementState = MovementState.Default;
+            }
+
+            rb.velocity = Vector2.zero;
         }
 
+        if (applyStun)
+        {
+            ApplyStun();
+            ApplyKnockBack(GetPlayerDirection() * -1f);
+        }
     }
 
     private void GetInputs()
@@ -191,6 +220,7 @@ public class Strawberry : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Z))
         {
             jumpTimer = jumpBuffer;
+
             releasedJumpInput = false;
         }
         else if (Input.GetKeyUp(KeyCode.Z))
@@ -254,6 +284,12 @@ public class Strawberry : MonoBehaviour
                         movementApplied = false;
                     }
                 }
+
+                if (currentSpeed > maxWalkSpeed)
+                {
+                    movementState = MovementState.Running;
+                    runState = RunState.Default;
+                }
                 break;
             case MovementState.Running:
                 switch (runState)
@@ -263,6 +299,7 @@ public class Strawberry : MonoBehaviour
                         {
                             FlipPlayerDirection();
                             runState = RunState.Turning;
+                            previousSpeed = currentSpeed;
                         }
                         
                         if (downInput)
@@ -280,6 +317,7 @@ public class Strawberry : MonoBehaviour
                         if (!grounded && hittingWall)
                         {
                             runState = RunState.WallRunning;
+                            currentSpeed = wallRunSpeed;
                         }
 
                         if (!runInput)
@@ -468,7 +506,7 @@ public class Strawberry : MonoBehaviour
                             {
                                 currentSpeed = initialRunSpeed;
                             }
-                            else
+                            else if (currentSpeed < maxRunSpeed)
                             {
                                 currentSpeed = Mathf.Min(currentSpeed + runAcceleration * Time.deltaTime, maxRunSpeed);
                             }
@@ -480,7 +518,6 @@ public class Strawberry : MonoBehaviour
                         {
                             movement.y = jumpStrength;
                         }
-
                         break;
                     case RunState.Rolling:
                         movement.x = horizontalDirection * currentSpeed;
@@ -493,6 +530,7 @@ public class Strawberry : MonoBehaviour
                         if (currentSpeed == 0f)
                         {
                             runState = RunState.Default;
+                            currentSpeed = previousSpeed;
                         }
                         break;
                     case RunState.Stopping:
@@ -507,7 +545,7 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.WallRunning:
-                        movement = new Vector2(0f, wallRunSpeed);
+                        movement = new Vector2(0f, currentSpeed);
                         break;
                     case RunState.WallJumping:
                         if (!movementApplied)
@@ -569,9 +607,15 @@ public class Strawberry : MonoBehaviour
             }
         }
 
+        if (currentSpeed > maxRunSpeed)
+        {
+            currentSpeed = Mathf.Max(currentSpeed - speedReduction * Time.deltaTime, maxRunSpeed);
+        }
+
         rb.velocity = movement;
     }
 
+    #region Player Direction
     private bool GetFacingIncorrectDirection()
     {
         return horizontalInput != 0f && horizontalInput != Mathf.Sign(transform.localScale.x);
@@ -586,6 +630,7 @@ public class Strawberry : MonoBehaviour
     {
         return Mathf.Sign(transform.localScale.x);
     }
+    #endregion
 
     private void DecrementTimers(float deltaTime)
     {
@@ -699,4 +744,47 @@ public class Strawberry : MonoBehaviour
         return activeCollider.bounds.max.y < other.bounds.min.y;
     }
     #endregion
+
+    public void TakeDamge(int damage, float horizontalDirection)
+    {
+        if (invincibilityTimer <= 0f)
+        {
+            if (hearts == 0)
+            {
+                Debug.Log("GAME OVER");
+            }
+            else
+            {
+                int previousHearts = hearts;
+                hearts = Mathf.Max(hearts - damage, 0);
+
+                SpawnHearts(previousHearts - hearts);
+
+                invincibilityTimer = invincibilityDuratrion;
+                ApplyStun();
+                ApplyKnockBack(horizontalDirection);
+            }
+        }
+    }
+
+    private void SpawnHearts(int amount)
+    {
+
+
+        for (int i = 0; i < amount; i++)
+        {
+            Instantiate(heart);
+        }
+    }
+
+    private void ApplyStun()
+    {
+        movementState = MovementState.Stunned;
+        stunTimer = stunDuration;
+    }
+
+    private void ApplyKnockBack(float horizontalDirection)
+    {
+        rb.velocity = knockBackDirection * horizontalDirection * knockBackStrength;
+    }
 }
