@@ -278,13 +278,12 @@ public class Strawberry : MonoBehaviour
                     FlipPlayerDirection();
                 }
 
-                if (grounded && runInput)
+                if (grounded && (runInput || currentSpeed > maxWalkSpeed))
                 {
                     movementState = MovementState.Running;
                     runState = RunState.Default;
                 }
-
-                if (downInput)
+                else if (downInput)
                 {
                     if (grounded)
                     {
@@ -298,54 +297,47 @@ public class Strawberry : MonoBehaviour
 
                     SwapActiveCollider();
                 }
-
-                if (currentSpeed > maxWalkSpeed)
-                {
-                    movementState = MovementState.Running;
-                    runState = RunState.Default;
-                }
                 break;
             case MovementState.Running:
                 switch (runState)
                 {
                     case RunState.Default:
-                        if (GetFacingIncorrectDirection())
-                        {
-                            FlipPlayerDirection();
-                            runState = RunState.Turning;
-                            previousSpeed = currentSpeed;
-                        }
-                        
-                        if (downInput)
-                        {
-                            if (grounded)
-                            {
-                                runState = RunState.Rolling;
-                            }
-                            else
-                            {
-                                runState = RunState.Diving;
-                            }
-
-                            SwapActiveCollider();
-                        }
-
-                        if (upInput)
-                        {
-                            runState = RunState.ChargingSuperJump;
-                            SwapActiveCollider();
-                        }
-
-                        if (!grounded && hittingWall)
-                        {
-                            runState = RunState.WallRunning;
-                            currentSpeed = wallRunSpeed;
-                        }
-
                         if (!runInput)
                         {
                             runState = RunState.Stopping;
                         }
+                        else
+                        {
+                            if (downInput)
+                            {
+                                if (grounded)
+                                {
+                                    runState = RunState.Rolling;
+                                }
+                                else
+                                {
+                                    runState = RunState.Diving;
+                                }
+
+                                SwapActiveCollider();
+                            }
+                            else if (!grounded && hittingWall)
+                            {
+                                runState = RunState.WallRunning;
+                                currentSpeed = wallRunSpeed;
+                            }
+                            else if (upInput && grounded)
+                            {
+                                runState = RunState.ChargingSuperJump;
+                                SwapActiveCollider();
+                            }
+                            else if (GetFacingIncorrectDirection() && grounded)
+                            {
+                                FlipPlayerDirection();
+                                runState = RunState.Turning;
+                                previousSpeed = currentSpeed;
+                            }
+                        }                    
                         break;
                     case RunState.Rolling:
                         if (!downInput && !hittingCeiling)
@@ -361,8 +353,7 @@ public class Strawberry : MonoBehaviour
 
                             SwapActiveCollider();
                         }
-
-                        if (downInput && !grounded)
+                        else if (downInput && !grounded)
                         {
                             runState = RunState.Diving;
                         }
@@ -391,12 +382,6 @@ public class Strawberry : MonoBehaviour
                         }                      
                         break;
                     case RunState.WallJumping:
-                        if (downInput)
-                        {
-                            runState = RunState.Diving;
-                            SwapActiveCollider();
-                        }
-
                         if (grounded)
                         {
                             if (runInput)
@@ -408,8 +393,7 @@ public class Strawberry : MonoBehaviour
                                 runState = RunState.Stopping;
                             }
                         }
-
-                        if (hittingWall)
+                        else if (hittingWall)
                         {
                             if (runInput)
                             {
@@ -421,6 +405,11 @@ public class Strawberry : MonoBehaviour
                                 runState = RunState.Default;
                             }
                         }
+                        else if (downInput)
+                        {
+                            runState = RunState.Diving;
+                            SwapActiveCollider();
+                        }
                         break;
                     case RunState.Diving:
                         if (jumpTimer > 0f)
@@ -429,8 +418,7 @@ public class Strawberry : MonoBehaviour
                             runState = RunState.Default;
                             movementApplied = false;
                         }
-
-                        if (grounded && !hittingWall)
+                        else if (grounded && !hittingWall)
                         {
                             if (runInput)
                             {
@@ -471,7 +459,11 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.CancellingSuperJump:
-                        if (grounded)
+                        if (hittingWall && runInput)
+                        {
+                            runState = RunState.WallRunning;
+                        }
+                        else if (grounded)
                         {
                             if (runInput)
                             {
@@ -481,11 +473,6 @@ public class Strawberry : MonoBehaviour
                             {
                                 runState = RunState.Stopping;
                             }
-                        }
-
-                        if (hittingWall && runInput)
-                        {
-                            runState = RunState.WallRunning;
                         }
                         break;
                 }
@@ -511,11 +498,18 @@ public class Strawberry : MonoBehaviour
             case MovementState.Default:
                 if (horizontalInput == 0f)
                 {
-                    currentSpeed = initialWalkSpeed;
+                    currentSpeed = 0f;
                 }
                 else
                 {
-                    currentSpeed = Mathf.Min(currentSpeed + walkAcceleration * Time.deltaTime, maxWalkSpeed);
+                    if (currentSpeed == 0f)
+                    {
+                        currentSpeed = initialWalkSpeed;
+                    }
+                    else
+                    {
+                        currentSpeed = Mathf.Min(currentSpeed + walkAcceleration * Time.deltaTime, maxWalkSpeed);
+                    }
                 }
 
                 movement.x = horizontalDirection * currentSpeed;
@@ -524,6 +518,8 @@ public class Strawberry : MonoBehaviour
                 {
                     movement.y = jumpStrength;
                 }
+
+                //incomplete jump
                 break;
             case MovementState.Running:
                 switch (runState)
@@ -547,6 +543,8 @@ public class Strawberry : MonoBehaviour
                         {
                             movement.y = jumpStrength;
                         }
+
+                        //incomplete jump
                         break;
                     case RunState.Rolling:
                         movement.x = horizontalDirection * currentSpeed;
@@ -610,6 +608,8 @@ public class Strawberry : MonoBehaviour
                 {
                     movement.y = crawlJumpStrength;
                 }
+
+                //incomplete jump
                 break;
             case MovementState.BellyFlopping:
                 if (!movementApplied)
