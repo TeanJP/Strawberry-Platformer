@@ -86,16 +86,16 @@ public class Strawberry : MonoBehaviour
 
     private float jumpStrength = 6f;
     private float fallSpeed = 2.5f;
-    private float incompleteJumpStrength = 0.5f;
+    private float incompleteJumpStrength = 0.25f;
 
     private float crawlSpeed = 3f;
     private float crawlJumpStrength = 4f;
 
     private float bellyFlopStrength = 8f;
 
-    private float turnDeceleration = 1f;
+    private float turnDeceleration = 4f;
 
-    private float slideDeceleration = 1f;
+    private float slideDeceleration = 4f;
 
     private float diveSpeed = 10f;
     private Vector2 diveDirection = new Vector2(1f, -1f);
@@ -367,7 +367,9 @@ public class Strawberry : MonoBehaviour
                                 {
                                     FlipPlayerDirection();                                  
                                     runState = RunState.WallJumping;
+                                    
                                     movementApplied = false;
+                                    jumpTimer = 0f;
                                 }
                             }
                             else
@@ -416,7 +418,9 @@ public class Strawberry : MonoBehaviour
                         {
                             movementState = MovementState.BellyFlopping;
                             runState = RunState.Default;
+                            
                             movementApplied = false;
+                            jumpTimer = 0f;
                         }
                         else if (grounded && !hittingWall)
                         {
@@ -448,7 +452,9 @@ public class Strawberry : MonoBehaviour
                             }
 
                             runState = RunState.CancellingSuperJump;
+                            
                             movementApplied = false;
+                            jumpTimer = 0f;
                         }
                         break;
                     case RunState.ChargingSuperJump:
@@ -517,9 +523,19 @@ public class Strawberry : MonoBehaviour
                 if (jumpTimer > 0f && groundedTimer > 0f)
                 {
                     movement.y = jumpStrength;
+                    jumpTimer = 0f;
                 }
 
-                //incomplete jump
+                if (grounded)
+                {
+                    movementApplied = false;
+                }
+
+                if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                {
+                    movement.y *= incompleteJumpStrength;
+                    movementApplied = true;
+                }
                 break;
             case MovementState.Running:
                 switch (runState)
@@ -542,9 +558,19 @@ public class Strawberry : MonoBehaviour
                         if (jumpTimer > 0f && groundedTimer > 0f)
                         {
                             movement.y = jumpStrength;
+                            jumpTimer = 0f;
                         }
 
-                        //incomplete jump
+                        if (grounded)
+                        {
+                            movementApplied = false;
+                        }
+
+                        if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                        {
+                            movement.y *= incompleteJumpStrength;
+                            movementApplied = true;
+                        }
                         break;
                     case RunState.Rolling:
                         movement.x = horizontalDirection * currentSpeed;
@@ -607,9 +633,19 @@ public class Strawberry : MonoBehaviour
                 if (jumpTimer > 0f && groundedTimer > 0f)
                 {
                     movement.y = crawlJumpStrength;
+                    jumpTimer = 0f;
                 }
 
-                //incomplete jump
+                if (grounded)
+                {
+                    movementApplied = false;
+                }
+
+                if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                {
+                    movement.y *= incompleteJumpStrength;
+                    movementApplied = true;
+                }
                 break;
             case MovementState.BellyFlopping:
                 if (!movementApplied)
@@ -626,7 +662,7 @@ public class Strawberry : MonoBehaviour
         }
         else
         {
-            if (rb.velocity.y < 0f)
+            if (movement.y < 0f)
             {
                 rb.gravityScale = fallSpeed;
             }
