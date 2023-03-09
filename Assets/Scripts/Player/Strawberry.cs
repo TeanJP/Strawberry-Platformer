@@ -93,9 +93,9 @@ public class Strawberry : MonoBehaviour
 
     private float bellyFlopStrength = 8f;
 
-    private float turnDeceleration = 4f;
+    private float turnDeceleration = 6f;
 
-    private float slideDeceleration = 4f;
+    private float slideDeceleration = 6f;
 
     private float diveSpeed = 10f;
     private Vector2 diveDirection = new Vector2(1f, -1f);
@@ -375,13 +375,17 @@ public class Strawberry : MonoBehaviour
                             else
                             {
                                 runState = RunState.Default;
+
+                                rb.velocity *= new Vector2(1f, 0f);
                             }
                         }
                         else
                         {
                             movementState = MovementState.Default;
                             runState = RunState.Default;
-                        }                      
+
+                            rb.velocity *= new Vector2(1f, 0f);
+                        }
                         break;
                     case RunState.WallJumping:
                         if (grounded)
@@ -603,7 +607,7 @@ public class Strawberry : MonoBehaviour
                     case RunState.WallJumping:
                         if (!movementApplied)
                         {
-                            movement = horizontalDirection * wallJumpDirection * wallJumpStrength;
+                            movement = new Vector2(horizontalDirection, 1f) * wallJumpDirection * wallJumpStrength;
                             movementApplied = true;
                         }
                         break;
@@ -751,7 +755,7 @@ public class Strawberry : MonoBehaviour
     private bool GetHittingWall()
     {   
         float boxWidth = 0.01f;
-        Vector2 boxCheckPosition = new Vector2(activeCollider.bounds.max.x * Mathf.Sign(transform.localScale.x) + boxWidth * 0.5f, transform.position.y);
+        Vector2 boxCheckPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + (boxWidth * 0.5f)) * GetPlayerDirection(), activeCollider.bounds.center.y);
         Vector2 boxCheckSize = new Vector2(boxWidth, activeCollider.bounds.extents.y * 2f);
 
         Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);

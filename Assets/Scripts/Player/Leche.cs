@@ -28,7 +28,10 @@ public class Leche : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.C) && attackTimer <= 0f)
         {
-            Projectile createdProjectile = Instantiate(projectile).GetComponent<Projectile>();
+            if (projectile != null)
+            {
+                Projectile createdProjectile = Instantiate(projectile).GetComponent<Projectile>();
+            }
 
             attackTimer = attackDelay;    
         }
