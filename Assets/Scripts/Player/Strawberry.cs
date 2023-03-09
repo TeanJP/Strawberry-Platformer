@@ -44,6 +44,14 @@ public class Strawberry : MonoBehaviour
     private Rigidbody2D rb = null;
     private SpriteRenderer spriteRenderer = null;
     private BoxCollider2D activeCollider = null;
+    [SerializeField]
+    private BoxCollider2D fullCollider = null;
+    [SerializeField]
+    private BoxCollider2D halfCollider = null;
+    [SerializeField]
+    private Sprite fullSprite = null;
+    [SerializeField]
+    private Sprite halfSprite = null;
     #endregion
 
     #region Inputs
@@ -127,7 +135,9 @@ public class Strawberry : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        activeCollider = GetComponent<BoxCollider2D>();
+
+        spriteRenderer.sprite = fullSprite;
+        activeCollider = fullCollider;
 
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
@@ -184,6 +194,7 @@ public class Strawberry : MonoBehaviour
             else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall)
             {
                 applyStun = true;
+                SwapActiveCollider();
             }
             else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling)
             {
@@ -201,6 +212,7 @@ public class Strawberry : MonoBehaviour
             else
             {
                 movementState = MovementState.Default;
+                SwapActiveCollider();
             }
 
             rb.velocity = Vector2.zero;
@@ -283,6 +295,8 @@ public class Strawberry : MonoBehaviour
                         movementState = MovementState.BellyFlopping;
                         movementApplied = false;
                     }
+
+                    SwapActiveCollider();
                 }
 
                 if (currentSpeed > maxWalkSpeed)
@@ -312,6 +326,14 @@ public class Strawberry : MonoBehaviour
                             {
                                 runState = RunState.Diving;
                             }
+
+                            SwapActiveCollider();
+                        }
+
+                        if (upInput)
+                        {
+                            runState = RunState.ChargingSuperJump;
+                            SwapActiveCollider();
                         }
 
                         if (!grounded && hittingWall)
@@ -336,6 +358,8 @@ public class Strawberry : MonoBehaviour
                             {
                                 runState = RunState.Stopping;
                             }
+
+                            SwapActiveCollider();
                         }
 
                         if (downInput && !grounded)
@@ -370,6 +394,7 @@ public class Strawberry : MonoBehaviour
                         if (downInput)
                         {
                             runState = RunState.Diving;
+                            SwapActiveCollider();
                         }
 
                         if (grounded)
@@ -416,11 +441,13 @@ public class Strawberry : MonoBehaviour
                                 else
                                 {
                                     runState = RunState.Default;
+                                    SwapActiveCollider();
                                 }
                             }
                             else
                             {
-                                runState = RunState.Rolling;
+                                runState = RunState.Stopping;
+                                SwapActiveCollider();
                             }
                         }
                         break;
@@ -440,6 +467,7 @@ public class Strawberry : MonoBehaviour
                         if (!upInput)
                         {
                             runState = RunState.SuperJumping;
+                            SwapActiveCollider();
                         }
                         break;
                     case RunState.CancellingSuperJump:
@@ -463,9 +491,10 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.Crawling:
-                if (!downInput && !hittingCeiling)
+                if (!downInput && !hittingCeiling && grounded)
                 {
                     movementState = MovementState.Default;
+                    SwapActiveCollider();
                 }
                 break;
         }
@@ -585,7 +614,7 @@ public class Strawberry : MonoBehaviour
             case MovementState.BellyFlopping:
                 if (!movementApplied)
                 {
-                    movement = new Vector2(0f, bellyFlopStrength);
+                    movement = new Vector2(0f, -bellyFlopStrength);
                     movementApplied = true;
                 }
                 break;
@@ -786,5 +815,22 @@ public class Strawberry : MonoBehaviour
     private void ApplyKnockBack(float horizontalDirection)
     {
         rb.velocity = knockBackDirection * horizontalDirection * knockBackStrength;
+    }
+
+    private void SwapActiveCollider()
+    {
+        fullCollider.enabled = !fullCollider.enabled;
+        halfCollider.enabled = !halfCollider.enabled;
+
+        if (halfCollider.enabled)
+        {
+            spriteRenderer.sprite = halfSprite;
+            activeCollider = halfCollider;
+        }
+        else
+        {
+            spriteRenderer.sprite = fullSprite;
+            activeCollider = fullCollider;
+        }
     }
 }
