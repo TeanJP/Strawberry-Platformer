@@ -89,9 +89,9 @@ public class Strawberry : MonoBehaviour
     private float incompleteJumpStrength = 0.25f;
 
     private float crawlSpeed = 3f;
-    private float crawlJumpStrength = 4f;
+    private float crawlJumpStrength = 6f;
 
-    private float bellyFlopStrength = 8f;
+    private float bellyFlopStrength = 10f;
 
     private float turnDeceleration = 6f;
 
@@ -111,8 +111,8 @@ public class Strawberry : MonoBehaviour
     private float superJumpCancelSpeed = 10f;
     private Vector2 superJumpCancelDirection = new Vector2(1f, 0f);
 
-    private float knockBackStrength = 1f;
-    private Vector2 knockBackDirection = new Vector2(-1f, 1f);
+    private float knockBackStrength = 3f;
+    private Vector2 knockBackDirection = new Vector2(1f, 1f);
     #endregion
 
     #region Health
@@ -142,6 +142,7 @@ public class Strawberry : MonoBehaviour
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
         superJumpCancelDirection.Normalize();
+        knockBackDirection.Normalize();
     }
 
     void Update()
@@ -187,7 +188,7 @@ public class Strawberry : MonoBehaviour
 
         if (movementState == MovementState.Running)
         {
-            if (runState == RunState.Default && grounded && isWall)
+            if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall)
             {
                 applyStun = true;
             }
@@ -488,6 +489,11 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.Crawling:
+                if (GetFacingIncorrectDirection())
+                {
+                    FlipPlayerDirection();
+                }
+
                 if (!downInput && !hittingCeiling && grounded)
                 {
                     movementState = MovementState.Default;
@@ -632,7 +638,15 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.Crawling:
-                movement.x = horizontalDirection * crawlSpeed;
+
+                if (horizontalInput != 0f)
+                {
+                    movement.x = horizontalDirection * crawlSpeed;
+                }
+                else
+                {
+                    movement.x = 0f;
+                }
 
                 if (jumpTimer > 0f && groundedTimer > 0f)
                 {
@@ -850,11 +864,12 @@ public class Strawberry : MonoBehaviour
     {
         movementState = MovementState.Stunned;
         stunTimer = stunDuration;
+        currentSpeed = 0f;
     }
 
     private void ApplyKnockBack(float horizontalDirection)
     {
-        rb.velocity = knockBackDirection * horizontalDirection * knockBackStrength;
+        rb.velocity = knockBackDirection * new Vector2(horizontalDirection, 1f) * knockBackStrength;
     }
 
     private void SwapActiveCollider()
