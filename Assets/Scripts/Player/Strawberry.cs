@@ -36,8 +36,15 @@ public class Strawberry : MonoBehaviour
     private bool grounded = false;
 
     private bool movementApplied = false;
+    #endregion
 
-    private bool bouncing = false;
+    #region Collision Checking
+    private float rayCastLength = 0.02f;
+    private float fullColliderHeight;
+    private int horizontalRayCasts = 3;
+    private float horizontalRayCastSpacing;
+    private int verticalRayCasts = 3;
+    private float verticalRayCastSpacing;
     #endregion
 
     #region Components
@@ -137,7 +144,15 @@ public class Strawberry : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         spriteRenderer.sprite = fullSprite;
+
+        fullColliderHeight = fullCollider.bounds.extents.y * 2f;
+
         activeCollider = fullCollider;
+
+        Vector2 activeColliderDimensions = activeCollider.bounds.extents * 2f;
+
+        verticalRayCastSpacing = activeColliderDimensions.x / (verticalRayCasts - 1);
+        horizontalRayCastSpacing = activeColliderDimensions.y / (horizontalRayCasts - 1);
 
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
@@ -226,6 +241,7 @@ public class Strawberry : MonoBehaviour
         }
     }
 
+    #region Movement
     private void GetInputs()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -530,7 +546,7 @@ public class Strawberry : MonoBehaviour
 
                 movement.x = horizontalDirection * currentSpeed;
 
-                if (jumpTimer > 0f && groundedTimer > 0f)
+                if (jumpTimer > 0f && groundedTimer > 0f && movement.y <= 0f)
                 {
                     movement.y = jumpStrength;
                     jumpTimer = 0f;
@@ -565,7 +581,7 @@ public class Strawberry : MonoBehaviour
 
                         movement.x = horizontalDirection * currentSpeed;
 
-                        if (jumpTimer > 0f && groundedTimer > 0f)
+                        if (jumpTimer > 0f && groundedTimer > 0f && movement.y <= 0f)
                         {
                             movement.y = jumpStrength;
                             jumpTimer = 0f;
@@ -590,7 +606,7 @@ public class Strawberry : MonoBehaviour
 
                         movement.x = horizontalDirection * -1f * currentSpeed;
 
-                        if (currentSpeed == 0f)
+                        if (currentSpeed == 0f && grounded)
                         {
                             runState = RunState.Default;
                             currentSpeed = previousSpeed;
@@ -648,7 +664,7 @@ public class Strawberry : MonoBehaviour
                     movement.x = 0f;
                 }
 
-                if (jumpTimer > 0f && groundedTimer > 0f)
+                if (jumpTimer > 0f && groundedTimer > 0f && movement.y <= 0f)
                 {
                     movement.y = crawlJumpStrength;
                     jumpTimer = 0f;
@@ -697,6 +713,7 @@ public class Strawberry : MonoBehaviour
 
         rb.velocity = movement;
     }
+    #endregion
 
     #region Player Direction
     private bool GetFacingIncorrectDirection()
@@ -745,44 +762,42 @@ public class Strawberry : MonoBehaviour
 
     #region Collision Checks
     private bool GetGrounded()
-    { 
-        float boxHeight = 0.01f;
-        Vector2 boxCheckPosition =  new Vector2(transform.position.x, activeCollider.bounds.min.y - boxHeight * 0.5f);
-        Vector2 boxCheckSize = new Vector2(activeCollider.bounds.extents.x * 2f, boxHeight);
+    {
+        Vector2 raycastDirection = Vector2.down;
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
 
-        Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
-
-        if (platforms.Length != 0)
+        for (int i = 0; i < verticalRayCasts; i++)
         {
-            for (int i = 0; i < platforms.Length; i++)
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+
+            Debug.Log(hit.collider != null);
+
+            if (hit.collider != null)
             {
-                if (GetAboveCollider(platforms[i]))
-                {
-                    return true;
-                }
+                return true;
             }
+
+            raycastOrigin += new Vector2(verticalRayCastSpacing, 0f);
         }
-        
+
         return false;
     }
 
     private bool GetHittingWall()
-    {   
-        float boxWidth = 0.01f;
-        Vector2 boxCheckPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + (boxWidth * 0.5f)) * GetPlayerDirection(), activeCollider.bounds.center.y);
-        Vector2 boxCheckSize = new Vector2(boxWidth, activeCollider.bounds.extents.y * 2f);
+    {
+        Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
 
-        Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
-
-        if (platforms.Length != 0)
+        for (int i = 0; i < horizontalRayCasts; i++)
         {
-            for (int i = 0; i < platforms.Length; i++)
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+
+            if (hit.collider != null)
             {
-                if (GetParallelToCollider(platforms[i]))
-                {
-                    return true;
-                }
+                return true;
             }
+
+            raycastOrigin += new Vector2(0f, horizontalRayCastSpacing);
         }
 
         return false;
@@ -790,44 +805,26 @@ public class Strawberry : MonoBehaviour
         
     private bool GetHittingCeiling()
     {
-        float boxHeight = 0.01f;
-        Vector2 boxCheckPosition = new Vector2(transform.position.x, activeCollider.bounds.max.y + boxHeight * 0.5f);
-        Vector2 boxCheckSize = new Vector2(activeCollider.bounds.extents.x * 2f, boxHeight);
+        Vector2 raycastDirection = Vector2.up;
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y + fullColliderHeight);
 
-        Collider2D[] platforms = Physics2D.OverlapBoxAll(boxCheckPosition, boxCheckSize, 0f, platformMask);
-
-        if (platforms.Length != 0)
+        for (int i = 0; i < verticalRayCasts;  i++)
         {
-            for (int i = 0; i < platforms.Length; i++)
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+
+            if (hit.collider != null)
             {
-                if (GetBelowCollider(platforms[i]))
-                {
-                    return true;
-                }
+                return true;
             }
+
+            raycastOrigin += new Vector2(verticalRayCastSpacing, 0f);
         }
 
         return false;
     }
     #endregion
 
-    #region Collider Position Comparisons
-    private bool GetAboveCollider(Collider2D other)
-    {
-        return activeCollider.bounds.min.y > other.bounds.max.y;
-    }
-
-    private bool GetParallelToCollider(Collider2D other)
-    {
-        return activeCollider.bounds.min.y < other.bounds.max.y && activeCollider.bounds.max.y > other.bounds.min.y;
-    }
-
-    private bool GetBelowCollider(Collider2D other)
-    {
-        return activeCollider.bounds.max.y < other.bounds.min.y;
-    }
-    #endregion
-
+    #region Taking Damage
     public void TakeDamge(int damage, float horizontalDirection)
     {
         if (invincibilityTimer <= 0f)
@@ -871,6 +868,7 @@ public class Strawberry : MonoBehaviour
     {
         rb.velocity = knockBackDirection * new Vector2(horizontalDirection, 1f) * knockBackStrength;
     }
+    #endregion
 
     private void SwapActiveCollider()
     {
@@ -887,5 +885,7 @@ public class Strawberry : MonoBehaviour
             spriteRenderer.sprite = fullSprite;
             activeCollider = fullCollider;
         }
+        
+        horizontalRayCastSpacing = (activeCollider.bounds.extents.y * 2f) / horizontalRayCasts;
     }
 }
