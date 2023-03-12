@@ -249,8 +249,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 356009231}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -4, z: 0}
-  m_LocalScale: {x: 12, y: 1, z: 1}
+  m_LocalPosition: {x: -4, y: -4, z: 0}
+  m_LocalScale: {x: 20, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -355,10 +355,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strawberry: {fileID: 1990224996}
   levelBoundaries:
-    left: -10
+    left: -40
     right: 40
-    top: 10
-    bottom: -6
+    top: 20
+    bottom: -20
 --- !u!1 &611314524
 GameObject:
   m_ObjectHideFlags: 0
@@ -489,7 +489,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -1320,8 +1320,8 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: 3402c68255b04534780c1055b9424819, type: 2}
-  m_Interpolate: 0
-  m_SleepingMode: 1
+  m_Interpolate: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!212 &1990224991
@@ -1429,13 +1429,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aa2c6568a2b5d244b910fc5a355e571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  platformMask:
+    serializedVersion: 2
+    m_Bits: 64
   fullCollider: {fileID: 1990224995}
   halfCollider: {fileID: 1990224997}
   fullSprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
   halfSprite: {fileID: 21300000, guid: 8b861e7e60709244d9bc67a75c182bee, type: 3}
-  platformMask:
-    serializedVersion: 2
-    m_Bits: 64
+  jumpBuffer: 0.2
+  groundedBuffer: 0.15
+  initialWalkSpeed: 3
+  maxWalkSpeed: 6
+  walkAcceleration: 6
+  initialRunSpeed: 6
+  maxRunSpeed: 12
+  runAcceleration: 6
+  speedReduction: 2
+  jumpStrength: 7
+  fallSpeed: 2.5
+  incompleteJumpStrength: 0.3
+  crawlSpeed: 3
+  crawlJumpStrength: 6
+  bellyFlopStrength: 16
+  turnDeceleration: 10
+  slideDeceleration: 10
+  diveSpeed: 12
+  diveDirection: {x: 1, y: -1}
+  wallRunSpeed: 6
+  wallJumpStrength: 8
+  wallJumpDirection: {x: 0.6, y: 0.4}
+  superJumpSpeed: 12
+  superJumpChargeSpeed: 3
+  superJumpCancelSpeed: 10
+  superJumpCancelDirection: {x: 1, y: 0}
+  knockBackStrength: 3
+  knockBackDirection: {x: 1, y: 1}
+  maxHearts: 100
+  stunDuration: 0.5
+  invincibilityDuratrion: 3
 --- !u!61 &1990224997
 BoxCollider2D:
   m_ObjectHideFlags: 0

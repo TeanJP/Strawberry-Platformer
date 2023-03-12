@@ -39,11 +39,14 @@ public class Strawberry : MonoBehaviour
     #endregion
 
     #region Collision Checking
+    [Header("Collision Checking")]
+    [SerializeField]
+    private LayerMask platformMask;
     private float rayCastLength = 0.02f;
     private float fullColliderHeight;
-    private int horizontalRayCasts = 3;
+    private int horizontalRayCasts = 5;
     private float horizontalRayCastSpacing;
-    private int verticalRayCasts = 3;
+    private int verticalRayCasts = 5;
     private float verticalRayCastSpacing;
     #endregion
 
@@ -51,6 +54,7 @@ public class Strawberry : MonoBehaviour
     private Rigidbody2D rb = null;
     private SpriteRenderer spriteRenderer = null;
     private BoxCollider2D activeCollider = null;
+    [Header("Components")]
     [SerializeField]
     private BoxCollider2D fullCollider = null;
     [SerializeField]
@@ -70,9 +74,12 @@ public class Strawberry : MonoBehaviour
     #endregion
 
     #region Buffers
+    [Header("Buffers")]
+    [SerializeField]
     private float jumpBuffer = 0.2f;
     private float jumpTimer = 0f;
 
+    [SerializeField]
     private float groundedBuffer = 0.15f;
     private float groundedTimer = 0f;
     #endregion
@@ -81,62 +88,91 @@ public class Strawberry : MonoBehaviour
     private float currentSpeed = 0f;
     private float previousSpeed;
 
+    [Header("Movement Values")]
+    [SerializeField]
     private float initialWalkSpeed = 2f;
+    [SerializeField]
     private float maxWalkSpeed = 5f;
+    [SerializeField]
     private float walkAcceleration = 6f;
 
+
+    [SerializeField]
     private float initialRunSpeed = 5f;
+    [SerializeField]
     private float maxRunSpeed = 10f;
+    [SerializeField]
     private float runAcceleration = 5f;
-    
+
+    [SerializeField]
     private float speedReduction = 1f;
 
+    [SerializeField]
     private float jumpStrength = 6f;
+    [SerializeField]
     private float fallSpeed = 2.5f;
+    [SerializeField]
     private float incompleteJumpStrength = 0.25f;
 
+    [SerializeField]
     private float crawlSpeed = 3f;
+    [SerializeField]
     private float crawlJumpStrength = 6f;
 
+    [SerializeField]
     private float bellyFlopStrength = 10f;
 
+    [SerializeField]
     private float turnDeceleration = 6f;
 
+    [SerializeField]
     private float slideDeceleration = 6f;
 
+    [SerializeField]
     private float diveSpeed = 10f;
+    [SerializeField]
     private Vector2 diveDirection = new Vector2(1f, -1f);
 
+    [SerializeField]
     private float wallRunSpeed = 6f;
 
+    [SerializeField]
     private float wallJumpStrength = 6f;
+    [SerializeField]
     private Vector2 wallJumpDirection = new Vector2(1f ,1f);
 
+    [SerializeField]
     private float superJumpSpeed = 10f;
+    [SerializeField]
     private float superJumpChargeSpeed = 3f;
 
+    [SerializeField]
     private float superJumpCancelSpeed = 10f;
+    [SerializeField]
     private Vector2 superJumpCancelDirection = new Vector2(1f, 0f);
 
+    [SerializeField]
     private float knockBackStrength = 3f;
+    [SerializeField]
     private Vector2 knockBackDirection = new Vector2(1f, 1f);
     #endregion
 
     #region Health
+    [Header("Health Values")]
+    [SerializeField]
     private int maxHearts = 100;
     private int hearts = 0;
 
+    [SerializeField]
     private float stunDuration = 0.5f;
     private float stunTimer = 0f;
 
+    [SerializeField]
     private float invincibilityDuratrion = 3f;
     private float invincibilityTimer = 0f;
 
     private GameObject heart = null;
     #endregion
-
-    [SerializeField]
-    private LayerMask platformMask;
 
     void Start()
     {
@@ -295,7 +331,7 @@ public class Strawberry : MonoBehaviour
                     FlipPlayerDirection();
                 }
 
-                if (grounded && (runInput || currentSpeed > maxWalkSpeed))
+                if (grounded && !hittingWall && (runInput || currentSpeed > maxWalkSpeed))
                 {
                     movementState = MovementState.Running;
                     runState = RunState.Default;
@@ -343,7 +379,7 @@ public class Strawberry : MonoBehaviour
                                 runState = RunState.WallRunning;
                                 currentSpeed = wallRunSpeed;
                             }
-                            else if (upInput && grounded)
+                            else if (upInput && grounded && currentSpeed >= maxRunSpeed)
                             {
                                 runState = RunState.ChargingSuperJump;
                                 SwapActiveCollider();
@@ -489,12 +525,14 @@ public class Strawberry : MonoBehaviour
                         if (hittingWall && runInput)
                         {
                             runState = RunState.WallRunning;
+                            currentSpeed = wallRunSpeed;
                         }
                         else if (grounded)
                         {
                             if (runInput)
                             {
                                 runState = RunState.Default;
+                                currentSpeed = maxRunSpeed;
                             }
                             else
                             {
@@ -689,14 +727,14 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
         }
-
+        
         if (movementState == MovementState.Running && (runState == RunState.Diving || runState == RunState.WallRunning || runState == RunState.SuperJumping))
         {
             rb.gravityScale = 0f;
         }
         else
         {
-            if (movement.y < 0f)
+            if (movement.y < 0f && !(movementState == MovementState.Running && runState == RunState.CancellingSuperJump))
             {
                 rb.gravityScale = fallSpeed;
             }
@@ -705,7 +743,7 @@ public class Strawberry : MonoBehaviour
                 rb.gravityScale = 1f;
             }
         }
-
+        
         if (currentSpeed > maxRunSpeed)
         {
             currentSpeed = Mathf.Max(currentSpeed - speedReduction * Time.deltaTime, maxRunSpeed);
@@ -769,8 +807,6 @@ public class Strawberry : MonoBehaviour
         for (int i = 0; i < verticalRayCasts; i++)
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
-
-            Debug.Log(hit.collider != null);
 
             if (hit.collider != null)
             {
