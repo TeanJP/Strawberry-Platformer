@@ -42,12 +42,13 @@ public class Strawberry : MonoBehaviour
     [Header("Collision Checking")]
     [SerializeField]
     private LayerMask platformMask;
-    private float rayCastLength = 0.02f;
+    private float raycastLeniency = 0.02f;
+    private float raycastLength = 0.02f;
     private float fullColliderHeight;
-    private int horizontalRayCasts = 5;
-    private float horizontalRayCastSpacing;
-    private int verticalRayCasts = 5;
-    private float verticalRayCastSpacing;
+    private int horizontalRaycasts = 5;
+    private float horizontalRaycastSpacing;
+    private int verticalRaycasts = 5;
+    private float verticalRaycastSpacing;
     #endregion
 
     #region Components
@@ -185,10 +186,10 @@ public class Strawberry : MonoBehaviour
 
         activeCollider = fullCollider;
 
-        Vector2 activeColliderDimensions = activeCollider.bounds.extents * 2f;
+        Vector2 activeColliderDimensions = activeCollider.bounds.size;
 
-        verticalRayCastSpacing = activeColliderDimensions.x / (verticalRayCasts - 1);
-        horizontalRayCastSpacing = activeColliderDimensions.y / (horizontalRayCasts - 1);
+        verticalRaycastSpacing = activeColliderDimensions.x / (verticalRaycasts - 1);
+        horizontalRaycastSpacing = activeColliderDimensions.y / (horizontalRaycasts - 1);
 
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
@@ -804,16 +805,36 @@ public class Strawberry : MonoBehaviour
         Vector2 raycastDirection = Vector2.down;
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
 
-        for (int i = 0; i < verticalRayCasts; i++)
+        for (int i = 0; i < verticalRaycasts; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
             if (hit.collider != null)
             {
                 return true;
             }
 
-            raycastOrigin += new Vector2(verticalRayCastSpacing, 0f);
+            raycastOrigin.x += verticalRaycastSpacing;
+        }
+
+        raycastOrigin.x = activeCollider.bounds.min.x - raycastLeniency;
+
+        Vector2 wallCheckDirection = Vector2.left;
+        Vector2 wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
+
+        for (int i = 0; i < 2; i++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+            RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, platformMask);
+
+            if (hit.collider != null && wallHit.collider == null)
+            {
+                return true;
+            }
+
+            raycastOrigin.x += (activeCollider.bounds.size.x + raycastLeniency * 2f);
+            wallCheckOrigin.x += activeCollider.bounds.size.x;
+            wallCheckDirection *= -1f;
         }
 
         return false;
@@ -824,16 +845,16 @@ public class Strawberry : MonoBehaviour
         Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
 
-        for (int i = 0; i < horizontalRayCasts; i++)
+        for (int i = 0; i < horizontalRaycasts; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
             if (hit.collider != null)
             {
                 return true;
             }
 
-            raycastOrigin += new Vector2(0f, horizontalRayCastSpacing);
+            raycastOrigin.y += horizontalRaycastSpacing;
         }
 
         return false;
@@ -844,16 +865,16 @@ public class Strawberry : MonoBehaviour
         Vector2 raycastDirection = Vector2.up;
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y + fullColliderHeight);
 
-        for (int i = 0; i < verticalRayCasts;  i++)
+        for (int i = 0; i < verticalRaycasts;  i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, rayCastLength, platformMask);
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
             if (hit.collider != null)
             {
                 return true;
             }
 
-            raycastOrigin += new Vector2(verticalRayCastSpacing, 0f);
+            raycastOrigin.x += verticalRaycastSpacing;
         }
 
         return false;
@@ -922,6 +943,6 @@ public class Strawberry : MonoBehaviour
             activeCollider = fullCollider;
         }
         
-        horizontalRayCastSpacing = (activeCollider.bounds.extents.y * 2f) / horizontalRayCasts;
+        horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
     }
 }
