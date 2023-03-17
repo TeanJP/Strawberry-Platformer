@@ -42,6 +42,9 @@ public class Strawberry : MonoBehaviour
     [Header("Collision Checking")]
     [SerializeField]
     private LayerMask platformMask;
+    [SerializeField]
+    private LayerMask enemyMask;
+    private float attackCheckWidth = 0.04f;
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
     private float fullColliderHeight;
@@ -161,7 +164,7 @@ public class Strawberry : MonoBehaviour
     [Header("Health Values")]
     [SerializeField]
     private int maxHearts = 100;
-    private int hearts = 0;
+    private int hearts = 1;
 
     [SerializeField]
     private float stunDuration = 0.5f;
@@ -884,6 +887,62 @@ public class Strawberry : MonoBehaviour
     }
     #endregion
 
+    #region Attacks
+    private void PerformHorizontalAttack()
+    {
+        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * GetPlayerDirection(), activeCollider.bounds.center.y);
+        Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y);
+
+        Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Enemy enemy = enemies[i].GetComponent<Enemy>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(1);
+            }
+        }
+    }
+    
+    private void PerformDownwardsAttack()
+    {
+        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
+        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
+
+        Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Enemy enemy = enemies[i].GetComponent<Enemy>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(1);
+            }
+        }
+    }
+
+    private void PerformUpwardsAttack()
+    {
+        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.max.y + attackCheckWidth * 0.5f);
+        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
+
+        Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Enemy enemy = enemies[i].GetComponent<Enemy>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(1);
+            }
+        }
+    }
+    #endregion
+
     #region Taking Damage
     public void TakeDamge(int damage, float horizontalDirection)
     {
@@ -902,19 +961,21 @@ public class Strawberry : MonoBehaviour
 
                 invincibilityTimer = invincibilityDuratrion;
                 ApplyStun();
-                ApplyKnockBack(horizontalDirection);
             }
+
+            ApplyKnockBack(horizontalDirection);
         }
     }
 
     private void SpawnHearts(int amount)
     {
-
+        /*
 
         for (int i = 0; i < amount; i++)
         {
             Instantiate(heart);
         }
+        */
     }
 
     private void ApplyStun()

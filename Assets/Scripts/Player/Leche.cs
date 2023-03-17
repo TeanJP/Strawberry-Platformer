@@ -30,7 +30,7 @@ public class Leche : MonoBehaviour
         {
             if (projectile != null)
             {
-                Projectile createdProjectile = Instantiate(projectile).GetComponent<Projectile>();
+                PlayerProjectile createdProjectile = Instantiate(projectile).GetComponent<PlayerProjectile>();
             }
 
             attackTimer = attackDelay;    
