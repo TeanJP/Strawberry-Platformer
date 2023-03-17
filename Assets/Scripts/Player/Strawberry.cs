@@ -97,7 +97,6 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float walkAcceleration = 6f;
 
-
     [SerializeField]
     private float initialRunSpeed = 5f;
     [SerializeField]
@@ -824,12 +823,16 @@ public class Strawberry : MonoBehaviour
 
         for (int i = 0; i < 2; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
             RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, platformMask);
 
-            if (hit.collider != null && wallHit.collider == null)
+            if (wallHit.collider == null)
             {
-                return true;
+                RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+
+                if (hit.collider != null)
+                {
+                    return true;
+                }
             }
 
             raycastOrigin.x += (activeCollider.bounds.size.x + raycastLeniency * 2f);
