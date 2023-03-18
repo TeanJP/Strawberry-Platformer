@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour
 {
     private Rigidbody2D rb = null;
     private BoxCollider2D activeCollider = null;
 
+    [SerializeField]
     private LayerMask platformMask;
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
@@ -15,12 +16,12 @@ public class Enemy : MonoBehaviour
     private int verticalRaycasts = 3;
     private float verticalRaycastSpacing;
 
-    private float maxSpeed = 8f;
+    [SerializeField]
     private float initialSpeed = 4f;
     private float currentSpeed = 0f;
-    private float acceleration = 5f;
 
     private int health = 10;
+    private float stunTimer = 0f;
 
     void Start()
     {
@@ -114,7 +115,15 @@ public class Enemy : MonoBehaviour
     }
     #endregion
 
-    public void TakeDamage(int damage)
+    private void DecrementTimers(float deltaTime)
+    {
+        if (stunTimer > 0f)
+        {
+            stunTimer -= deltaTime;
+        }
+    }
+
+    public void TakeDamage(int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
     {
         health = Mathf.Max(health - damage, 0);
 
@@ -122,5 +131,21 @@ public class Enemy : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        else
+        {
+            stunTimer = stunDuration;
+        }
+
+        RepelEnemy(repelDirection, repelStrength);
+    }
+
+    public void ApplyStun(float stunDuration)
+    {
+        stunTimer = stunDuration;
+    }
+
+    public void RepelEnemy(Vector2 repelDirection, float repelStrength)
+    {
+        rb.velocity = repelDirection * repelStrength;
     }
 }

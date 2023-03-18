@@ -155,9 +155,9 @@ public class Strawberry : MonoBehaviour
     private Vector2 superJumpCancelDirection = new Vector2(1f, 0f);
 
     [SerializeField]
-    private float knockBackStrength = 3f;
+    private float collisionRepelStrength = 3f;
     [SerializeField]
-    private Vector2 knockBackDirection = new Vector2(1f, 1f);
+    private Vector2 collisionRepelDirection = new Vector2(1f, 1f);
     #endregion
 
     #region Health
@@ -196,7 +196,7 @@ public class Strawberry : MonoBehaviour
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
         superJumpCancelDirection.Normalize();
-        knockBackDirection.Normalize();
+        collisionRepelDirection.Normalize();
     }
 
     void Update()
@@ -276,7 +276,7 @@ public class Strawberry : MonoBehaviour
         if (applyStun)
         {
             ApplyStun();
-            ApplyKnockBack(GetPlayerDirection() * -1f);
+            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
         }
     }
 
@@ -901,7 +901,7 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1);
+                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
             }
         }
     }
@@ -919,7 +919,7 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1);
+                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
             }
         }
     }
@@ -937,14 +937,14 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1);
+                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
             }
         }
     }
     #endregion
 
     #region Taking Damage
-    public void TakeDamge(int damage, float horizontalDirection)
+    public void TakeDamge(int damage, Vector2 repelDirection, float repelStrength)
     {
         if (invincibilityTimer <= 0f)
         {
@@ -963,7 +963,7 @@ public class Strawberry : MonoBehaviour
                 ApplyStun();
             }
 
-            ApplyKnockBack(horizontalDirection);
+            RepelPlayer(repelDirection, repelStrength);
         }
     }
 
@@ -978,16 +978,16 @@ public class Strawberry : MonoBehaviour
         */
     }
 
-    private void ApplyStun()
+    public void ApplyStun()
     {
         movementState = MovementState.Stunned;
         stunTimer = stunDuration;
         currentSpeed = 0f;
     }
 
-    private void ApplyKnockBack(float horizontalDirection)
+    public void RepelPlayer(Vector2 repelDirection, float repelStrength)
     {
-        rb.velocity = knockBackDirection * new Vector2(horizontalDirection, 1f) * knockBackStrength;
+        rb.velocity = repelDirection * repelStrength;
     }
     #endregion
 

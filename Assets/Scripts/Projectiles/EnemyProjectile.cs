@@ -12,10 +12,14 @@ public class EnemyProjectile : MonoBehaviour
 
     [SerializeField]
     private int damage = 5;
+    private Vector2 repelDirection = Vector2.one;
+    private float repelStrength = 3f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        repelDirection.Normalize();
     }
 
     void Update()
@@ -31,8 +35,7 @@ public class EnemyProjectile : MonoBehaviour
         {
             float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
 
-            strawberry.TakeDamge(damage, horizontalDirection);
-
+            strawberry.TakeDamge(damage, repelDirection * new Vector2(horizontalDirection, 1f), repelStrength);
         }
 
         Destroy(gameObject);

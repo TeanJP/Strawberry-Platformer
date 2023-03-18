@@ -29,7 +29,7 @@ public class PlayerProjectile : MonoBehaviour
 
         if (enemy != null)
         {
-
+            enemy.TakeDamage(damage, 0f, Vector2.zero, 0f);
         }
 
         Destroy(gameObject);
