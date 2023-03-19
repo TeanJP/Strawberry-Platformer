@@ -4,24 +4,30 @@ using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour
 {
-    private Rigidbody2D rb = null;
-    private BoxCollider2D activeCollider = null;
+    protected Rigidbody2D rb = null;
+    protected BoxCollider2D activeCollider = null;
 
     [SerializeField]
-    private LayerMask platformMask;
-    private float raycastLeniency = 0.02f;
-    private float raycastLength = 0.02f;
-    private int horizontalRaycasts = 2;
-    private float horizontalRaycastSpacing;
-    private int verticalRaycasts = 3;
-    private float verticalRaycastSpacing;
+    protected Transform player = null;
 
     [SerializeField]
-    private float initialSpeed = 4f;
-    private float currentSpeed = 0f;
+    protected LayerMask platformMask;
+    protected float raycastLeniency = 0.02f;
+    protected float raycastLength = 0.02f;
+    protected int horizontalRaycasts = 2;
+    protected float horizontalRaycastSpacing;
+    protected int verticalRaycasts = 3;
+    protected float verticalRaycastSpacing;
 
-    private int health = 10;
-    private float stunTimer = 0f;
+    [SerializeField]
+    protected float initialSpeed = 4f;
+    protected float currentSpeed = 0f;
+    [SerializeField]
+    protected float fallSpeed = 2.5f;
+
+    [SerializeField]
+    protected int health = 10;
+    protected float stunTimer = 0f;
 
     void Start()
     {
@@ -38,19 +44,19 @@ public abstract class Enemy : MonoBehaviour
     }
 
     #region Enemy Direction
-    private void FlipDirection()
+    protected void FlipDirection()
     {
         transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
     }
 
-    private float GetFacingDirection()
+    protected float GetFacingDirection()
     {
         return Mathf.Sign(transform.localScale.x);
     }
     #endregion
 
     #region Colision Checking
-    private bool GetGrounded()
+    protected bool GetGrounded()
     {
         Vector2 raycastDirection = Vector2.down;
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
@@ -94,7 +100,7 @@ public abstract class Enemy : MonoBehaviour
         return false;
     }
 
-    private bool GetHittingWall()
+    protected bool GetHittingWall()
     {
         Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetFacingDirection(), activeCollider.bounds.min.y);
@@ -115,7 +121,7 @@ public abstract class Enemy : MonoBehaviour
     }
     #endregion
 
-    private void DecrementTimers(float deltaTime)
+    protected void DecrementTimers(float deltaTime)
     {
         if (stunTimer > 0f)
         {
@@ -123,6 +129,7 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
+    #region Taking Damage
     public void TakeDamage(int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
     {
         health = Mathf.Max(health - damage, 0);
@@ -148,4 +155,29 @@ public abstract class Enemy : MonoBehaviour
     {
         rb.velocity = repelDirection * repelStrength;
     }
+    #endregion
+
+    #region Direction to Player
+    protected float GetDistanceFromPlayer()
+    {
+        Vector2 difference = player.position - transform.position;
+        return difference.magnitude;
+    }
+
+    protected float GetDirectionToPlayer()
+    {
+        return Mathf.Sign(player.position.x - transform.position.x);
+    }
+
+    protected void FacePlayer()
+    {
+        float currentDirection = GetFacingDirection();
+        float directionToPlayer = GetDirectionToPlayer();
+
+        if (currentDirection != directionToPlayer)
+        {
+            FlipDirection();
+        }
+    }
+    #endregion
 }
