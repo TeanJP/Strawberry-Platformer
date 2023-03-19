@@ -4,11 +4,23 @@ using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour
 {
+    protected enum State
+    {
+        Default,
+        Attacking,
+        Scared,
+        Stunned
+    }
+
+    protected State state = State.Default;
+
     protected Rigidbody2D rb = null;
     protected BoxCollider2D activeCollider = null;
 
     [SerializeField]
     protected Transform player = null;
+    [SerializeField]
+    protected float scaredDistance = 3f;
 
     [SerializeField]
     protected LayerMask platformMask;
@@ -20,8 +32,12 @@ public abstract class Enemy : MonoBehaviour
     protected float verticalRaycastSpacing;
 
     [SerializeField]
+    protected float maxSpeed = 8f;
+    [SerializeField]
     protected float initialSpeed = 4f;
     protected float currentSpeed = 0f;
+    [SerializeField]
+    protected float acceleration = 6f;
     [SerializeField]
     protected float fallSpeed = 2.5f;
 
@@ -29,18 +45,13 @@ public abstract class Enemy : MonoBehaviour
     protected int health = 10;
     protected float stunTimer = 0f;
 
-    void Start()
+    protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         activeCollider = GetComponent<BoxCollider2D>();
 
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
-    }
-
-    void Update()
-    {
-        
     }
 
     #region Enemy Direction
@@ -121,11 +132,16 @@ public abstract class Enemy : MonoBehaviour
     }
     #endregion
 
-    protected void DecrementTimers(float deltaTime)
+    protected void DecrementStunTimer(float deltaTime)
     {
         if (stunTimer > 0f)
         {
             stunTimer -= deltaTime;
+
+            if (stunTimer <= 0f)
+            {
+                state = State.Default;
+            }
         }
     }
 
@@ -140,6 +156,7 @@ public abstract class Enemy : MonoBehaviour
         }
         else
         {
+            state = State.Stunned;
             stunTimer = stunDuration;
         }
 
