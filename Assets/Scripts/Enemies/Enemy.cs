@@ -13,6 +13,9 @@ public abstract class Enemy : MonoBehaviour
     }
 
     protected State state = State.Default;
+    [SerializeField]
+    protected bool patrol = false;
+    protected bool trapped = false;
 
     protected Rigidbody2D rb = null;
     protected BoxCollider2D activeCollider = null;
@@ -21,7 +24,11 @@ public abstract class Enemy : MonoBehaviour
     protected Transform player = null;
     [SerializeField]
     protected float scaredDistance = 3f;
+    [SerializeField]
+    protected float fearDuration = 4f;
+    protected float fearTimer = 0f;
 
+    #region Collision Checking
     [SerializeField]
     protected LayerMask platformMask;
     protected float raycastLeniency = 0.02f;
@@ -30,7 +37,10 @@ public abstract class Enemy : MonoBehaviour
     protected float horizontalRaycastSpacing;
     protected int verticalRaycasts = 3;
     protected float verticalRaycastSpacing;
+    protected float dropCheckOffset = 0.03f;
+    #endregion
 
+    #region Movement Values
     [SerializeField]
     protected float maxSpeed = 8f;
     [SerializeField]
@@ -40,6 +50,7 @@ public abstract class Enemy : MonoBehaviour
     protected float acceleration = 6f;
     [SerializeField]
     protected float fallSpeed = 2.5f;
+    #endregion
 
     [SerializeField]
     protected int health = 10;
@@ -53,6 +64,75 @@ public abstract class Enemy : MonoBehaviour
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
     }
+
+    #region Movement
+    protected void Patrol(bool hittingWall, bool dropAhead)
+    {
+        Vector2 movement = rb.velocity;
+
+        if (hittingWall || dropAhead)
+        {
+            FlipDirection();
+        }
+
+        movement.x = initialSpeed * GetFacingDirection();
+
+        rb.velocity = movement;
+    }
+
+    protected void Run(bool hittingWall, bool dropAhead, float deltaTime)
+    {
+        Vector2 movement = rb.velocity;
+
+        float facingDirection = GetFacingDirection();
+        float directionToPlayer = GetDirectionToPlayer();
+
+        if (trapped && facingDirection != directionToPlayer)
+        {
+            trapped = false;
+        }
+        else if (!trapped && hittingWall || dropAhead)
+        {
+            trapped = true;
+            currentSpeed = 0f;
+            FacePlayer();
+        }
+
+        if (!trapped)
+        {
+            if (facingDirection == directionToPlayer)
+            {
+                FlipDirection();
+                currentSpeed = initialSpeed;
+            }
+
+            if (currentSpeed < initialSpeed)
+            {
+                currentSpeed = initialSpeed;
+            }
+            else
+            {
+                currentSpeed = Mathf.Min(currentSpeed + acceleration * deltaTime, maxSpeed);
+            }
+        }
+
+        movement.x = currentSpeed * GetFacingDirection();
+
+        rb.velocity = movement;
+    }
+
+    protected void UpdateGravityScale()
+    {
+        if (rb.velocity.y < 0f)
+        {
+            rb.gravityScale = fallSpeed;
+        }
+        else
+        {
+            rb.gravityScale = 1f;
+        }
+    }
+    #endregion
 
     #region Enemy Direction
     protected void FlipDirection()
@@ -130,8 +210,19 @@ public abstract class Enemy : MonoBehaviour
 
         return false;
     }
+
+    protected bool GetDropAhead()
+    {
+        Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + dropCheckOffset) * GetFacingDirection(), activeCollider.bounds.min.y);
+
+        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+
+        return hit.collider == null;
+    }
     #endregion
 
+    #region Timers
     protected void DecrementStunTimer(float deltaTime)
     {
         if (stunTimer > 0f)
@@ -144,6 +235,20 @@ public abstract class Enemy : MonoBehaviour
             }
         }
     }
+
+    protected void DecrementFearTimer(float deltaTime)
+    {
+        if (fearTimer > 0f)
+        {
+            fearTimer -= deltaTime;
+
+            if (fearTimer <= 0f)
+            {
+                state = State.Default;
+            }
+        }
+    }
+    #endregion
 
     #region Taking Damage
     public void TakeDamage(int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
