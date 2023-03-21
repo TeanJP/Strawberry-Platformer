@@ -293,13 +293,20 @@ public abstract class Enemy : MonoBehaviour
 
     protected void FacePlayer()
     {
-        float currentDirection = GetFacingDirection();
-        float directionToPlayer = GetDirectionToPlayer();
+        bool facingPlayer = GetFacingPlayer();
 
-        if (currentDirection != directionToPlayer)
+        if (!facingPlayer)
         {
             FlipDirection();
         }
+    }
+
+    protected bool GetFacingPlayer()
+    {
+        float currentDirection = GetFacingDirection();
+        float directionToPlayer = GetDirectionToPlayer();
+
+        return currentDirection == directionToPlayer;
     }
     #endregion
 }
