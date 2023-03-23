@@ -21,11 +21,13 @@ public abstract class Enemy : MonoBehaviour
     protected BoxCollider2D activeCollider = null;
 
     [SerializeField]
-    protected Transform player = null;
+    protected Strawberry strawberry = null;
     [SerializeField]
     protected float scaredDistance = 3f;
     [SerializeField]
-    protected float fearDuration = 4f;
+    protected float fearSpeed = 1f;
+    [SerializeField]
+    protected float fearDuration = 2f;
     protected float fearTimer = 0f;
 
     #region Collision Checking
@@ -282,13 +284,13 @@ public abstract class Enemy : MonoBehaviour
     #region Direction to Player
     protected float GetDistanceFromPlayer()
     {
-        Vector2 difference = player.position - transform.position;
+        Vector2 difference = strawberry.transform.position - transform.position;
         return difference.magnitude;
     }
 
     protected float GetDirectionToPlayer()
     {
-        return Mathf.Sign(player.position.x - transform.position.x);
+        return Mathf.Sign(strawberry.transform.position.x - transform.position.x);
     }
 
     protected void FacePlayer()

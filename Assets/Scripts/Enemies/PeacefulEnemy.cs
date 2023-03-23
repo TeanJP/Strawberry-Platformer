@@ -33,16 +33,24 @@ public class PeacefulEnemy : Enemy
 
                 break;
         }
+
+        UpdateGravityScale();
     }
 
     private void UpdateState()
     {
-        float distanceFromPlayer = GetDistanceFromPlayer();
+        float distanceFromPlayer;
+        bool abovePlayer;
+        bool playerSpeedScary;
 
         switch (state)
         {
             case State.Default:
-                if (distanceFromPlayer < scaredDistance)
+                distanceFromPlayer = GetDistanceFromPlayer();
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y - 1f);
+                playerSpeedScary = strawberry.GetSpeedAbovePercentage(fearSpeed);
+
+                if (distanceFromPlayer < scaredDistance && !abovePlayer && playerSpeedScary)
                 {
                     state = State.Scared;
 
@@ -56,7 +64,11 @@ public class PeacefulEnemy : Enemy
                 }
                 break;
             case State.Scared:
-                if (distanceFromPlayer < scaredDistance)
+                distanceFromPlayer = GetDistanceFromPlayer();
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y - 1f);
+                playerSpeedScary = strawberry.GetSpeedAbovePercentage(fearSpeed);
+
+                if (distanceFromPlayer < scaredDistance && !abovePlayer && playerSpeedScary)
                 {
                     fearTimer = fearDuration;
                 }

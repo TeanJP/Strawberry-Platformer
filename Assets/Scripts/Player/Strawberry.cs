@@ -1009,4 +1009,32 @@ public class Strawberry : MonoBehaviour
         
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
     }
+
+    #region Enemy Interaction
+    public bool GetSpeedAbovePercentage(float percentage)
+    {
+        float minimum = Mathf.Lerp(initialRunSpeed, maxRunSpeed, percentage);
+
+        if (currentSpeed >= minimum && movementState == MovementState.Running)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool GetAbovePlayer(float position)
+    {
+        if (activeCollider.bounds.max.y < position)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    #endregion
 }

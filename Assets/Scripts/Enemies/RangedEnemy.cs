@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class RangedEnemy : Enemy
 {
+    [SerializeField]
     private float attackRange = 8f;
+    [SerializeField]
     private float attackCooldown = 1f;
     private float attackTimer = 0f;
 
+    [SerializeField]
+    private GameObject projectile = null;
+    [SerializeField]
     private float reloadDuration = 4f;
     private float reloadTimer = 0f;
+    [SerializeField]
     private int maxShots = 6;
     private int currentShots;
 
@@ -38,7 +44,31 @@ public class RangedEnemy : Enemy
                 }
                 break;
             case State.Attacking:
+                if (currentShots > 0)
+                {
+                    if (attackTimer <= 0f)
+                    {
+                        Instantiate(projectile);
+                        currentShots--;
 
+                        if (currentShots == 0)
+                        {
+                            reloadTimer = reloadDuration;
+                        }
+                        else
+                        {
+                            attackTimer = attackCooldown;
+                        }
+                    }
+                    else
+                    {
+                        DecrementAttackTimer(Time.deltaTime);
+                    }
+                }
+                else
+                {
+                    DecrementReloadTimer(Time.deltaTime);
+                }
                 break;
             case State.Scared:
                 Run(hittingWall, dropAhead, Time.deltaTime);
@@ -47,6 +77,8 @@ public class RangedEnemy : Enemy
 
                 break;
         }
+
+        UpdateGravityScale();
     }
 
     private void UpdateState()
@@ -70,11 +102,11 @@ public class RangedEnemy : Enemy
                 }
                 else if (distanceFromPlayer < attackRange)
                 {
-
+                    state = State.Attacking;
                 }
                 break;
             case State.Attacking:
-                if (distanceFromPlayer < scaredDistance)
+                if (distanceFromPlayer < scaredDistance && currentShots == 0)
                 {
                     state = State.Scared;
 
@@ -111,6 +143,27 @@ public class RangedEnemy : Enemy
             case State.Stunned:
                 DecrementStunTimer(Time.deltaTime);
                 break;
+        }
+    }
+
+    private void DecrementAttackTimer(float deltaTime)
+    {
+        if (attackTimer > 0f)
+        {
+            attackTimer -= deltaTime;
+        }
+    }
+
+    private void DecrementReloadTimer(float deltaTime)
+    {
+        if (reloadTimer > 0f)
+        {
+            reloadTimer -= deltaTime;
+
+            if (reloadTimer <= 0f)
+            {
+                currentShots = maxShots;
+            }
         }
     }
 }
