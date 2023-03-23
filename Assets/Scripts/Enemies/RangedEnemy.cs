@@ -88,17 +88,9 @@ public class RangedEnemy : Enemy
         switch (state)
         {
             case State.Default:
-                if (distanceFromPlayer < scaredDistance)
+                if (distanceFromPlayer < scaredDistance && currentShots == 0)
                 {
-                    state = State.Scared;
-
-                    bool facingPlayer = GetFacingPlayer();
-
-                    if (facingPlayer)
-                    {
-                        FlipDirection();
-                        currentSpeed = 0f;
-                    }
+                    SetScared();
                 }
                 else if (distanceFromPlayer < attackRange)
                 {
@@ -108,15 +100,7 @@ public class RangedEnemy : Enemy
             case State.Attacking:
                 if (distanceFromPlayer < scaredDistance && currentShots == 0)
                 {
-                    state = State.Scared;
-
-                    bool facingPlayer = GetFacingPlayer();
-
-                    if (facingPlayer)
-                    {
-                        FlipDirection();
-                        currentSpeed = 0f;
-                    }
+                    SetScared();
                 }
                 else if (distanceFromPlayer > attackRange)
                 {
@@ -165,5 +149,10 @@ public class RangedEnemy : Enemy
                 currentShots = maxShots;
             }
         }
+    }
+
+    protected override void SetDefeated()
+    {
+        Destroy(gameObject);
     }
 }

@@ -33,6 +33,8 @@ public abstract class Enemy : MonoBehaviour
     #region Collision Checking
     [SerializeField]
     protected LayerMask platformMask;
+    [SerializeField]
+    protected LayerMask enemyMask;
     protected float raycastLeniency = 0.02f;
     protected float raycastLength = 0.02f;
     protected int horizontalRaycasts = 2;
@@ -72,7 +74,9 @@ public abstract class Enemy : MonoBehaviour
     {
         Vector2 movement = rb.velocity;
 
-        if (hittingWall || dropAhead)
+        bool enemyAhead = GetEnemyAhead();
+
+        if (hittingWall || dropAhead || enemyAhead)
         {
             FlipDirection();
         }
@@ -108,17 +112,26 @@ public abstract class Enemy : MonoBehaviour
                 currentSpeed = initialSpeed;
             }
 
-            if (currentSpeed < initialSpeed)
+            bool enemyAhead = GetEnemyAhead();
+
+            if (enemyAhead)
             {
-                currentSpeed = initialSpeed;
+                currentSpeed = 0f;
             }
             else
             {
-                currentSpeed = Mathf.Min(currentSpeed + acceleration * deltaTime, maxSpeed);
+                if (currentSpeed < initialSpeed)
+                {
+                    currentSpeed = initialSpeed;
+                }
+                else
+                {
+                    currentSpeed = Mathf.Min(currentSpeed + acceleration * deltaTime, maxSpeed);
+                }
             }
+                
+            movement.x = currentSpeed * GetFacingDirection();
         }
-
-        movement.x = currentSpeed * GetFacingDirection();
 
         rb.velocity = movement;
     }
@@ -222,6 +235,16 @@ public abstract class Enemy : MonoBehaviour
 
         return hit.collider == null;
     }
+
+    protected bool GetEnemyAhead()
+    {
+        Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetFacingDirection(), activeCollider.bounds.min.y);
+
+        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, enemyMask);
+
+        return hit.collider != null;
+    }
     #endregion
 
     #region Timers
@@ -259,7 +282,7 @@ public abstract class Enemy : MonoBehaviour
 
         if (health == 0)
         {
-            Destroy(gameObject);
+            SetDefeated();
         }
         else
         {
@@ -279,6 +302,8 @@ public abstract class Enemy : MonoBehaviour
     {
         rb.velocity = repelDirection * repelStrength;
     }
+
+    protected abstract void SetDefeated();
     #endregion
 
     #region Direction to Player
@@ -311,4 +336,21 @@ public abstract class Enemy : MonoBehaviour
         return currentDirection == directionToPlayer;
     }
     #endregion
+
+    public void SetScared()
+    {
+        if (state != State.Scared)
+        {
+            state = State.Scared;
+            fearTimer = fearDuration;
+            currentSpeed = 0f;
+
+            bool facingPlayer = GetFacingPlayer();
+
+            if (facingPlayer)
+            {
+                FlipDirection();
+            }
+        }
+    }
 }

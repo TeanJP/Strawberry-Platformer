@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PeacefulEnemy : Enemy
 {
+    private float fearSpreadDistance = 6f;
+
     protected override void Start()
     {
         base.Start();
@@ -52,15 +54,7 @@ public class PeacefulEnemy : Enemy
 
                 if (distanceFromPlayer < scaredDistance && !abovePlayer && playerSpeedScary)
                 {
-                    state = State.Scared;
-
-                    bool facingPlayer = GetFacingPlayer();
-
-                    if (facingPlayer)
-                    {
-                        FlipDirection();
-                        currentSpeed = 0f;
-                    }
+                    SetScared();
                 }
                 break;
             case State.Scared:
@@ -81,5 +75,26 @@ public class PeacefulEnemy : Enemy
                 DecrementStunTimer(Time.deltaTime);
                 break;
         }
+    }
+
+    private void SpreadFear()
+    {
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(activeCollider.bounds.center, fearSpreadDistance, enemyMask);
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            PeacefulEnemy peacefulEnemy = enemies[i].gameObject.GetComponent<PeacefulEnemy>();
+
+            if (peacefulEnemy != null)
+            {
+                peacefulEnemy.SetScared();
+            }
+        }
+    }
+
+    protected override void SetDefeated()
+    {
+        SpreadFear();
+        Destroy(gameObject);
     }
 }

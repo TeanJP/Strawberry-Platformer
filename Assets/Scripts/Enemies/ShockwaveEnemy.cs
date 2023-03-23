@@ -5,6 +5,9 @@ using UnityEngine;
 public class ShockwaveEnemy : Enemy
 {
     [SerializeField]
+    private LayerMask playerMask;
+
+    [SerializeField]
     private float attackRange = 6f;
     [SerializeField]
     private float attackCooldown = 3f;
@@ -12,6 +15,7 @@ public class ShockwaveEnemy : Enemy
     private bool startedJump = false;
     private bool startedAttack = false;
 
+    float attackCheckWidth = 0.02f;
     [SerializeField]
     private float jumpStrength = 6f;
     [SerializeField]
@@ -57,6 +61,10 @@ public class ShockwaveEnemy : Enemy
                         rb.velocity = new Vector2(0f, -bellyFlopStrength);
                         startedAttack = true;
                     }
+                    else if (startedAttack)
+                    {
+                        PerformDownwardsAttack();
+                    }
                 }             
                 break;
             case State.Scared:
@@ -93,9 +101,12 @@ public class ShockwaveEnemy : Enemy
 
         if (state == State.Attacking && isFloor)
         {
-            for (int i = 0; i < 2; i++)
+            if (shockwave != null)
             {
-                Instantiate(shockwave, transform.position, transform.rotation);
+                for (int i = 0; i < 2; i++)
+                {
+                    Instantiate(shockwave, transform.position, transform.rotation);
+                }
             }
 
             attackTimer = attackCooldown;
@@ -111,17 +122,9 @@ public class ShockwaveEnemy : Enemy
         switch (state)
         {
             case State.Default:              
-                if (distanceFromPlayer < scaredDistance)
+                if (distanceFromPlayer < scaredDistance && attackTimer > 0f)
                 {
-                    state = State.Scared;
-
-                    bool facingPlayer = GetFacingPlayer();
-
-                    if (facingPlayer)
-                    {
-                        FlipDirection();
-                        currentSpeed = 0f;
-                    }
+                    SetScared();
                 }
                 else if (distanceFromPlayer < attackRange)
                 {
@@ -129,17 +132,9 @@ public class ShockwaveEnemy : Enemy
                 }
                 break;
             case State.Attacking:
-                if (distanceFromPlayer < scaredDistance)
+                if (distanceFromPlayer < scaredDistance && attackTimer > 0f)
                 {
-                    state = State.Scared;
-
-                    bool facingPlayer = GetFacingPlayer();
-
-                    if (facingPlayer)
-                    {
-                        FlipDirection();
-                        currentSpeed = 0f;
-                    }
+                    SetScared();
                 }
                 else if (distanceFromPlayer > attackRange)
                 {
@@ -169,7 +164,19 @@ public class ShockwaveEnemy : Enemy
         }
     }
 
+    private void PerformDownwardsAttack()
+    {
+        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
+        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
 
+        Collider2D player = Physics2D.OverlapBox(boxPosition, boxSize, 0f, playerMask);
+
+        if (player != null)
+        {
+            //Swap in actual values
+            strawberry.TakeDamge(0, Vector2.one, 1f);
+        }
+    }
 
     private void DecrementAttackTimer(float deltaTime)
     {
@@ -177,5 +184,10 @@ public class ShockwaveEnemy : Enemy
         {
             attackTimer -= deltaTime;
         }
+    }
+
+    protected override void SetDefeated()
+    {
+        Destroy(gameObject);
     }
 }
