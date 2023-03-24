@@ -12,6 +12,9 @@ public class RangedEnemy : Enemy
 
     [SerializeField]
     private GameObject projectile = null;
+    private Transform gunTransform = null;
+    [SerializeField]
+    private Vector2 gunBarrelOffset = new Vector2(0.5f, 0f);
     [SerializeField]
     private float reloadDuration = 4f;
     private float reloadTimer = 0f;
@@ -24,6 +27,8 @@ public class RangedEnemy : Enemy
         base.Start();
 
         currentShots = maxShots;
+
+        gunTransform = transform.GetChild(0).transform;
     }
 
     void Update()
@@ -48,7 +53,8 @@ public class RangedEnemy : Enemy
                 {
                     if (attackTimer <= 0f)
                     {
-                        Instantiate(projectile);
+                        CreateProjectile();
+
                         currentShots--;
 
                         if (currentShots == 0)
@@ -128,6 +134,16 @@ public class RangedEnemy : Enemy
                 DecrementStunTimer(Time.deltaTime);
                 break;
         }
+    }
+
+    private void CreateProjectile()
+    {
+        GameObject createdProjectile = Instantiate(projectile, (Vector2)gunTransform.position + gunBarrelOffset, Quaternion.identity);
+
+        float horizontalDirection = GetFacingDirection();
+        Vector2 projectileDirection = new Vector2(horizontalDirection, 0f);
+
+        createdProjectile.GetComponent<EnemyProjectile>().SetDirection(projectileDirection);
     }
 
     private void DecrementAttackTimer(float deltaTime)

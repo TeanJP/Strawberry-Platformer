@@ -20,6 +20,9 @@ public class ShockwaveEnemy : Enemy
     private float jumpStrength = 6f;
     [SerializeField]
     private float bellyFlopStrength = 10f;
+    private int bellyFlopDamage = 10;
+    private Vector2 bellyFlopRepelDirection = Vector2.one;
+    private float bellyFlopRepelStrength = 3f;
     [SerializeField]
     private GameObject shockwave = null;
 
@@ -103,9 +106,12 @@ public class ShockwaveEnemy : Enemy
         {
             if (shockwave != null)
             {
+                Vector2 shockwaveDirection = Vector2.left;
+
                 for (int i = 0; i < 2; i++)
                 {
-                    Instantiate(shockwave, transform.position, transform.rotation);
+                    CreateShockwave(shockwaveDirection);
+                    shockwaveDirection *= -1f;
                 }
             }
 
@@ -173,9 +179,17 @@ public class ShockwaveEnemy : Enemy
 
         if (player != null)
         {
-            //Swap in actual values
-            strawberry.TakeDamge(0, Vector2.one, 1f);
+            float directionToPlayer = GetDirectionToPlayer();
+            strawberry.TakeDamge(bellyFlopDamage, bellyFlopRepelDirection * new Vector2(directionToPlayer, 1f), bellyFlopRepelStrength);
         }
+    }
+
+    private void CreateShockwave(Vector2 direction)
+    {
+        GameObject createdShockwave = Instantiate(shockwave);
+        float shockwaveHeight = createdShockwave.GetComponent<SpriteRenderer>().bounds.extents.y;
+        createdShockwave.transform.position = new Vector2(transform.position.x, activeCollider.bounds.min.y + shockwaveHeight);
+        createdShockwave.GetComponent<EnemyProjectile>().SetDirection(direction);
     }
 
     private void DecrementAttackTimer(float deltaTime)

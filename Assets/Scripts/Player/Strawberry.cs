@@ -948,7 +948,7 @@ public class Strawberry : MonoBehaviour
     {
         if (invincibilityTimer <= 0f)
         {
-            if (hearts == 0)
+            if (hearts == 0 || damage > maxHearts)
             {
                 Debug.Log("GAME OVER");
             }

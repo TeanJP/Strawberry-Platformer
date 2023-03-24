@@ -40,4 +40,9 @@ public class EnemyProjectile : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+    public void SetDirection(Vector2 direction)
+    {
+        this.direction = direction;
+    }
 }
