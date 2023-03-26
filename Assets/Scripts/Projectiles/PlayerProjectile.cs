@@ -13,9 +13,13 @@ public class PlayerProjectile : MonoBehaviour
     [SerializeField]
     private int damage = 5;
 
+    [SerializeField]
+    private float lifeSpan = 5f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        Destroy(gameObject, lifeSpan);
     }
 
     void Update()

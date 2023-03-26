@@ -767,7 +767,7 @@ public class Strawberry : MonoBehaviour
         transform.localScale = new Vector3(transform.localScale.x * -1f, transform.localScale.y, transform.localScale.z);
     }
 
-    private float GetPlayerDirection()
+    public float GetPlayerDirection()
     {
         return Mathf.Sign(transform.localScale.x);
     }
@@ -1035,6 +1035,38 @@ public class Strawberry : MonoBehaviour
         {
             return false;
         }
+    }
+    #endregion
+
+    #region Leche Interaction
+    public float GetVerticalVelocity()
+    {
+        return rb.velocity.y;
+    }
+
+    public float GetTop()
+    {
+        return activeCollider.bounds.max.y;
+    }
+
+    public float GetBase()
+    {
+        return activeCollider.bounds.min.y;
+    }
+
+    public Vector2 GetCentre()
+    {
+        return activeCollider.bounds.center;
+    }
+
+    public bool GetStunned()
+    {
+        return movementState == MovementState.Stunned;
+    }
+
+    public bool GetWallRunning()
+    {
+        return movementState == MovementState.Running && runState == RunState.WallRunning;
     }
     #endregion
 }
