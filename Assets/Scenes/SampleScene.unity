@@ -397,6 +397,7 @@ MonoBehaviour:
     m_Bits: 64
   maxOffset: {x: 1.25, y: 0}
   movementSpeed: 3
+  halfColliderOffset: -0.25
 --- !u!212 &611314526
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1212,7 +1213,8 @@ MonoBehaviour:
   incompleteJumpStrength: 0.3
   crawlSpeed: 3
   crawlJumpStrength: 6
-  bellyFlopStrength: 16
+  bellyFlopStrength: 30
+  flopRecoveryDuration: 0.5
   turnDeceleration: 10
   slideDeceleration: 10
   diveSpeed: 12
@@ -1221,7 +1223,7 @@ MonoBehaviour:
   wallJumpStrength: 8
   wallJumpDirection: {x: 0.6, y: 0.4}
   superJumpSpeed: 12
-  superJumpChargeSpeed: 3
+  superJumpChargeSpeed: 1
   superJumpCancelSpeed: 10
   superJumpCancelDirection: {x: 1, y: 0}
   collisionRepelStrength: 3

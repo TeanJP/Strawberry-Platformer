@@ -124,6 +124,9 @@ public class Strawberry : MonoBehaviour
 
     [SerializeField]
     private float bellyFlopStrength = 10f;
+    [SerializeField]
+    private float flopRecoveryDuration = 0.5f;
+    private float flopRecoveryTimer = 0f;
 
     [SerializeField]
     private float turnDeceleration = 6f;
@@ -175,6 +178,11 @@ public class Strawberry : MonoBehaviour
     private float invincibilityTimer = 0f;
 
     private GameObject heart = null;
+    #endregion
+
+    #region Attack Values
+    [SerializeField]
+    float attackStunDuration = 2f;
     #endregion
 
     void Start()
@@ -260,6 +268,8 @@ public class Strawberry : MonoBehaviour
         }
         else if (movementState == MovementState.BellyFlopping && isFloor)
         {
+            flopRecoveryTimer = flopRecoveryDuration;
+            /*
             if (downInput)
             {
                 movementState = MovementState.Crawling;
@@ -269,6 +279,7 @@ public class Strawberry : MonoBehaviour
                 movementState = MovementState.Default;
                 SwapActiveCollider();
             }
+            */
 
             rb.velocity = Vector2.zero;
         }
@@ -557,6 +568,23 @@ public class Strawberry : MonoBehaviour
                     SwapActiveCollider();
                 }
                 break;
+            case MovementState.BellyFlopping:
+                if (!grounded && flopRecoveryTimer > 0f)
+                {
+                    if (downInput)
+                    {
+                        movementState = MovementState.Crawling;
+                    }
+                    else
+                    {
+                        movementState = MovementState.Default;
+                        SwapActiveCollider();
+                    }
+
+                    movementApplied = false;
+                    flopRecoveryTimer = 0f;
+                }
+                break;
         }
     }
 
@@ -722,12 +750,11 @@ public class Strawberry : MonoBehaviour
                     movementApplied = true;
                 }
                 break;
-            case MovementState.BellyFlopping:
+            case MovementState.BellyFlopping:               
                 if (!movementApplied)
                 {
                     movement = new Vector2(0f, -bellyFlopStrength);
-                    movementApplied = true;
-                }
+                }              
                 break;
         }
         
@@ -798,6 +825,26 @@ public class Strawberry : MonoBehaviour
         if (invincibilityTimer > 0f)
         {
             invincibilityTimer -= deltaTime;
+        }
+
+        if (flopRecoveryTimer > 0f)
+        {
+            flopRecoveryTimer -= deltaTime;
+
+            if (flopRecoveryTimer < 0f)
+            {
+                if (downInput)
+                {
+                    movementState = MovementState.Crawling;
+                }
+                else
+                {
+                    movementState = MovementState.Default;
+                    SwapActiveCollider();
+                }
+
+                movementApplied = false;
+            }
         }
     }
 
@@ -888,9 +935,58 @@ public class Strawberry : MonoBehaviour
     #endregion
 
     #region Attacks
-    private void PerformHorizontalAttack()
+    private void Attack()
     {
-        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * GetPlayerDirection(), activeCollider.bounds.center.y);
+        switch (movementState)
+        {
+            case MovementState.Default:
+
+                break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Default:
+
+                        break;
+                    case RunState.Rolling:
+
+                        break;
+                    case RunState.Turning:
+
+                        break;
+                    case RunState.Stopping:
+
+                        break;
+                    case RunState.WallRunning:
+
+                        break;
+                    case RunState.WallJumping:
+
+                        break;
+                    case RunState.Diving:
+
+                        break;
+                    case RunState.SuperJumping:
+
+                        break;
+                    case RunState.CancellingSuperJump:
+
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+
+                break;
+            case MovementState.BellyFlopping:
+
+                break;
+        }
+    }
+
+
+    private void PerformHorizontalAttack(float horizontalDirection, int damage, float repelStrength)
+    {
+        Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * horizontalDirection, activeCollider.bounds.center.y);
         Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y);
 
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
@@ -901,12 +997,14 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
+                Vector2 repelDirection = new Vector2(horizontalDirection, 1f);
+                repelDirection.Normalize();
+                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }
     
-    private void PerformDownwardsAttack()
+    private void PerformDownwardsAttack(int damage, float repelStrength)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
@@ -919,12 +1017,14 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
+                Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
+                repelDirection.Normalize();
+                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }
 
-    private void PerformUpwardsAttack()
+    private void PerformUpwardsAttack(int damage, float repelStrength)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.max.y + attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
@@ -937,7 +1037,9 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(1, 1f, Vector2.one, 3f);
+                Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
+                repelDirection.Normalize();
+                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }
@@ -981,7 +1083,9 @@ public class Strawberry : MonoBehaviour
     public void ApplyStun()
     {
         movementState = MovementState.Stunned;
+        runState = RunState.Default;
         stunTimer = stunDuration;
+        movementApplied = false;
         currentSpeed = 0f;
     }
 
@@ -1067,6 +1171,11 @@ public class Strawberry : MonoBehaviour
     public bool GetWallRunning()
     {
         return movementState == MovementState.Running && runState == RunState.WallRunning;
+    }
+
+    public bool GetUsingHalfCollider()
+    {
+        return activeCollider == halfCollider;
     }
     #endregion
 }

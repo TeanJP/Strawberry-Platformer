@@ -25,6 +25,9 @@ public class Leche : MonoBehaviour
     [SerializeField]
     private float movementSpeed = 2f;
 
+    [SerializeField]
+    private float halfColliderOffset = -0.25f;
+
     private SpriteRenderer spriteRenderer = null;
     private float halfSpriteWidth;
     private float raycastLength;
@@ -67,7 +70,20 @@ public class Leche : MonoBehaviour
             }
         }
 
-        transform.localPosition = currentOffset * strawberry.GetPlayerDirection();
+        bool usingHalfCollider = strawberry.GetUsingHalfCollider();
+        
+        if (usingHalfCollider)
+        {
+            currentOffset.y = halfColliderOffset;
+        }
+        else
+        {
+            currentOffset.y = 0f;
+        }
+
+        float horizontalDirection = strawberry.GetPlayerDirection();
+
+        transform.localPosition = currentOffset * new Vector2(horizontalDirection, 1f);
     }
 
     private void UpdateOffset()
