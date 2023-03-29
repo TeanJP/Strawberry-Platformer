@@ -182,7 +182,14 @@ public class Strawberry : MonoBehaviour
 
     #region Attack Values
     [SerializeField]
-    float attackStunDuration = 2f;
+    private float attackStunDuration = 2f;
+    private int fullDamage = 100;
+    [SerializeField]
+    private float fullRepelStrength = 4f;
+    [SerializeField]
+    private int reducedDamage = 5;
+    [SerializeField]
+    private float reducedRepelStrength = 2f;
     #endregion
 
     void Start()
@@ -269,18 +276,6 @@ public class Strawberry : MonoBehaviour
         else if (movementState == MovementState.BellyFlopping && isFloor)
         {
             flopRecoveryTimer = flopRecoveryDuration;
-            /*
-            if (downInput)
-            {
-                movementState = MovementState.Crawling;
-            }
-            else
-            {
-                movementState = MovementState.Default;
-                SwapActiveCollider();
-            }
-            */
-
             rb.velocity = Vector2.zero;
         }
 
@@ -937,48 +932,55 @@ public class Strawberry : MonoBehaviour
     #region Attacks
     private void Attack()
     {
+        float facingDirection = GetPlayerDirection();
+
         switch (movementState)
         {
             case MovementState.Default:
-
+                PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                 break;
             case MovementState.Running:
                 switch (runState)
                 {
                     case RunState.Default:
-
+                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.Rolling:
-
+                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
                         break;
                     case RunState.Turning:
-
+                        PerformHorizontalAttack(facingDirection * -1f, fullDamage, fullRepelStrength);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.Stopping:
-
+                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.WallRunning:
-
+                        PerformUpwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.WallJumping:
-
+                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.Diving:
-
+                        PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.SuperJumping:
-
+                        PerformUpwardsAttack(fullDamage, fullRepelStrength);
                         break;
                     case RunState.CancellingSuperJump:
-
+                        PerformHorizontalAttack(facingDirection, 100, 2f);
+                        PerformDownwardsAttack(100, 2f);
                         break;
                 }
                 break;
             case MovementState.Crawling:
-
+                PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                 break;
             case MovementState.BellyFlopping:
-
+                PerformDownwardsAttack(fullDamage, fullRepelStrength);
                 break;
         }
     }
