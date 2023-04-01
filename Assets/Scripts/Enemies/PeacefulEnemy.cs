@@ -37,6 +37,8 @@ public class PeacefulEnemy : Enemy
         }
 
         UpdateGravityScale();
+
+        DecrementImmunityTimer(Time.deltaTime);
     }
 
     private void UpdateState()

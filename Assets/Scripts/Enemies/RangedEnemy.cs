@@ -85,6 +85,8 @@ public class RangedEnemy : Enemy
         }
 
         UpdateGravityScale();
+
+        DecrementImmunityTimer(Time.deltaTime);
     }
 
     private void UpdateState()

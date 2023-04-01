@@ -84,6 +84,8 @@ public class ShockwaveEnemy : Enemy
         {
             DecrementAttackTimer(Time.deltaTime);
         }
+
+        DecrementImmunityTimer(Time.deltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D other)

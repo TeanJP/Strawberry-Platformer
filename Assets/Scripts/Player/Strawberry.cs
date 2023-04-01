@@ -190,6 +190,12 @@ public class Strawberry : MonoBehaviour
     private int reducedDamage = 5;
     [SerializeField]
     private float reducedRepelStrength = 2f;
+    [SerializeField]
+    private float minimumSpeed = 8f;
+    [SerializeField]
+    private int minimumDamage = 1;
+    [SerializeField]
+    private float minimumRepelStrength = 1f;
     #endregion
 
     void Start()
@@ -229,6 +235,7 @@ public class Strawberry : MonoBehaviour
         GetInputs();
         ApplyInputs(grounded, hittingWall, hittingCeiling);
         Move(grounded);
+        Attack();
         DecrementTimers(Time.deltaTime);
     }
 
@@ -933,54 +940,120 @@ public class Strawberry : MonoBehaviour
     private void Attack()
     {
         float facingDirection = GetPlayerDirection();
+        bool falling = rb.velocity.y <= 0f;
 
         switch (movementState)
         {
             case MovementState.Default:
-                PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                if (!grounded && falling)
+                {
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                }
                 break;
             case MovementState.Running:
                 switch (runState)
                 {
                     case RunState.Default:
-                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        }
+                        else if (currentSpeed >= minimumSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                        }
+                        else
+                        {
+                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                        }
+
+                        if (!grounded && falling)
+                        {
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        }
                         break;
                     case RunState.Rolling:
-                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        }
+                        else if (currentSpeed >= minimumSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                        }
+                        else
+                        {
+                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                        }
                         break;
                     case RunState.Turning:
-                        PerformHorizontalAttack(facingDirection * -1f, fullDamage, fullRepelStrength);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        if (previousSpeed >= maxRunSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection * -1f, fullDamage, fullRepelStrength);
+                        }
+                        else if (previousSpeed >= minimumSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection * -1f, reducedDamage, reducedRepelStrength);
+                        }
+                        else
+                        {
+                            PerformHorizontalAttack(facingDirection * -1f, minimumDamage, minimumRepelStrength);
+                        }
+
+                        if (!grounded && falling)
+                        {
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        }
                         break;
                     case RunState.Stopping:
-                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        }
+                        else if (currentSpeed >= minimumSpeed)
+                        {
+                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                        }
+                        else
+                        {
+                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                        }
+                        if (!grounded && falling)
+                        {
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        }
                         break;
                     case RunState.WallRunning:
                         PerformUpwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.WallJumping:
-                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
                         PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.Diving:
                         PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
                         break;
                     case RunState.SuperJumping:
                         PerformUpwardsAttack(fullDamage, fullRepelStrength);
                         break;
                     case RunState.CancellingSuperJump:
-                        PerformHorizontalAttack(facingDirection, 100, 2f);
-                        PerformDownwardsAttack(100, 2f);
+                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                        PerformDownwardsAttack(fullDamage, fullRepelStrength);
                         break;
                 }
                 break;
             case MovementState.Crawling:
-                PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                if (!grounded && falling)
+                {
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                }
                 break;
             case MovementState.BellyFlopping:
-                PerformDownwardsAttack(fullDamage, fullRepelStrength);
+                if (flopRecoveryTimer <= 0f)
+                {
+                    PerformDownwardsAttack(fullDamage, fullRepelStrength);
+                }
                 break;
         }
     }
@@ -1001,7 +1074,7 @@ public class Strawberry : MonoBehaviour
             {
                 Vector2 repelDirection = new Vector2(horizontalDirection, 1f);
                 repelDirection.Normalize();
-                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
+                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }
@@ -1021,7 +1094,7 @@ public class Strawberry : MonoBehaviour
             {
                 Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
                 repelDirection.Normalize();
-                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
+                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }
@@ -1041,7 +1114,7 @@ public class Strawberry : MonoBehaviour
             {
                 Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
                 repelDirection.Normalize();
-                enemy.TakeDamage(damage, attackStunDuration, repelDirection, repelStrength);
+                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
             }
         }
     }

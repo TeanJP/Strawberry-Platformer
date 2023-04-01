@@ -59,6 +59,9 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     protected int health = 10;
     protected float stunTimer = 0f;
+    [SerializeField]
+    protected float immunityDuration = 1f;
+    protected float immunityTimer = 0f;
 
     protected virtual void Start()
     {
@@ -273,24 +276,40 @@ public abstract class Enemy : MonoBehaviour
             }
         }
     }
+
+    protected void DecrementImmunityTimer(float deltaTime)
+    {
+        if (immunityTimer > 0f)
+        {
+            immunityTimer -= deltaTime;
+        }
+    }
     #endregion
 
     #region Taking Damage
-    public void TakeDamage(int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
+    public void TakeDamage(bool projectile, int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
     {
-        health = Mathf.Max(health - damage, 0);
-
-        if (health == 0)
+        if (projectile || immunityTimer <= 0f)
         {
-            SetDefeated();
-        }
-        else
-        {
-            state = State.Stunned;
-            stunTimer = stunDuration;
-        }
+            health = Mathf.Max(health - damage, 0);
 
-        RepelEnemy(repelDirection, repelStrength);
+            if (health == 0)
+            {
+                SetDefeated();
+            }
+            else
+            {
+                state = State.Stunned;
+                stunTimer = stunDuration;
+            }
+
+            RepelEnemy(repelDirection, repelStrength);
+
+            if (!projectile)
+            {
+                immunityTimer = immunityDuration;
+            }
+        }
     }
 
     public void ApplyStun(float stunDuration)
