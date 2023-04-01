@@ -12,13 +12,13 @@ TagManager:
   - Water
   - UI
   - Platforms
-  - Player
+  - Player Collider
   - Enemies
   - Player Projectiles
   - Enemy Projectiles
-  - Hearts
-  - 
-  - 
+  - Heart Colliders
+  - Player Trigger
+  - Heart Triggers
   - 
   - 
   - 
