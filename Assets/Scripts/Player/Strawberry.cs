@@ -48,9 +48,9 @@ public class Strawberry : MonoBehaviour
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
     private float fullColliderHeight;
-    private int horizontalRaycasts = 5;
+    private int horizontalRaycasts = 3;
     private float horizontalRaycastSpacing;
-    private int verticalRaycasts = 5;
+    private int verticalRaycasts = 3;
     private float verticalRaycastSpacing;
     #endregion
 
@@ -86,6 +86,10 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float groundedBuffer = 0.15f;
     private float groundedTimer = 0f;
+
+    [SerializeField]
+    private float boostBuffer = 1f;
+    private float boostTimer = 0f;
     #endregion
 
     #region Movement Values
@@ -107,6 +111,8 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float runAcceleration = 5f;
 
+    [SerializeField]
+    private float maxSpeed = 30f;
     [SerializeField]
     private float speedReduction = 1f;
 
@@ -241,55 +247,58 @@ public class Strawberry : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        bool applyStun = false, isWall = false, isFloor = false, isCeiling = false;
-
-        ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
-        other.GetContacts(contacts);
-
-        for (int i = 0; i < contacts.Length; i++)
-        {       
-            if (contacts[i].normal.x == GetPlayerDirection() * -1f)
-            {
-                isWall = true;
-            }
-            else if (contacts[i].normal.y == 1f)
-            {
-                isFloor = true;
-            }
-            else if (contacts[i].normal.y == -1f)
-            {
-                isCeiling = true;
-            }   
-        }
-
-        if (movementState == MovementState.Running)
+        if (other.gameObject.CompareTag("Platform"))
         {
-            if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall)
+            bool applyStun = false, isWall = false, isFloor = false, isCeiling = false;
+
+            ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
+            other.GetContacts(contacts);
+
+            for (int i = 0; i < contacts.Length; i++)
             {
-                applyStun = true;
+                if (contacts[i].normal.x == GetPlayerDirection() * -1f)
+                {
+                    isWall = true;
+                }
+                else if (contacts[i].normal.y == 1f)
+                {
+                    isFloor = true;
+                }
+                else if (contacts[i].normal.y == -1f)
+                {
+                    isCeiling = true;
+                }
             }
-            else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall)
+
+            if (movementState == MovementState.Running)
             {
-                applyStun = true;
-                SwapActiveCollider();
+                if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall)
+                {
+                    applyStun = true;
+                }
+                else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall)
+                {
+                    applyStun = true;
+                    SwapActiveCollider();
+                }
+                else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling)
+                {
+                    movementState = MovementState.Default;
+                    runState = RunState.Default;
+                    rb.velocity = Vector2.zero;
+                }
             }
-            else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling)
+            else if (movementState == MovementState.BellyFlopping && isFloor)
             {
-                movementState = MovementState.Default;
-                runState = RunState.Default;
+                flopRecoveryTimer = flopRecoveryDuration;
                 rb.velocity = Vector2.zero;
             }
-        }
-        else if (movementState == MovementState.BellyFlopping && isFloor)
-        {
-            flopRecoveryTimer = flopRecoveryDuration;
-            rb.velocity = Vector2.zero;
-        }
 
-        if (applyStun)
-        {
-            ApplyStun();
-            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+            if (applyStun)
+            {
+                ApplyStun();
+                RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+            }
         }
     }
 
@@ -347,7 +356,7 @@ public class Strawberry : MonoBehaviour
                     FlipPlayerDirection();
                 }
 
-                if (grounded && !hittingWall && (runInput || currentSpeed > maxWalkSpeed))
+                if (grounded && !hittingWall && runInput)
                 {
                     movementState = MovementState.Running;
                     runState = RunState.Default;
@@ -371,7 +380,7 @@ public class Strawberry : MonoBehaviour
                 switch (runState)
                 {
                     case RunState.Default:
-                        if (!runInput)
+                        if (!runInput && boostTimer <= 0f)
                         {
                             runState = RunState.Stopping;
                         }
@@ -386,6 +395,7 @@ public class Strawberry : MonoBehaviour
                                 else
                                 {
                                     runState = RunState.Diving;
+                                    boostTimer = 0f;
                                 }
 
                                 SwapActiveCollider();
@@ -394,17 +404,20 @@ public class Strawberry : MonoBehaviour
                             {
                                 runState = RunState.WallRunning;
                                 currentSpeed = wallRunSpeed;
+                                boostTimer = 0f;
                             }
                             else if (upInput && grounded && currentSpeed >= maxRunSpeed)
                             {
                                 runState = RunState.ChargingSuperJump;
                                 SwapActiveCollider();
+                                boostTimer = 0f;
                             }
                             else if (GetFacingIncorrectDirection() && grounded)
                             {
                                 FlipPlayerDirection();
                                 runState = RunState.Turning;
                                 previousSpeed = currentSpeed;
+                                boostTimer = 0f;
                             }
                         }                    
                         break;
@@ -415,7 +428,7 @@ public class Strawberry : MonoBehaviour
                             {
                                 runState = RunState.Default;
                             }
-                            else
+                            else if (boostTimer <= 0f)
                             {
                                 runState = RunState.Stopping;
                             }
@@ -425,6 +438,7 @@ public class Strawberry : MonoBehaviour
                         else if (downInput && !grounded)
                         {
                             runState = RunState.Diving;
+                            boostTimer = 0f;
                         }
                         break;
                     case RunState.WallRunning:
@@ -814,6 +828,11 @@ public class Strawberry : MonoBehaviour
             groundedTimer -= deltaTime;
         }
 
+        if (boostTimer > 0f)
+        {
+            boostTimer -= deltaTime;
+        }
+
         if (stunTimer > 0f)
         {
             stunTimer -= deltaTime;
@@ -833,7 +852,7 @@ public class Strawberry : MonoBehaviour
         {
             flopRecoveryTimer -= deltaTime;
 
-            if (flopRecoveryTimer < 0f)
+            if (flopRecoveryTimer <= 0f)
             {
                 if (downInput)
                 {
@@ -1223,16 +1242,6 @@ public class Strawberry : MonoBehaviour
         return rb.velocity.y;
     }
 
-    public float GetTop()
-    {
-        return activeCollider.bounds.max.y;
-    }
-
-    public float GetBase()
-    {
-        return activeCollider.bounds.min.y;
-    }
-
     public Vector2 GetCentre()
     {
         return activeCollider.bounds.center;
@@ -1253,4 +1262,73 @@ public class Strawberry : MonoBehaviour
         return activeCollider == halfCollider;
     }
     #endregion
+
+    public void AddSpeed(float speedDirection, float speed)
+    {
+        bool validState = false;
+
+        switch (movementState)
+        {
+            case MovementState.Default:
+                validState = true;
+                    break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Default:
+                        validState = true;
+                        break;
+                    case RunState.Rolling:
+                        validState = true;
+                        break;
+                    case RunState.Turning:
+                        validState = true;
+                        break;
+                    case RunState.Stopping:
+                        validState = true;
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+                validState = true;
+                break;
+        }
+
+        if (grounded && validState)
+        {
+            currentSpeed = Mathf.Min(currentSpeed + speed, maxSpeed);
+
+            float playerDirection = GetPlayerDirection();
+
+            if (playerDirection != speedDirection)
+            {
+                FlipPlayerDirection();
+            }
+
+            boostTimer = boostBuffer;
+
+            movementState = MovementState.Running;
+
+            switch (movementState)
+            {
+                case MovementState.Default:
+                    runState = RunState.Default;
+                    break;
+                case MovementState.Running:
+                    switch (runState)
+                    {
+                        case RunState.Turning:
+                            runState = RunState.Default;
+                            break;
+                        case RunState.Stopping:
+                            runState = RunState.Default;
+                            break;
+                    }
+                    break;
+                case MovementState.Crawling:
+                    runState = RunState.Rolling;
+                    break;
+            }
+        }
+    }
 }

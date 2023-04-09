@@ -29,15 +29,15 @@ public class Leche : MonoBehaviour
     private float halfColliderOffset = -0.25f;
 
     private SpriteRenderer spriteRenderer = null;
-    private float halfSpriteWidth;
+    private Vector2 halfDimensions;
     private float raycastLength;
 
     void Start()
     {
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        halfSpriteWidth = spriteRenderer.bounds.extents.x;
+        halfDimensions = spriteRenderer.bounds.extents;
 
-        raycastLength = maxOffset.x + halfSpriteWidth;
+        raycastLength = maxOffset.x + halfDimensions.x;
 
         UpdateDirection();
         targetOffset = maxOffset * new Vector2(strawberry.GetPlayerDirection() * -1f, 1f);
@@ -92,32 +92,23 @@ public class Leche : MonoBehaviour
 
         Vector2 raycastDirection = new Vector2(playerDirection * -1f, 0f);
 
-        float x = strawberry.GetCentre().x;
-        float y;
+        Vector2 raycastOrigin = strawberry.GetCentre();
+        Vector2 offset = new Vector2(0f, halfDimensions.y * Mathf.Sign(strawberry.GetVerticalVelocity()));
 
-        float verticalVelocity = strawberry.GetVerticalVelocity();
-
-        if (verticalVelocity > 0f)
+        for (int i = 0; i < 2; i++)
         {
-            y = strawberry.GetTop();
-        }
-        else
-        {
-            y = strawberry.GetBase();
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin + offset, raycastDirection, raycastLength, platformMask);
+
+            if (hit.collider != null)
+            {
+                targetOffset.x = (hit.distance - halfDimensions.x) * (playerDirection * -1f);
+                return;
+            }
+
+            offset *= -1f;
         }
 
-        Vector2 raycastOrigin = new Vector2(x, y);
-
-        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
-
-        if (hit.collider != null)
-        {
-            targetOffset.x = (hit.distance - halfSpriteWidth) * (playerDirection * -1f);
-        }
-        else
-        {
-            targetOffset.x = maxOffset.x * (playerDirection * -1f);
-        }
+        targetOffset.x = maxOffset.x * (playerDirection * -1f);
     }
 
     private void UpdateDirection()
