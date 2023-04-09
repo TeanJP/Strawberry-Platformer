@@ -1263,7 +1263,8 @@ public class Strawberry : MonoBehaviour
     }
     #endregion
 
-    public void AddSpeed(float speedDirection, float speed)
+    #region Adding Speed
+    public bool GetCanAddSpeed()
     {
         bool validState = false;
 
@@ -1271,7 +1272,7 @@ public class Strawberry : MonoBehaviour
         {
             case MovementState.Default:
                 validState = true;
-                    break;
+                break;
             case MovementState.Running:
                 switch (runState)
                 {
@@ -1294,41 +1295,44 @@ public class Strawberry : MonoBehaviour
                 break;
         }
 
-        if (grounded && validState)
-        {
-            currentSpeed = Mathf.Min(currentSpeed + speed, maxSpeed);
-
-            float playerDirection = GetPlayerDirection();
-
-            if (playerDirection != speedDirection)
-            {
-                FlipPlayerDirection();
-            }
-
-            boostTimer = boostBuffer;
-
-            movementState = MovementState.Running;
-
-            switch (movementState)
-            {
-                case MovementState.Default:
-                    runState = RunState.Default;
-                    break;
-                case MovementState.Running:
-                    switch (runState)
-                    {
-                        case RunState.Turning:
-                            runState = RunState.Default;
-                            break;
-                        case RunState.Stopping:
-                            runState = RunState.Default;
-                            break;
-                    }
-                    break;
-                case MovementState.Crawling:
-                    runState = RunState.Rolling;
-                    break;
-            }
-        }
+        return grounded && validState;
     }
+
+    public void AddSpeed(float speedDirection, float speed)
+    {
+        currentSpeed = Mathf.Min(currentSpeed + speed, maxSpeed);
+
+        float playerDirection = GetPlayerDirection();
+
+        if (playerDirection != speedDirection)
+        {
+            FlipPlayerDirection();
+        }
+
+        boostTimer = boostBuffer;
+
+        movementState = MovementState.Running;
+
+        switch (movementState)
+        {
+            case MovementState.Default:
+                runState = RunState.Default;
+                break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Turning:
+                        runState = RunState.Default;
+                        break;
+                    case RunState.Stopping:
+                        runState = RunState.Default;
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+                runState = RunState.Rolling;
+                break;
+        }       
+    }
+    #endregion
 }

@@ -4,13 +4,24 @@ using UnityEngine;
 
 public class Heart : MonoBehaviour
 {
-    // Start is called before the first frame update
+    protected Rigidbody2D rb = null;
+
+    [SerializeField]
+    protected float movementSpeed = 8f;
+
+    [SerializeField]
+    protected float activationDistance = 2f;
+    protected bool activated = false;
+
+    [SerializeField]
+    protected Transform strawberry = null;
+
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
     void Update()
     {
         
