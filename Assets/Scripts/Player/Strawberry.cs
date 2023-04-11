@@ -64,6 +64,10 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private BoxCollider2D halfCollider = null;
     [SerializeField]
+    private CapsuleCollider2D fullTrigger = null;
+    [SerializeField]
+    private CapsuleCollider2D halfTrigger = null;
+    [SerializeField]
     private Sprite fullSprite = null;
     [SerializeField]
     private Sprite halfSprite = null;
@@ -183,10 +187,19 @@ public class Strawberry : MonoBehaviour
     private float invincibilityDuratrion = 3f;
     private float invincibilityTimer = 0f;
 
-    private GameObject heart = null;
+    [SerializeField]
+    private GameObject droppedHeart = null;
+    [SerializeField]
+    private float maxDroppedHearts = 10;
+
+    [SerializeField]
+    private float heartActivationDistance = 1.5f;
+    [SerializeField]
+    private LayerMask heartMask;
     #endregion
 
     #region Attack Values
+    [Header("Attack Values")]
     [SerializeField]
     private float attackStunDuration = 2f;
     private int fullDamage = 100;
@@ -243,6 +256,11 @@ public class Strawberry : MonoBehaviour
         Move(grounded);
         Attack();
         DecrementTimers(Time.deltaTime);
+
+        if (movementState != MovementState.Stunned)
+        {
+            ActivateHearts();
+        }
     }
 
     void OnCollisionEnter2D(Collision2D other)
@@ -1163,17 +1181,6 @@ public class Strawberry : MonoBehaviour
         }
     }
 
-    private void SpawnHearts(int amount)
-    {
-        /*
-
-        for (int i = 0; i < amount; i++)
-        {
-            Instantiate(heart);
-        }
-        */
-    }
-
     public void ApplyStun()
     {
         movementState = MovementState.Stunned;
@@ -1193,6 +1200,9 @@ public class Strawberry : MonoBehaviour
     {
         fullCollider.enabled = !fullCollider.enabled;
         halfCollider.enabled = !halfCollider.enabled;
+
+        fullTrigger.enabled = !fullTrigger.enabled;
+        halfTrigger.enabled = !halfTrigger.enabled;
 
         if (halfCollider.enabled)
         {
@@ -1333,6 +1343,47 @@ public class Strawberry : MonoBehaviour
                 runState = RunState.Rolling;
                 break;
         }       
+    }
+    #endregion
+
+    #region Hearts
+    public void AddHeart()
+    {
+        hearts = Mathf.Min(hearts++, maxHearts);
+    }
+
+    private void ActivateHearts()
+    {
+        Vector2 capsuleCentre = activeCollider.bounds.center;
+        Vector2 capsuleSize = (Vector2)activeCollider.bounds.size + (Vector2.one * heartActivationDistance);
+
+        Collider2D[] hearts = Physics2D.OverlapCapsuleAll(capsuleCentre, capsuleSize, CapsuleDirection2D.Vertical, 0f, heartMask);
+
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            Heart heart = hearts[i].gameObject.GetComponent<Heart>();
+
+            if (heart != null)
+            {
+                bool activated = heart.GetActivated();
+
+                if (!activated)
+                {
+                    heart.Activate(transform);
+                }
+            }
+        }
+    }
+
+    private void SpawnHearts(int amount)
+    {
+        /*
+
+        for (int i = 0; i < amount; i++)
+        {
+            Instantiate(heart);
+        }
+        */
     }
     #endregion
 }

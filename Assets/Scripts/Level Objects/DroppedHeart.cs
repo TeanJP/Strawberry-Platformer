@@ -4,13 +4,48 @@ using UnityEngine;
 
 public class DroppedHeart : Heart
 {
-    void Start()
+    [SerializeField]
+    private float lifeSpanDuration = 8f;
+    private float lifeSpanTimer = 0f;
+
+    private CircleCollider2D physicsCollider = null;
+
+    protected override void Start()
     {
-        
+        base.Start();
+
+        physicsCollider = transform.GetChild(0).GetComponent<CircleCollider2D>();
+
+        lifeSpanTimer = lifeSpanDuration;
     }
 
-    void Update()
+    protected override void Update()
     {
-        
+        if (!activated)
+        {
+            lifeSpanTimer -= Time.deltaTime;
+
+            if (lifeSpanTimer < 0f)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        base.Update();
+    }
+
+    public override void Activate(Transform strawberry)
+    {
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        physicsCollider.enabled = false;
+
+        rb.velocity = Vector2.zero;
+
+        base.Activate(strawberry);
+    }
+
+    public void SetInitialVelocity(Vector2 velocity)
+    {
+        rb.velocity = velocity;
     }
 }
