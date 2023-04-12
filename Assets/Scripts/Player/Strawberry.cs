@@ -190,7 +190,7 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private GameObject droppedHeart = null;
     [SerializeField]
-    private float maxDroppedHearts = 10;
+    private int maxDroppedHearts = 10;
 
     [SerializeField]
     private float heartActivationDistance = 1.5f;
@@ -1171,7 +1171,7 @@ public class Strawberry : MonoBehaviour
                 int previousHearts = hearts;
                 hearts = Mathf.Max(hearts - damage, 0);
 
-                SpawnHearts(previousHearts - hearts);
+                SpawnHearts(Mathf.Min(previousHearts - hearts, maxDroppedHearts));
 
                 invincibilityTimer = invincibilityDuratrion;
                 ApplyStun();
@@ -1369,7 +1369,7 @@ public class Strawberry : MonoBehaviour
 
                 if (!activated)
                 {
-                    heart.Activate(transform);
+                    heart.Activate(this);
                 }
             }
         }

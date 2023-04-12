@@ -34,12 +34,10 @@ public class DroppedHeart : Heart
         base.Update();
     }
 
-    public override void Activate(Transform strawberry)
+    public override void Activate(Strawberry strawberry)
     {
         rb.bodyType = RigidbodyType2D.Kinematic;
         physicsCollider.enabled = false;
-
-        rb.velocity = Vector2.zero;
 
         base.Activate(strawberry);
     }

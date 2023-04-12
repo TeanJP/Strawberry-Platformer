@@ -7,14 +7,18 @@ public class Heart : MonoBehaviour
     protected Rigidbody2D rb = null;
 
     [SerializeField]
-    protected float maxSpeed = 4f;
+    private float initialSpeed = 6f;
     [SerializeField]
-    protected float acceleration = 6f;
+    private float maxSpeed = 32f;
+    [SerializeField]
+    private float acceleration = 10f;
 
     protected bool activated = false;
 
-    protected Transform strawberry = null;
+    private Strawberry strawberry = null;
 
+    [SerializeField]
+    private float targetLeniency = 0.02f;
 
     protected virtual void Start()
     {
@@ -36,9 +40,7 @@ public class Heart : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        Strawberry strawberry = other.gameObject.GetComponent<Strawberry>();
-
-        if (strawberry != null)
+        if (other.gameObject == strawberry.gameObject)
         {
             strawberry.AddHeart();
             Destroy(gameObject);
@@ -50,21 +52,29 @@ public class Heart : MonoBehaviour
         return activated;
     }
 
-    public virtual void Activate(Transform strawberry)
+    public virtual void Activate(Strawberry strawberry)
     {
         this.strawberry = strawberry;
         activated = true;
+
+        rb.velocity = GetMovementDirection() * initialSpeed;
     }
 
     protected Vector2 GetMovementDirection()
     {
         Vector2 currentDirection = rb.velocity.normalized;
-        Vector2 targetDirection = strawberry.position - transform.position;
+        Vector2 targetDirection = strawberry.GetCentre() - (Vector2)transform.position;
         targetDirection.Normalize();
 
-        Vector2 movementDirection = targetDirection - currentDirection;
-        movementDirection.Normalize();
+        Vector2 difference = targetDirection - currentDirection;
 
-        return movementDirection;
+        if (difference.magnitude < targetLeniency)
+        {
+            return currentDirection;
+        }
+        else
+        {
+            return difference.normalized;
+        }
     }
 }
