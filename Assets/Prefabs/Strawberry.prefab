@@ -394,6 +394,7 @@ MonoBehaviour:
   invincibilityDuratrion: 3
   droppedHeart: {fileID: 4354287373657892966, guid: 2164ffac5f570e6479884775a1865daf, type: 3}
   maxDroppedHearts: 10
+  dropSpeed: 8
   heartActivationDistance: 0.75
   heartMask:
     serializedVersion: 2

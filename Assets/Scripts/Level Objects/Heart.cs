@@ -38,12 +38,19 @@ public class Heart : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject == strawberry.gameObject)
+        Strawberry strawberry = other.gameObject.GetComponent<Strawberry>();
+
+        if (strawberry != null)
         {
-            strawberry.AddHeart();
-            Destroy(gameObject);
+            bool stunned = strawberry.GetStunned();
+
+            if (!stunned)
+            {
+                strawberry.AddHeart();
+                Destroy(gameObject);
+            }
         }
     }
 

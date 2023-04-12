@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Strawberry : MonoBehaviour
 {
-    #region State Enums
+    #region Enums
     private enum MovementState
     {
         Default,
@@ -26,6 +26,12 @@ public class Strawberry : MonoBehaviour
         SuperJumping,
         ChargingSuperJump,
         CancellingSuperJump
+    }
+
+    private enum StunType
+    {
+        Collision,
+        Damage
     }
     #endregion
 
@@ -180,7 +186,9 @@ public class Strawberry : MonoBehaviour
     private int hearts = 1;
 
     [SerializeField]
-    private float stunDuration = 0.5f;
+    private float damageStunDuration = 1f;
+    [SerializeField]
+    private float collisionStunDuration = 0.5f;
     private float stunTimer = 0f;
 
     [SerializeField]
@@ -191,6 +199,8 @@ public class Strawberry : MonoBehaviour
     private GameObject droppedHeart = null;
     [SerializeField]
     private int maxDroppedHearts = 10;
+    [SerializeField]
+    private float dropSpeed = 4f;
 
     [SerializeField]
     private float heartActivationDistance = 1.5f;
@@ -314,7 +324,7 @@ public class Strawberry : MonoBehaviour
 
             if (applyStun)
             {
-                ApplyStun();
+                ApplyStun(StunType.Collision);
                 RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
             }
         }
@@ -857,7 +867,14 @@ public class Strawberry : MonoBehaviour
 
             if (stunTimer <= 0f)
             {
-                movementState = MovementState.Default;
+                if (activeCollider == fullCollider)
+                {
+                    movementState = MovementState.Default;
+                }
+                else
+                {
+                    movementState = MovementState.Crawling;
+                }
             }
         }
 
@@ -1171,23 +1188,33 @@ public class Strawberry : MonoBehaviour
                 int previousHearts = hearts;
                 hearts = Mathf.Max(hearts - damage, 0);
 
-                SpawnHearts(Mathf.Min(previousHearts - hearts, maxDroppedHearts));
+                Vector2 dropDirection = new Vector2(Mathf.Sign(repelDirection.x), 0f);
+                SpawnHearts(Mathf.Min(previousHearts - hearts, maxDroppedHearts), dropDirection);
 
                 invincibilityTimer = invincibilityDuratrion;
-                ApplyStun();
+                ApplyStun(StunType.Damage);
             }
 
             RepelPlayer(repelDirection, repelStrength);
         }
     }
 
-    public void ApplyStun()
+    private void ApplyStun(StunType stunType)
     {
         movementState = MovementState.Stunned;
         runState = RunState.Default;
-        stunTimer = stunDuration;
         movementApplied = false;
         currentSpeed = 0f;
+
+        switch (stunType)
+        {
+            case StunType.Collision:
+                stunTimer = collisionStunDuration;
+                break;
+            case StunType.Damage:
+                stunTimer = attackStunDuration;
+                break;
+        }
     }
 
     public void RepelPlayer(Vector2 repelDirection, float repelStrength)
@@ -1375,15 +1402,17 @@ public class Strawberry : MonoBehaviour
         }
     }
 
-    private void SpawnHearts(int amount)
+    private void SpawnHearts(int amount, Vector2 dropDirection)
     {
-        /*
+        Quaternion rotation = Quaternion.Euler(0f, 0f, 360f / amount);
 
         for (int i = 0; i < amount; i++)
         {
-            Instantiate(heart);
-        }
-        */
+            DroppedHeart heart = Instantiate(droppedHeart, activeCollider.bounds.center, Quaternion.identity).GetComponent<DroppedHeart>();
+            heart.SetInitialVelocity(dropDirection * dropSpeed);
+
+            dropDirection = rotation * dropDirection;
+        }      
     }
     #endregion
 }
