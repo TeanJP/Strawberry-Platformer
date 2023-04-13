@@ -1212,7 +1212,7 @@ public class Strawberry : MonoBehaviour
                 stunTimer = collisionStunDuration;
                 break;
             case StunType.Damage:
-                stunTimer = attackStunDuration;
+                stunTimer = damageStunDuration;
                 break;
         }
     }

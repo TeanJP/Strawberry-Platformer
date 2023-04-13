@@ -90,36 +90,39 @@ public class ShockwaveEnemy : Enemy
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        bool isFloor = false;
-
-        ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
-        other.GetContacts(contacts);
-
-        for (int i = 0; i < contacts.Length; i++)
+        if (other.gameObject.CompareTag("Platform"))
         {
-            if (contacts[i].normal.y == 1f)
-            {
-                isFloor = true;
-                break;
-            }
-        }
+            bool isFloor = false;
 
-        if (state == State.Attacking && isFloor)
-        {
-            if (shockwave != null)
-            {
-                Vector2 shockwaveDirection = Vector2.left;
+            ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
+            other.GetContacts(contacts);
 
-                for (int i = 0; i < 2; i++)
+            for (int i = 0; i < contacts.Length; i++)
+            {
+                if (contacts[i].normal.y == 1f)
                 {
-                    CreateShockwave(shockwaveDirection);
-                    shockwaveDirection *= -1f;
+                    isFloor = true;
+                    break;
                 }
             }
 
-            attackTimer = attackCooldown;
-            startedJump = false;
-            startedAttack = false;
+            if (state == State.Attacking && isFloor)
+            {
+                if (shockwave != null)
+                {
+                    Vector2 shockwaveDirection = Vector2.left;
+
+                    for (int i = 0; i < 2; i++)
+                    {
+                        CreateShockwave(shockwaveDirection);
+                        shockwaveDirection *= -1f;
+                    }
+                }
+
+                attackTimer = attackCooldown;
+                startedJump = false;
+                startedAttack = false;
+            }
         }
     }
 

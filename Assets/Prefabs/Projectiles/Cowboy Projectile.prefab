@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2359528188337511231}
   - component: {fileID: 2359528188337511224}
   - component: {fileID: 2359528188337511225}
-  - component: {fileID: 2359528188337511229}
+  - component: {fileID: -9112965250118490157}
   m_Layer: 10
   m_Name: Cowboy Projectile
   m_TagString: Untagged
@@ -124,7 +124,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.4
---- !u!114 &2359528188337511229
+--- !u!114 &-9112965250118490157
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -133,8 +133,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 2359528188337511226}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa1a1d4241c4fcc43b93d569f3235d28, type: 3}
+  m_Script: {fileID: 11500000, guid: f986e7d7a2b5d26439daf030e13dac38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 5
   damage: 5
+  movementSpeed: 5
