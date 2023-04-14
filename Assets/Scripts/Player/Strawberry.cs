@@ -183,7 +183,7 @@ public class Strawberry : MonoBehaviour
     [Header("Health Values")]
     [SerializeField]
     private int maxHearts = 100;
-    private int hearts = 1;
+    private int hearts = 0;
 
     [SerializeField]
     private float damageStunDuration = 1f;

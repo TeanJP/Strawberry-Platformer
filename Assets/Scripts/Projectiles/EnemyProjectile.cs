@@ -11,7 +11,9 @@ public abstract class EnemyProjectile : MonoBehaviour
 
     [SerializeField]
     protected int damage = 5;
+    [SerializeField]
     protected Vector2 repelDirection = Vector2.one;
+    [SerializeField]
     protected float repelStrength = 3f;
 
     protected virtual void Start()

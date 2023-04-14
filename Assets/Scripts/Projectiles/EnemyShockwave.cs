@@ -15,8 +15,8 @@ public class EnemyShockwave : EnemyProjectile
 
     [SerializeField]
     private float raycastLength = 0.02f;
-    protected int horizontalRaycasts = 2;
-    protected float horizontalRaycastSpacing;
+    private int horizontalRaycasts = 2;
+    private float horizontalRaycastSpacing;
 
     protected override void Start()
     {
@@ -54,6 +54,7 @@ public class EnemyShockwave : EnemyProjectile
         }
     }
 
+    #region Strawberry Collision
     void OnTriggerEnter2D(Collider2D other)
     {
         Strawberry strawberry = other.gameObject.GetComponentInParent<Strawberry>();
@@ -61,11 +62,23 @@ public class EnemyShockwave : EnemyProjectile
         if (strawberry != null)
         {
             float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
-
             strawberry.TakeDamge(damage, repelDirection * new Vector2(horizontalDirection, 1f), repelStrength);
         }
     }
 
+    void OnTriggerStay2D(Collider2D other)
+    {
+        Strawberry strawberry = other.gameObject.GetComponentInParent<Strawberry>();
+
+        if (strawberry != null)
+        {
+            float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
+            strawberry.TakeDamge(damage, repelDirection * new Vector2(horizontalDirection, 1f), repelStrength);
+        }
+    }
+    #endregion
+
+    #region Collision Checks
     private bool GetDropAtPosition(Vector2 position)
     {
         Vector2 raycastDirection = Vector2.down;
@@ -95,4 +108,5 @@ public class EnemyShockwave : EnemyProjectile
 
         return false;
     }
+    #endregion
 }
