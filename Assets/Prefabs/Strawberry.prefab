@@ -187,7 +187,7 @@ GameObject:
   - component: {fileID: 6151032129827649329}
   m_Layer: 7
   m_Name: Strawberry
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -390,7 +390,8 @@ MonoBehaviour:
   collisionRepelStrength: 3
   collisionRepelDirection: {x: 1, y: 1}
   maxHearts: 100
-  stunDuration: 0.5
+  damageStunDuration: 1
+  collisionStunDuration: 0.5
   invincibilityDuratrion: 3
   droppedHeart: {fileID: 4354287373657892966, guid: 2164ffac5f570e6479884775a1865daf, type: 3}
   maxDroppedHearts: 10

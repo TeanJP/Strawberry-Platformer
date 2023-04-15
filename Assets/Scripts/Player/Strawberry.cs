@@ -132,6 +132,8 @@ public class Strawberry : MonoBehaviour
     private float fallSpeed = 2.5f;
     [SerializeField]
     private float incompleteJumpStrength = 0.25f;
+    [SerializeField]
+    private float reducedBounceStrength = 0.5f;
 
     [SerializeField]
     private float crawlSpeed = 3f;
@@ -1372,6 +1374,21 @@ public class Strawberry : MonoBehaviour
         }       
     }
     #endregion
+
+    public void Bounce(float bounceStrength)
+    {
+        if (movementState != MovementState.Default && !(movementState == MovementState.Running && runState == RunState.Default))
+        {
+            bounceStrength *= reducedBounceStrength;
+        }
+
+        rb.velocity = new Vector2(rb.velocity.x, bounceStrength);
+    }
+
+    public float GetHorizontalVelocity()
+    {
+        return rb.velocity.x;
+    }
 
     #region Hearts
     public void AddHeart()
