@@ -40,23 +40,10 @@ public class Spike : MonoBehaviour
 
         if (strawberry != null)
         {
-            Vector2 modifiedRepelDirection = repelDirection;
+            Vector2 collisionNormal = other.GetContact(0).normal;
+            Vector2 modifiedRepelDirection = GetRepelDirection(strawberry, collisionNormal);
 
-            if (transform.rotation.z % 180f == 0f)
-            {
-                float horizontalVelocity = strawberry.GetHorizontalVelocity();
-
-                if (horizontalVelocity == 0f)
-                {
-                    modifiedRepelDirection.x = 0f;
-                }
-                else
-                {
-                    modifiedRepelDirection.x *= Mathf.Sign(horizontalVelocity);
-                }
-            }
-
-            strawberry.TakeDamge(damage, modifiedRepelDirection, repelStrength);
+            strawberry.TakeDamge(damage, modifiedRepelDirection, repelStrength);     
         }
     }
 
@@ -66,7 +53,43 @@ public class Spike : MonoBehaviour
 
         if (strawberry != null)
         {
-            strawberry.TakeDamge(damage, repelDirection, repelStrength);
+            Vector2 collisionNormal = other.GetContact(0).normal;
+            Vector2 modifiedRepelDirection = GetRepelDirection(strawberry, collisionNormal);
+
+            strawberry.TakeDamge(damage, modifiedRepelDirection, repelStrength);
         }
+        
+    }
+
+    private Vector2 GetRepelDirection(Strawberry strawberry, Vector2 collisionNormal)
+    {
+        Vector2 modifiedRepelDirection = repelDirection;
+
+        if (collisionNormal.x == 0f)
+        {
+            float horizontalVelocity = strawberry.GetHorizontalVelocity();
+
+            if (horizontalVelocity == 0f)
+            {
+                modifiedRepelDirection.x = 0f;
+                modifiedRepelDirection.Normalize();
+            }
+            else
+            {
+                modifiedRepelDirection.x *= Mathf.Sign(horizontalVelocity);
+            }
+
+            modifiedRepelDirection.y *= (collisionNormal.y * -1f);
+        }
+        else
+        {
+            Quaternion rotation = Quaternion.Euler(0f, 0f, 90f);
+            
+            modifiedRepelDirection = rotation * modifiedRepelDirection;
+            modifiedRepelDirection.y = Mathf.Abs(modifiedRepelDirection.y);
+            modifiedRepelDirection.x *= collisionNormal.x;
+        }
+
+        return modifiedRepelDirection;
     }
 }
