@@ -361,6 +361,7 @@ MonoBehaviour:
   jumpBuffer: 0.2
   groundedBuffer: 0.15
   boostBuffer: 1
+  bounceBuffer: 0.5
   initialWalkSpeed: 3
   maxWalkSpeed: 6
   walkAcceleration: 6
@@ -371,7 +372,8 @@ MonoBehaviour:
   speedReduction: 2
   jumpStrength: 7
   fallSpeed: 2.5
-  incompleteJumpStrength: 0.3
+  incompleteJumpStrength: 0.4
+  reducedBounceStrength: 0.6
   crawlSpeed: 3
   crawlJumpStrength: 6
   bellyFlopStrength: 30

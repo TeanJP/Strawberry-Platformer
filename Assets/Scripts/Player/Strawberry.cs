@@ -100,6 +100,10 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float boostBuffer = 1f;
     private float boostTimer = 0f;
+
+    [SerializeField]
+    private float bounceBuffer = 1f;
+    private float bounceTimer = 0f;
     #endregion
 
     #region Movement Values
@@ -321,7 +325,7 @@ public class Strawberry : MonoBehaviour
             else if (movementState == MovementState.BellyFlopping && isFloor)
             {
                 flopRecoveryTimer = flopRecoveryDuration;
-                rb.velocity = Vector2.zero;
+                movementApplied = true;
             }
 
             if (applyStun)
@@ -457,13 +461,13 @@ public class Strawberry : MonoBehaviour
                             if (runInput)
                             {
                                 runState = RunState.Default;
+                                SwapActiveCollider();
                             }
                             else if (boostTimer <= 0f)
                             {
                                 runState = RunState.Stopping;
+                                SwapActiveCollider();
                             }
-
-                            SwapActiveCollider();
                         }
                         else if (downInput && !grounded)
                         {
@@ -615,7 +619,7 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.BellyFlopping:
-                if (!grounded && flopRecoveryTimer > 0f)
+                if (!grounded && flopRecoveryTimer > 0f && bounceTimer <= 0f)
                 {
                     if (downInput)
                     {
@@ -672,7 +676,7 @@ public class Strawberry : MonoBehaviour
                     movementApplied = false;
                 }
 
-                if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
                 {
                     movement.y *= incompleteJumpStrength;
                     movementApplied = true;
@@ -707,7 +711,7 @@ public class Strawberry : MonoBehaviour
                             movementApplied = false;
                         }
 
-                        if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                        if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
                         {
                             movement.y *= incompleteJumpStrength;
                             movementApplied = true;
@@ -790,13 +794,13 @@ public class Strawberry : MonoBehaviour
                     movementApplied = false;
                 }
 
-                if (movement.y > 0f && releasedJumpInput && !movementApplied)
+                if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
                 {
                     movement.y *= incompleteJumpStrength;
                     movementApplied = true;
                 }
                 break;
-            case MovementState.BellyFlopping:               
+            case MovementState.BellyFlopping:                
                 if (!movementApplied)
                 {
                     movement = new Vector2(0f, -bellyFlopStrength);
@@ -903,6 +907,11 @@ public class Strawberry : MonoBehaviour
 
                 movementApplied = false;
             }
+        }
+
+        if (bounceTimer > 0f)
+        {
+            bounceTimer -= deltaTime;
         }
     }
 
@@ -1350,8 +1359,6 @@ public class Strawberry : MonoBehaviour
 
         boostTimer = boostBuffer;
 
-        movementState = MovementState.Running;
-
         switch (movementState)
         {
             case MovementState.Default:
@@ -1371,7 +1378,9 @@ public class Strawberry : MonoBehaviour
             case MovementState.Crawling:
                 runState = RunState.Rolling;
                 break;
-        }       
+        }
+
+        movementState = MovementState.Running;
     }
     #endregion
 
@@ -1382,7 +1391,8 @@ public class Strawberry : MonoBehaviour
             bounceStrength *= reducedBounceStrength;
         }
 
-        rb.velocity = new Vector2(rb.velocity.x, bounceStrength);
+        rb.velocity = new Vector2(0f, bounceStrength);
+        bounceTimer = bounceBuffer;
     }
 
     public float GetHorizontalVelocity()

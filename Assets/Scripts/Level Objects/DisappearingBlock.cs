@@ -17,6 +17,10 @@ public class DisappearingBlock : MonoBehaviour
     private BoxCollider2D blockCollider = null;
 
     [SerializeField]
+    private LayerMask playerMask;
+    private Vector2 blockDimensions;
+
+    [SerializeField]
     private float timeToDisappear = 2f;
     [SerializeField]
     private float timeToReappear = 3f;
@@ -27,6 +31,8 @@ public class DisappearingBlock : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         blockCollider = GetComponent<BoxCollider2D>();
+
+        blockDimensions = blockCollider.bounds.size;
     }
 
     void Update()
@@ -51,10 +57,15 @@ public class DisappearingBlock : MonoBehaviour
             case State.Reappearing:
                 if (timer <= 0f)
                 {
-                    state = State.Default;
+                    Collider2D strawberry = Physics2D.OverlapBox(transform.position, blockDimensions, 0f, playerMask);
 
-                    spriteRenderer.enabled = true;
-                    blockCollider.enabled = true;
+                    if (strawberry == null)
+                    {
+                        state = State.Default;
+
+                        spriteRenderer.enabled = true;
+                        blockCollider.enabled = true;
+                    }
                 }
                 break;
         }
@@ -71,7 +82,7 @@ public class DisappearingBlock : MonoBehaviour
 
             for (int i = 0; i < contacts.Length; i++)
             {
-                if (contacts[i].normal.y < 0f)
+                if (contacts[i].normal.y >= 0f)
                 {
                     playerBelowBlock = true;
                     break;

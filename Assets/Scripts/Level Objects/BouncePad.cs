@@ -25,7 +25,7 @@ public class BouncePad : MonoBehaviour
 
             for (int i = 0; i < contacts.Length; i++)
             {
-                if (contacts[i].normal.y > 0f)
+                if (contacts[i].normal.y < 0f)
                 {
                     playerAbove = true;
                     break;
