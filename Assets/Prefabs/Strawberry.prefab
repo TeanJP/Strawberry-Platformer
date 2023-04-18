@@ -349,13 +349,17 @@ MonoBehaviour:
   platformMask:
     serializedVersion: 2
     m_Bits: 32832
+  nonBreakableWallMask:
+    serializedVersion: 2
+    m_Bits: 64
   enemyMask:
     serializedVersion: 2
     m_Bits: 256
   breakableBlockMask:
     serializedVersion: 2
     m_Bits: 32768
-  attackCheckWidth: 0.02
+  attackCheckWidth: 0.04
+  attackReduction: 0.02
   fullCollider: {fileID: 6151032129827649334}
   halfCollider: {fileID: 6151032129827649328}
   fullTrigger: {fileID: 6151032129391701524}

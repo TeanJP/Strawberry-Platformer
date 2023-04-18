@@ -50,6 +50,8 @@ public class Strawberry : MonoBehaviour
     private bool verticalAttack = false;
 
     private bool movementApplied = false;
+
+    private bool bouncing = false;
     #endregion
 
     #region Collision Checking
@@ -57,11 +59,15 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private LayerMask platformMask;
     [SerializeField]
+    private LayerMask nonBreakableWallMask;
+    [SerializeField]
     private LayerMask enemyMask;
     [SerializeField]
     private LayerMask breakableBlockMask;
     [SerializeField]
     private float attackCheckWidth = 0.04f;
+    [SerializeField]
+    private float attackReduction = 0.02f;
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
     private float fullColliderHeight;
@@ -111,10 +117,6 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float boostBuffer = 1f;
     private float boostTimer = 0f;
-
-    [SerializeField]
-    private float bounceBuffer = 1f;
-    private float bounceTimer = 0f;
     #endregion
 
     #region Movement Values
@@ -148,7 +150,7 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private float incompleteJumpStrength = 0.25f;
     [SerializeField]
-    private float reducedBounceStrength = 0.5f;
+    private float bounceStrength = 5f;
 
     [SerializeField]
     private float crawlSpeed = 3f;
@@ -273,13 +275,15 @@ public class Strawberry : MonoBehaviour
         if (grounded)
         {
             groundedTimer = groundedBuffer;
+            bouncing = false;
         }
         
-        bool hittingWall = GetHittingWall();
+        bool hittingWall = GetHittingWall(platformMask);
+        bool hittingNonBreakableWall = GetHittingWall(nonBreakableWallMask);
         bool hittingCeiling = GetHittingCeiling();
 
         GetInputs();
-        ApplyInputs(grounded, hittingWall, hittingCeiling);
+        ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling);
         Move(grounded);
         Attack();
         DecrementTimers(Time.deltaTime);
@@ -394,7 +398,7 @@ public class Strawberry : MonoBehaviour
         }
     }
 
-    private void ApplyInputs(bool grounded, bool hittingWall, bool hittingCeiling)
+    private void ApplyInputs(bool grounded, bool hittingWall, bool hittingNonBreakableWall, bool hittingCeiling)
     {
         switch (movementState)
         {
@@ -448,7 +452,7 @@ public class Strawberry : MonoBehaviour
 
                                 SwapActiveCollider();
                             }
-                            else if (!grounded && hittingWall)
+                            else if (!grounded && hittingNonBreakableWall)
                             {
                                 runState = RunState.WallRunning;
                                 currentSpeed = wallRunSpeed;
@@ -530,7 +534,7 @@ public class Strawberry : MonoBehaviour
                                 runState = RunState.Stopping;
                             }
                         }
-                        else if (hittingWall)
+                        else if (hittingNonBreakableWall)
                         {
                             if (runInput)
                             {
@@ -557,7 +561,7 @@ public class Strawberry : MonoBehaviour
                             movementApplied = false;
                             jumpTimer = 0f;
                         }
-                        else if (grounded && !hittingWall)
+                        else if (grounded && !hittingNonBreakableWall)
                         {
                             if (runInput)
                             {
@@ -600,7 +604,7 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.CancellingSuperJump:
-                        if (hittingWall && runInput)
+                        if (hittingNonBreakableWall && runInput)
                         {
                             runState = RunState.WallRunning;
                             currentSpeed = wallRunSpeed;
@@ -633,7 +637,7 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.BellyFlopping:
-                if (!grounded && flopRecoveryTimer > 0f && bounceTimer <= 0f)
+                if (!grounded && flopRecoveryTimer > 0f)
                 {
                     if (downInput)
                     {
@@ -690,7 +694,7 @@ public class Strawberry : MonoBehaviour
                     movementApplied = false;
                 }
 
-                if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
+                if (movement.y > 0f && releasedJumpInput && !movementApplied && !bouncing)
                 {
                     movement.y *= incompleteJumpStrength;
                     movementApplied = true;
@@ -725,7 +729,7 @@ public class Strawberry : MonoBehaviour
                             movementApplied = false;
                         }
 
-                        if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
+                        if (movement.y > 0f && releasedJumpInput && !movementApplied && !bouncing)
                         {
                             movement.y *= incompleteJumpStrength;
                             movementApplied = true;
@@ -808,7 +812,7 @@ public class Strawberry : MonoBehaviour
                     movementApplied = false;
                 }
 
-                if (movement.y > 0f && releasedJumpInput && !movementApplied && bounceTimer <= 0f)
+                if (movement.y > 0f && releasedJumpInput && !movementApplied && !bouncing)
                 {
                     movement.y *= incompleteJumpStrength;
                     movementApplied = true;
@@ -922,11 +926,6 @@ public class Strawberry : MonoBehaviour
                 movementApplied = false;
             }
         }
-
-        if (bounceTimer > 0f)
-        {
-            bounceTimer -= deltaTime;
-        }
     }
 
     #region Collision Checks
@@ -974,14 +973,14 @@ public class Strawberry : MonoBehaviour
         return false;
     }
 
-    private bool GetHittingWall()
+    private bool GetHittingWall(LayerMask maskToUse)
     {
         Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
 
         for (int i = 0; i < horizontalRaycasts; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
             if (hit.collider != null)
             {
@@ -1151,7 +1150,7 @@ public class Strawberry : MonoBehaviour
         }
 
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * horizontalDirection, activeCollider.bounds.center.y);
-        Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y);
+        Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y - attackReduction * 2f);
 
         DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Horizontal);
 
@@ -1161,7 +1160,7 @@ public class Strawberry : MonoBehaviour
     private void PerformDownwardsAttack(int damage, float repelStrength, bool breakBlocks)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
-        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
+        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
         DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
 
@@ -1171,7 +1170,7 @@ public class Strawberry : MonoBehaviour
     private void PerformUpwardsAttack(int damage, float repelStrength, bool breakBlocks)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.max.y + attackCheckWidth * 0.5f);
-        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
+        Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
         DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
 
@@ -1182,12 +1181,19 @@ public class Strawberry : MonoBehaviour
     {
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
 
+        bool attackSuccessful = false;
+
         for (int i = 0; i < enemies.Length; i++)
         {
             Enemy enemy = enemies[i].GetComponent<Enemy>();
 
             if (enemy != null)
             {
+                if (!attackSuccessful)
+                {
+                    attackSuccessful = true;
+                }
+
                 Vector2 repelDirection = Vector2.zero;
 
                 switch (attackDirection)
@@ -1210,6 +1216,11 @@ public class Strawberry : MonoBehaviour
                 repelDirection.Normalize();
                 enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
             }
+        }
+
+        if (attackSuccessful)
+        {
+            Bounce();
         }
 
         if (breakBlocks)
@@ -1428,15 +1439,10 @@ public class Strawberry : MonoBehaviour
     }
     #endregion
 
-    public void Bounce(float bounceStrength)
+    private void Bounce()
     {
-        if (movementState != MovementState.Default && !(movementState == MovementState.Running && runState == RunState.Default))
-        {
-            bounceStrength *= reducedBounceStrength;
-        }
-
-        rb.velocity = new Vector2(0f, bounceStrength);
-        bounceTimer = bounceBuffer;
+        rb.velocity = new Vector2(rb.velocity.x, bounceStrength);
+        bouncing = true;
     }
 
     public float GetHorizontalVelocity()
