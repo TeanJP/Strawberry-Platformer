@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Platform
+  - Breakable
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - Player Trigger
   - Heart Triggers
   - Level Trigger
-  - 
+  - Breakable Blocks
   - 
   - 
   - 

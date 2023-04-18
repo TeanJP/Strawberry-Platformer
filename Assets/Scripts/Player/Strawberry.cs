@@ -33,6 +33,12 @@ public class Strawberry : MonoBehaviour
         Collision,
         Damage
     }
+
+    private enum AttackDirection
+    {
+        Horizontal,
+        Vertical
+    }
     #endregion
 
     #region States
@@ -40,6 +46,8 @@ public class Strawberry : MonoBehaviour
     private RunState runState = RunState.Default;
 
     private bool grounded = false;
+    private bool horizontalAttack = false;
+    private bool verticalAttack = false;
 
     private bool movementApplied = false;
     #endregion
@@ -50,6 +58,9 @@ public class Strawberry : MonoBehaviour
     private LayerMask platformMask;
     [SerializeField]
     private LayerMask enemyMask;
+    [SerializeField]
+    private LayerMask breakableBlockMask;
+    [SerializeField]
     private float attackCheckWidth = 0.04f;
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
@@ -281,7 +292,10 @@ public class Strawberry : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Platform"))
+        bool platform = other.gameObject.CompareTag("Platform");
+        bool breakable = other.gameObject.CompareTag("Breakable");
+
+        if (platform || breakable)
         {
             bool applyStun = false, isWall = false, isFloor = false, isCeiling = false;
 
@@ -306,23 +320,23 @@ public class Strawberry : MonoBehaviour
 
             if (movementState == MovementState.Running)
             {
-                if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall)
+                if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall && !(breakable && horizontalAttack))
                 {
                     applyStun = true;
                 }
-                else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall)
+                else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall && !(breakable && horizontalAttack))
                 {
                     applyStun = true;
                     SwapActiveCollider();
                 }
-                else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling)
+                else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling && !(breakable && verticalAttack))
                 {
                     movementState = MovementState.Default;
                     runState = RunState.Default;
                     rb.velocity = Vector2.zero;
                 }
             }
-            else if (movementState == MovementState.BellyFlopping && isFloor)
+            else if (movementState == MovementState.BellyFlopping && isFloor && !(breakable && verticalAttack))
             {
                 flopRecoveryTimer = flopRecoveryDuration;
                 movementApplied = true;
@@ -1004,7 +1018,9 @@ public class Strawberry : MonoBehaviour
     #region Attacks
     private void Attack()
     {
-        float facingDirection = GetPlayerDirection();
+        horizontalAttack = false;
+        verticalAttack = false;
+
         bool falling = rb.velocity.y <= 0f;
 
         switch (movementState)
@@ -1012,7 +1028,7 @@ public class Strawberry : MonoBehaviour
             case MovementState.Default:
                 if (!grounded && falling)
                 {
-                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                 }
                 break;
             case MovementState.Running:
@@ -1021,154 +1037,149 @@ public class Strawberry : MonoBehaviour
                     case RunState.Default:
                         if (currentSpeed >= maxRunSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                            PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
                         }
                         else if (currentSpeed >= minimumSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                            PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
                         }
                         else
                         {
-                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                            PerformHorizontalAttack(minimumDamage, minimumRepelStrength, true);
                         }
 
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                         }
                         break;
                     case RunState.Rolling:
                         if (currentSpeed >= maxRunSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                            PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
                         }
                         else if (currentSpeed >= minimumSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                            PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
                         }
                         else
                         {
-                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                            PerformHorizontalAttack(minimumDamage, minimumRepelStrength, true);
                         }
                         break;
                     case RunState.Turning:
                         if (previousSpeed >= maxRunSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection * -1f, fullDamage, fullRepelStrength);
+                            PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
                         }
                         else if (previousSpeed >= minimumSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection * -1f, reducedDamage, reducedRepelStrength);
+                            PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
                         }
                         else
                         {
-                            PerformHorizontalAttack(facingDirection * -1f, minimumDamage, minimumRepelStrength);
+                            PerformHorizontalAttack(minimumDamage, minimumRepelStrength, true);
                         }
 
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                         }
                         break;
                     case RunState.Stopping:
                         if (currentSpeed >= maxRunSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
+                            PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
                         }
                         else if (currentSpeed >= minimumSpeed)
                         {
-                            PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
+                            PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
                         }
                         else
                         {
-                            PerformHorizontalAttack(facingDirection, minimumDamage, minimumRepelStrength);
+                            PerformHorizontalAttack(minimumDamage, minimumRepelStrength, true);
                         }
+                        
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                         }
                         break;
                     case RunState.WallRunning:
-                        PerformUpwardsAttack(reducedDamage, reducedRepelStrength);
+                        PerformUpwardsAttack(reducedDamage, reducedRepelStrength, true);
                         break;
                     case RunState.WallJumping:
-                        PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                         break;
                     case RunState.Diving:
-                        PerformHorizontalAttack(facingDirection, reducedDamage, reducedRepelStrength);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                        PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, true);
                         break;
                     case RunState.SuperJumping:
-                        PerformUpwardsAttack(fullDamage, fullRepelStrength);
+                        PerformUpwardsAttack(fullDamage, fullRepelStrength, true);
                         break;
                     case RunState.CancellingSuperJump:
-                        PerformHorizontalAttack(facingDirection, fullDamage, fullRepelStrength);
-                        PerformDownwardsAttack(fullDamage, fullRepelStrength);
+                        PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
+                        PerformDownwardsAttack(fullDamage, fullRepelStrength, false);
                         break;
                 }
                 break;
             case MovementState.Crawling:
                 if (!grounded && falling)
                 {
-                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength);
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
                 }
                 break;
             case MovementState.BellyFlopping:
                 if (flopRecoveryTimer <= 0f)
                 {
-                    PerformDownwardsAttack(fullDamage, fullRepelStrength);
+                    PerformDownwardsAttack(fullDamage, fullRepelStrength, true);
                 }
                 break;
         }
     }
 
 
-    private void PerformHorizontalAttack(float horizontalDirection, int damage, float repelStrength)
+    private void PerformHorizontalAttack(int damage, float repelStrength, bool breakBlocks)
     {
+        float horizontalDirection = GetPlayerDirection();
+
+        if (movementState == MovementState.Running && runState == RunState.Turning)
+        {
+            horizontalDirection *= -1f;
+        }
+
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * horizontalDirection, activeCollider.bounds.center.y);
         Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y);
 
-        Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
+        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Horizontal);
 
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            Enemy enemy = enemies[i].GetComponent<Enemy>();
-
-            if (enemy != null)
-            {
-                Vector2 repelDirection = new Vector2(horizontalDirection, 1f);
-                repelDirection.Normalize();
-                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
-            }
-        }
+        horizontalAttack = true;
     }
     
-    private void PerformDownwardsAttack(int damage, float repelStrength)
+    private void PerformDownwardsAttack(int damage, float repelStrength, bool breakBlocks)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
 
-        Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
+        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
 
-        for (int i = 0; i < enemies.Length; i++)
-        {
-            Enemy enemy = enemies[i].GetComponent<Enemy>();
-
-            if (enemy != null)
-            {
-                Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
-                repelDirection.Normalize();
-                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
-            }
-        }
+        verticalAttack = true;
     }
 
-    private void PerformUpwardsAttack(int damage, float repelStrength)
+    private void PerformUpwardsAttack(int damage, float repelStrength, bool breakBlocks)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.max.y + attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
 
+        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
+
+        verticalAttack = true;
+    }
+
+    private void DealDamage(int damage, float repelStrength, bool breakBlocks, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
+    {
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
 
         for (int i = 0; i < enemies.Length; i++)
@@ -1177,9 +1188,42 @@ public class Strawberry : MonoBehaviour
 
             if (enemy != null)
             {
-                Vector2 repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
+                Vector2 repelDirection = Vector2.zero;
+
+                switch (attackDirection)
+                {
+                    case AttackDirection.Horizontal:
+                        float horizontalDirection = GetPlayerDirection();
+                        
+                        if (movementState == MovementState.Running && runState == RunState.Turning)
+                        {
+                            horizontalDirection *= -1f;
+                        }
+
+                        repelDirection = new Vector2(horizontalDirection, 1f);
+                        break;
+                    case AttackDirection.Vertical:
+                        repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
+                        break;
+                }                
+                
                 repelDirection.Normalize();
                 enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
+            }
+        }
+
+        if (breakBlocks)
+        {
+            Collider2D[] breakableBlocks = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, breakableBlockMask);
+
+            for (int i = 0; i < breakableBlocks.Length; i++)
+            {
+                BreakableBlock breakableBlock = breakableBlocks[i].GetComponent<BreakableBlock>();
+
+                if (breakableBlock != null)
+                {
+                    breakableBlock.Break();
+                }
             }
         }
     }
