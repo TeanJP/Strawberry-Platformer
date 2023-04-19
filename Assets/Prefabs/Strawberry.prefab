@@ -102,7 +102,7 @@ MonoBehaviour:
   attackDelay: 0.25
   platformMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 32832
   maxOffset: {x: 1.25, y: 0}
   movementSpeed: 3
   halfColliderOffset: -0.25
@@ -369,7 +369,6 @@ MonoBehaviour:
   jumpBuffer: 0.2
   groundedBuffer: 0.15
   boostBuffer: 1
-  bounceBuffer: 0.5
   initialWalkSpeed: 3
   maxWalkSpeed: 6
   walkAcceleration: 6
@@ -381,7 +380,7 @@ MonoBehaviour:
   jumpStrength: 7
   fallSpeed: 2.5
   incompleteJumpStrength: 0.4
-  reducedBounceStrength: 0.6
+  bounceStrength: 5
   crawlSpeed: 3
   crawlJumpStrength: 6
   bellyFlopStrength: 30

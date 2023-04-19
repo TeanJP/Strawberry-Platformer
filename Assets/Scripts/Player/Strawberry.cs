@@ -1136,6 +1136,12 @@ public class Strawberry : MonoBehaviour
                     PerformDownwardsAttack(fullDamage, fullRepelStrength, true);
                 }
                 break;
+            case MovementState.Stunned:
+                if (!grounded && falling)
+                {
+                    PerformDownwardsAttack(minimumDamage, minimumRepelStrength, false);
+                }
+                break;
         }
     }
 
@@ -1162,7 +1168,12 @@ public class Strawberry : MonoBehaviour
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
-        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
+        bool attackSuccessful = DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
+
+        if (attackSuccessful)
+        {
+            Bounce();
+        }
 
         verticalAttack = true;
     }
@@ -1177,7 +1188,7 @@ public class Strawberry : MonoBehaviour
         verticalAttack = true;
     }
 
-    private void DealDamage(int damage, float repelStrength, bool breakBlocks, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
+    private bool DealDamage(int damage, float repelStrength, bool breakBlocks, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
     {
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
 
@@ -1218,11 +1229,6 @@ public class Strawberry : MonoBehaviour
             }
         }
 
-        if (attackSuccessful)
-        {
-            Bounce();
-        }
-
         if (breakBlocks)
         {
             Collider2D[] breakableBlocks = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, breakableBlockMask);
@@ -1237,6 +1243,8 @@ public class Strawberry : MonoBehaviour
                 }
             }
         }
+
+        return attackSuccessful;
     }
     #endregion
 

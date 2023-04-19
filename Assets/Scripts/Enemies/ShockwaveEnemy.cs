@@ -90,7 +90,10 @@ public class ShockwaveEnemy : Enemy
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Platform"))
+        bool platform = other.gameObject.CompareTag("Platform");
+        bool breakable = other.gameObject.CompareTag("Breakable");
+
+        if (platform || breakable)
         {
             bool isFloor = false;
 

@@ -372,4 +372,9 @@ public abstract class Enemy : MonoBehaviour
             }
         }
     }
+
+    public float GetHorizontalVelocity()
+    {
+        return rb.velocity.x;
+    }
 }
