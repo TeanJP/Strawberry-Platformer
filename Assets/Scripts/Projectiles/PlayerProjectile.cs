@@ -29,14 +29,21 @@ public class PlayerProjectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        Enemy enemy = other.gameObject.GetComponent<Enemy>();
+        bool enemy = other.gameObject.CompareTag("Enemy");
+        bool launchedEnemy = other.gameObject.CompareTag("Launched Enemy");
 
-        if (enemy != null)
+        if (enemy)
         {
-            enemy.TakeDamage(true, damage, 0f, Vector2.zero, 0f);
+            other.gameObject.GetComponent<Enemy>().TakeDamage(true, damage, 0f, Vector2.zero, 0f);
         }
-
-        Destroy(gameObject);
+        else if (launchedEnemy)
+        {
+            other.gameObject.GetComponent<LaunchedEnemy>().TakeDamage(damage);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void SetDirection(Vector2 direction)

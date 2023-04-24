@@ -19,17 +19,17 @@ public class Spike : MonoBehaviour
     {
         repelDirection.Normalize();
 
-        if (transform.rotation.z % 360f != 0f)
+        if (transform.rotation.eulerAngles.z % 360f != 0f)
         {
             Quaternion rotation = Quaternion.Euler(0f, 0f, transform.rotation.z);
 
             Vector2 rotatedRepelDirection = rotation * repelDirection;
 
-            if (transform.rotation.z % 180f == 0f)
+            if (transform.rotation.eulerAngles.z % 180f == 0f)
             {
                 rotatedRepelDirection.x = Mathf.Abs(rotatedRepelDirection.x);
             }
-            else if (transform.rotation.z % 90f == 0f)
+            else if (transform.rotation.eulerAngles.z % 90f == 0f)
             {
                 rotatedRepelDirection.y = Mathf.Abs(rotatedRepelDirection.y);
             }

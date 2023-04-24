@@ -1027,7 +1027,7 @@ public class Strawberry : MonoBehaviour
             case MovementState.Default:
                 if (!grounded && falling)
                 {
-                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                 }
                 break;
             case MovementState.Running:
@@ -1049,7 +1049,7 @@ public class Strawberry : MonoBehaviour
 
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                         }
                         break;
                     case RunState.Rolling:
@@ -1082,7 +1082,7 @@ public class Strawberry : MonoBehaviour
 
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                         }
                         break;
                     case RunState.Stopping:
@@ -1101,7 +1101,7 @@ public class Strawberry : MonoBehaviour
                         
                         if (!grounded && falling)
                         {
-                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                            PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                         }
                         break;
                     case RunState.WallRunning:
@@ -1109,37 +1109,37 @@ public class Strawberry : MonoBehaviour
                         break;
                     case RunState.WallJumping:
                         PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                         break;
                     case RunState.Diving:
                         PerformHorizontalAttack(reducedDamage, reducedRepelStrength, true);
-                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, true);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, true, false);
                         break;
                     case RunState.SuperJumping:
                         PerformUpwardsAttack(fullDamage, fullRepelStrength, true);
                         break;
                     case RunState.CancellingSuperJump:
                         PerformHorizontalAttack(fullDamage, fullRepelStrength, true);
-                        PerformDownwardsAttack(fullDamage, fullRepelStrength, false);
+                        PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                         break;
                 }
                 break;
             case MovementState.Crawling:
                 if (!grounded && falling)
                 {
-                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false);
+                    PerformDownwardsAttack(reducedDamage, reducedRepelStrength, false, true);
                 }
                 break;
             case MovementState.BellyFlopping:
                 if (flopRecoveryTimer <= 0f)
                 {
-                    PerformDownwardsAttack(fullDamage, fullRepelStrength, true);
+                    PerformDownwardsAttack(fullDamage, fullRepelStrength, true, false);
                 }
                 break;
             case MovementState.Stunned:
                 if (!grounded && falling)
                 {
-                    PerformDownwardsAttack(minimumDamage, minimumRepelStrength, false);
+                    PerformDownwardsAttack(minimumDamage, minimumRepelStrength, false, true);
                 }
                 break;
         }
@@ -1158,19 +1158,19 @@ public class Strawberry : MonoBehaviour
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + attackCheckWidth * 0.5f) * horizontalDirection, activeCollider.bounds.center.y);
         Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y - attackReduction * 2f);
 
-        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Horizontal);
+        DealDamage(damage, repelStrength, breakBlocks, false, boxPosition, boxSize, AttackDirection.Horizontal);
 
         horizontalAttack = true;
     }
     
-    private void PerformDownwardsAttack(int damage, float repelStrength, bool breakBlocks)
+    private void PerformDownwardsAttack(int damage, float repelStrength, bool breakBlocks, bool bounce)
     {
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
-        bool attackSuccessful = DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
+        bool attackSuccessful = DealDamage(damage, repelStrength, breakBlocks, true, boxPosition, boxSize, AttackDirection.Vertical);
 
-        if (attackSuccessful)
+        if (attackSuccessful && bounce)
         {
             Bounce();
         }
@@ -1183,12 +1183,12 @@ public class Strawberry : MonoBehaviour
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.max.y + attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
-        DealDamage(damage, repelStrength, breakBlocks, boxPosition, boxSize, AttackDirection.Vertical);
+        DealDamage(damage, repelStrength, breakBlocks, false, boxPosition, boxSize, AttackDirection.Vertical);
 
         verticalAttack = true;
     }
 
-    private bool DealDamage(int damage, float repelStrength, bool breakBlocks, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
+    private bool DealDamage(int damage, float repelStrength, bool breakBlocks, bool destroyProjectiles, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
     {
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
 
@@ -1196,10 +1196,13 @@ public class Strawberry : MonoBehaviour
 
         for (int i = 0; i < enemies.Length; i++)
         {
-            Enemy enemy = enemies[i].GetComponent<Enemy>();
+            bool enemy = enemies[i].CompareTag("Enemy");
+            bool launchedEnemy = enemies[i].CompareTag("Launched Enemy");
 
-            if (enemy != null)
+            if (enemy)
             {
+                Enemy currentEnemy = enemies[i].GetComponent<Enemy>();
+
                 if (!attackSuccessful)
                 {
                     attackSuccessful = true;
@@ -1220,12 +1223,26 @@ public class Strawberry : MonoBehaviour
                         repelDirection = new Vector2(horizontalDirection, 1f);
                         break;
                     case AttackDirection.Vertical:
-                        repelDirection = new Vector2(Mathf.Sign(enemy.transform.position.x - boxPosition.x), 1f);
+                        repelDirection = new Vector2(Mathf.Sign(currentEnemy.transform.position.x - boxPosition.x), 1f);
                         break;
                 }                
                 
                 repelDirection.Normalize();
-                enemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
+                currentEnemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
+            }
+            else if (launchedEnemy && destroyProjectiles)
+            {
+                LaunchedEnemy currentLaunchedEnemy = enemies[i].GetComponent<LaunchedEnemy>();
+
+                if (currentLaunchedEnemy.GetDirection() != Vector2.up)
+                {
+                    if (!attackSuccessful)
+                    {
+                        attackSuccessful = true;
+                    }
+
+                    currentLaunchedEnemy.Crash();
+                }
             }
         }
 

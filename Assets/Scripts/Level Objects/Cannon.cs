@@ -26,8 +26,11 @@ public class Cannon : MonoBehaviour
 
     private LaunchedEnemy loadedProjectile = null;
 
+    float height;
+
     void Start()
     {
+        height = GetComponent<BoxCollider2D>().bounds.size.y; 
         timer = loadDuration;
     }
 
@@ -44,9 +47,10 @@ public class Cannon : MonoBehaviour
                 if (timer <= 0f)
                 {
                     loadedProjectile = Instantiate(projectile).GetComponent<LaunchedEnemy>();
-                    loadedProjectile.SetDirection(direction);
+                    loadedProjectile.SetDirection(direction, gameObject);
 
-                    loadedProjectile.transform.position = new Vector2();
+                    float sizeDifference = Mathf.Abs(loadedProjectile.GetComponent<BoxCollider2D>().bounds.size.y - height);
+                    loadedProjectile.transform.position = (Vector2)transform.position + direction * sizeDifference;
 
                     state = State.Charging;
                     timer = chargeDuration;

@@ -22,6 +22,9 @@ public class LaunchedEnemy : EnemyProjectile
 
     private int lethalDamage = 100;
 
+    [SerializeField]
+    int health = 5;
+
     private GameObject cannon = null;
 
     private bool activated = false;
@@ -61,7 +64,13 @@ public class LaunchedEnemy : EnemyProjectile
         {
             GameObject target = targets[i].gameObject;
 
-            bool player = target.CompareTag("Player");
+            bool player = false;
+
+            if (target.transform.parent != null)
+            {
+                player = target.transform.parent.CompareTag("Player");
+            }
+
             bool enemy = target.CompareTag("Enemy");
             bool launchedEnemy = target.CompareTag("Launched Enemy");
 
@@ -78,7 +87,7 @@ public class LaunchedEnemy : EnemyProjectile
 
             if (player)
             {
-                target.GetComponent<Strawberry>().TakeDamge(damage, modifiedRepelDirection, repelStrength);
+                target.GetComponentInParent<Strawberry>().TakeDamge(damage, modifiedRepelDirection, repelStrength);
             }
             else if (enemy)
             {
@@ -86,7 +95,7 @@ public class LaunchedEnemy : EnemyProjectile
 
                 target.GetComponent<Enemy>().TakeDamage(false, lethalDamage, 0f, modifiedRepelDirection, repelStrength);
             }
-            else if (launchedEnemy)
+            else if (launchedEnemy && target != gameObject)
             {
                 target.GetComponent<LaunchedEnemy>().Crash();
                 Crash();
@@ -96,7 +105,7 @@ public class LaunchedEnemy : EnemyProjectile
 
     public void SetDirection(Vector2 direction, GameObject cannon)
     {
-        base.SetDirection(direction);
+        SetDirection(direction);
 
         this.cannon = cannon;
 
@@ -104,15 +113,15 @@ public class LaunchedEnemy : EnemyProjectile
 
         transform.Rotate(0f, 0f, Vector2.SignedAngle(direction, Vector2.up));
 
-        if (transform.rotation.z % 180f == 0f)
+        if (transform.rotation.eulerAngles.z % 180f == 0f)
         {
             boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction, attackWidth);
             relativeBoxPosition = new Vector2(0f, (activeCollider.bounds.extents.y - attackWidth * 0.5f) * Mathf.Sign(direction.y));
         }
         else
         {
-            boxSize = new Vector2(attackWidth, activeCollider.bounds.size.y - attackReduction);
-            relativeBoxPosition = new Vector2((activeCollider.bounds.extents.x - attackWidth * 0.5f) * Mathf.Sign(direction.x), 0f);
+            boxSize = new Vector2(attackWidth, activeCollider.bounds.size.x - attackReduction);
+            relativeBoxPosition = new Vector2((activeCollider.bounds.extents.y - attackWidth * 0.5f) * Mathf.Sign(direction.x), 0f);
         }
     }
 
@@ -129,5 +138,15 @@ public class LaunchedEnemy : EnemyProjectile
     public void Activate()
     {
         activated = true;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }
