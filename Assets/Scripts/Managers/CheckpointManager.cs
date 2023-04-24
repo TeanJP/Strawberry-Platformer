@@ -4,15 +4,39 @@ using UnityEngine;
 
 public class CheckpointManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    private List<Checkpoint> checkpoints = new List<Checkpoint>();
+
+    private int currentCheckpoint = 0;
+
+    public void LoadCurrentCheckpoint()
     {
-        
+        if (PlayerPrefs.HasKey("Current Checkpoint"))
+        {
+            currentCheckpoint = PlayerPrefs.GetInt("Current Checkpoint");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SaveCurrentCheckpoint()
     {
-        
+        PlayerPrefs.SetInt("Current Checkpoint", currentCheckpoint);
+    }
+
+    public Vector2 GetCurrentCheckpointPosition()
+    {
+        return checkpoints[currentCheckpoint].transform.position;
+    }
+
+    public void SetCurrentCheckpoint(Checkpoint checkpoint)
+    {
+        if (checkpoints[currentCheckpoint] != checkpoint)
+        {
+            int checkpointIndex = checkpoints.IndexOf(checkpoint);
+
+            if (checkpointIndex != -1)
+            {
+                currentCheckpoint = checkpointIndex;
+            }
+        }
     }
 }

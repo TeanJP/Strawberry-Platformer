@@ -7,7 +7,6 @@ public class CameraBehaviour : MonoBehaviour
     private Camera mainCamera = null;
     private Vector2 mainCameraDimensions;
 
-    [SerializeField]
     private Strawberry strawberry = null;
 
     [System.Serializable]
@@ -34,6 +33,8 @@ public class CameraBehaviour : MonoBehaviour
 
     void Start()
     {
+        strawberry = GameManager.Instance.GetStrawberryInstance();
+
         mainCamera = Camera.main;
         mainCameraDimensions = new Vector2(mainCamera.orthographicSize * mainCamera.aspect, mainCamera.orthographicSize);
     }

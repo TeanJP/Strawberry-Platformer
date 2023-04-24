@@ -40,10 +40,8 @@ public class PlayerProjectile : MonoBehaviour
         {
             other.gameObject.GetComponent<LaunchedEnemy>().TakeDamage(damage);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+        Destroy(gameObject);      
     }
 
     public void SetDirection(Vector2 direction)

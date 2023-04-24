@@ -17,7 +17,7 @@ public class DisappearingBlock : MonoBehaviour
     private BoxCollider2D blockCollider = null;
 
     [SerializeField]
-    private LayerMask playerMask;
+    private LayerMask movingObjects;
     private Vector2 blockDimensions;
 
     [SerializeField]
@@ -57,9 +57,9 @@ public class DisappearingBlock : MonoBehaviour
             case State.Reappearing:
                 if (timer <= 0f)
                 {
-                    Collider2D strawberry = Physics2D.OverlapBox(transform.position, blockDimensions, 0f, playerMask);
+                    Collider2D movingObject = Physics2D.OverlapBox(transform.position, blockDimensions, 0f, movingObjects);
 
-                    if (strawberry == null)
+                    if (movingObject == null)
                     {
                         state = State.Default;
 

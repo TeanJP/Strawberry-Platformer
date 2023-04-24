@@ -20,7 +20,6 @@ public abstract class Enemy : MonoBehaviour
     protected Rigidbody2D rb = null;
     protected BoxCollider2D activeCollider = null;
 
-    [SerializeField]
     protected Strawberry strawberry = null;
     [SerializeField]
     protected float scaredDistance = 3f;
@@ -70,6 +69,8 @@ public abstract class Enemy : MonoBehaviour
 
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
+
+        strawberry = GameManager.Instance.GetStrawberryInstance();
     }
 
     #region Movement
