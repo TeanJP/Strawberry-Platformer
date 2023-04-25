@@ -43,28 +43,22 @@ public class PeacefulEnemy : Enemy
 
     private void UpdateState()
     {
-        float distanceFromPlayer;
-        bool abovePlayer;
-        bool playerSpeedScary;
+        bool scared;
 
         switch (state)
         {
             case State.Default:
-                distanceFromPlayer = GetDistanceFromPlayer();
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y - 1f);
-                playerSpeedScary = strawberry.GetSpeedAbovePercentage(fearSpeed);
+                scared = GetScared();
 
-                if (distanceFromPlayer < scaredDistance && !abovePlayer && playerSpeedScary)
+                if (scared)
                 {
                     SetScared();
                 }
                 break;
             case State.Scared:
-                distanceFromPlayer = GetDistanceFromPlayer();
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y - 1f);
-                playerSpeedScary = strawberry.GetSpeedAbovePercentage(fearSpeed);
+                scared = GetScared();
 
-                if (distanceFromPlayer < scaredDistance && !abovePlayer && playerSpeedScary)
+                if (scared)
                 {
                     fearTimer = fearDuration;
                 }
@@ -87,7 +81,7 @@ public class PeacefulEnemy : Enemy
         {
             PeacefulEnemy peacefulEnemy = enemies[i].gameObject.GetComponent<PeacefulEnemy>();
 
-            if (peacefulEnemy != null)
+            if (peacefulEnemy != null && peacefulEnemy != this)
             {
                 peacefulEnemy.SetScared();
             }

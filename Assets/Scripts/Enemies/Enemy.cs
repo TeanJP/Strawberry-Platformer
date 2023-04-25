@@ -12,6 +12,13 @@ public abstract class Enemy : MonoBehaviour
         Stunned
     }
 
+    protected enum FearLevel
+    { 
+        None,
+        Low,
+        High
+    }
+
     protected State state = State.Default;
     [SerializeField]
     protected bool patrol = false;
@@ -24,10 +31,10 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     protected float scaredDistance = 3f;
     [SerializeField]
-    protected float fearSpeed = 1f;
-    [SerializeField]
     protected float fearDuration = 2f;
     protected float fearTimer = 0f;
+    [SerializeField]
+    protected FearLevel fearLevel = FearLevel.High;
 
     #region Collision Checking
     [SerializeField]
@@ -101,7 +108,7 @@ public abstract class Enemy : MonoBehaviour
         {
             trapped = false;
         }
-        else if (!trapped && hittingWall || dropAhead)
+        else if (!trapped && (hittingWall || dropAhead))
         {
             trapped = true;
             currentSpeed = 0f;
@@ -135,6 +142,10 @@ public abstract class Enemy : MonoBehaviour
             }
                 
             movement.x = currentSpeed * GetFacingDirection();
+        }
+        else
+        {
+            movement.x = 0f;
         }
 
         rb.velocity = movement;
@@ -232,7 +243,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected bool GetDropAhead()
     {
-        Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
+        Vector2 raycastDirection = Vector2.down;
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + dropCheckOffset) * GetFacingDirection(), activeCollider.bounds.min.y);
 
         RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
@@ -245,9 +256,17 @@ public abstract class Enemy : MonoBehaviour
         Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetFacingDirection(), activeCollider.bounds.min.y);
 
-        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, enemyMask);
+        RaycastHit2D[] hits = Physics2D.RaycastAll (raycastOrigin, raycastDirection, raycastLength, enemyMask);
 
-        return hit.collider != null;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider != null && hits[i].collider.gameObject != gameObject)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
     #endregion
 
@@ -274,6 +293,8 @@ public abstract class Enemy : MonoBehaviour
             if (fearTimer <= 0f)
             {
                 state = State.Default;
+                rb.velocity = Vector2.zero;
+                currentSpeed = 0f;
             }
         }
     }
@@ -300,11 +321,16 @@ public abstract class Enemy : MonoBehaviour
             }
             else
             {
-                state = State.Stunned;
-                stunTimer = stunDuration;
+                if (!projectile)
+                {
+                    state = State.Stunned;
+                    stunTimer = stunDuration;
+                }
+
             }
 
             RepelEnemy(repelDirection, repelStrength);
+            currentSpeed = 0f;
 
             if (!projectile)
             {
@@ -372,6 +398,37 @@ public abstract class Enemy : MonoBehaviour
                 FlipDirection();
             }
         }
+    }
+
+    protected bool GetScared()
+    {
+        bool scared = false;
+
+        if (fearLevel != FearLevel.None)
+        {
+            float distanceFromPlayer = GetDistanceFromPlayer();
+            bool abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+
+            switch (fearLevel)
+            {
+                case FearLevel.Low:
+                    bool playerRunning = strawberry.GetRunning();
+
+                    if (distanceFromPlayer < scaredDistance && playerRunning && !abovePlayer)
+                    {
+                        scared = true;
+                    }
+                    break;
+                case FearLevel.High:
+                    if (distanceFromPlayer < scaredDistance && !abovePlayer)
+                    {
+                        scared = true;
+                    }
+                    break;
+            }
+        }
+
+        return scared;
     }
 
     public float GetHorizontalVelocity()

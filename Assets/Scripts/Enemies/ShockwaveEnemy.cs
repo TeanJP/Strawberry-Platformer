@@ -51,6 +51,8 @@ public class ShockwaveEnemy : Enemy
             case State.Attacking:
                 if (!startedJump)
                 {
+                    FacePlayer();
+
                     if (attackTimer <= 0f && grounded)
                     {
                         rb.velocity = new Vector2(0f, jumpStrength);
@@ -131,28 +133,53 @@ public class ShockwaveEnemy : Enemy
 
     private void UpdateState()
     {
-        float distanceFromPlayer = GetDistanceFromPlayer();
+        float distanceFromPlayer;
+        bool scared;
+        bool abovePlayer;
+
 
         switch (state)
         {
-            case State.Default:              
-                if (distanceFromPlayer < scaredDistance && attackTimer > 0f)
+            case State.Default:
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                distanceFromPlayer = GetDistanceFromPlayer();
+                scared = GetScared();
+
+                if (scared && attackTimer > 0f)
                 {
                     SetScared();
                 }
-                else if (distanceFromPlayer < attackRange)
+                else if (distanceFromPlayer < attackRange && !abovePlayer)
                 {
                     state = State.Attacking;
                 }
                 break;
             case State.Attacking:
-                if (distanceFromPlayer < scaredDistance && attackTimer > 0f)
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                distanceFromPlayer = GetDistanceFromPlayer();
+                scared = GetScared();
+
+                if (attackTimer > 0f)
                 {
-                    SetScared();
-                }
-                else if (distanceFromPlayer > attackRange)
-                {
-                    state = State.Default;
+                    if (scared)
+                    {
+                        float facingDirection = GetFacingDirection();
+                        float directionToPlayer = GetDirectionToPlayer();
+
+                        if (trapped && facingDirection != directionToPlayer)
+                        {
+                            trapped = false;
+                        }
+
+                        if (!trapped)
+                        {
+                            SetScared();
+                        }
+                    }
+                    else if (distanceFromPlayer > attackRange || abovePlayer)
+                    {
+                        state = State.Default;
+                    }
                 }
                 break;
             case State.Scared:
@@ -162,7 +189,9 @@ public class ShockwaveEnemy : Enemy
                 }
                 else
                 {
-                    if (distanceFromPlayer < scaredDistance)
+                    scared = GetScared();
+
+                    if (scared)
                     {
                         fearTimer = fearDuration;
                     }

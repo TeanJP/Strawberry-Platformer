@@ -49,6 +49,8 @@ public class RangedEnemy : Enemy
                 }
                 break;
             case State.Attacking:
+                FacePlayer();
+
                 if (currentShots > 0)
                 {
                     if (attackTimer <= 0f)
@@ -91,26 +93,47 @@ public class RangedEnemy : Enemy
 
     private void UpdateState()
     {
-        float distanceFromPlayer = GetDistanceFromPlayer();
+        float distanceFromPlayer;
+        bool scared;
+        bool abovePlayer;
 
         switch (state)
         {
             case State.Default:
-                if (distanceFromPlayer < scaredDistance && currentShots == 0)
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                distanceFromPlayer = GetDistanceFromPlayer();
+                scared = GetScared();
+
+                if (scared && currentShots == 0)
                 {
                     SetScared();
                 }
-                else if (distanceFromPlayer < attackRange)
+                else if (distanceFromPlayer < attackRange && !abovePlayer)
                 {
                     state = State.Attacking;
                 }
                 break;
             case State.Attacking:
-                if (distanceFromPlayer < scaredDistance && currentShots == 0)
+                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                distanceFromPlayer = GetDistanceFromPlayer();
+                scared = GetScared();
+
+                if (scared && currentShots == 0)
                 {
-                    SetScared();
+                    float facingDirection = GetFacingDirection();
+                    float directionToPlayer = GetDirectionToPlayer();
+
+                    if (trapped && facingDirection != directionToPlayer)
+                    {
+                        trapped = false;
+                    }
+
+                    if (!trapped)
+                    {
+                        SetScared();
+                    }
                 }
-                else if (distanceFromPlayer > attackRange)
+                else if (distanceFromPlayer > attackRange || abovePlayer)
                 {
                     state = State.Default;
                 }
@@ -122,7 +145,9 @@ public class RangedEnemy : Enemy
                 }
                 else
                 {
-                    if (distanceFromPlayer < scaredDistance)
+                    scared = GetScared();
+
+                    if (scared)
                     {
                         fearTimer = fearDuration;
                     }

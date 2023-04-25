@@ -1337,18 +1337,9 @@ public class Strawberry : MonoBehaviour
     }
 
     #region Enemy Interaction
-    public bool GetSpeedAbovePercentage(float percentage)
+    public bool GetRunning()
     {
-        float minimum = Mathf.Lerp(initialRunSpeed, maxRunSpeed, percentage);
-
-        if (currentSpeed >= minimum && movementState == MovementState.Running)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return movementState == MovementState.Running;
     }
 
     public bool GetAbovePlayer(float position)
