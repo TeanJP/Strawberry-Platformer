@@ -404,7 +404,9 @@ public abstract class Enemy : MonoBehaviour
     {
         bool scared = false;
 
-        if (fearLevel != FearLevel.None)
+        bool playerDefeated = strawberry.GetDefeated();
+
+        if (fearLevel != FearLevel.None && !playerDefeated)
         {
             float distanceFromPlayer = GetDistanceFromPlayer();
             bool abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);

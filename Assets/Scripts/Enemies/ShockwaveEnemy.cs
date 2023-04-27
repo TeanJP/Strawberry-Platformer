@@ -134,6 +134,7 @@ public class ShockwaveEnemy : Enemy
     private void UpdateState()
     {
         float distanceFromPlayer;
+        bool playerDefeated;
         bool scared;
         bool abovePlayer;
 
@@ -141,42 +142,56 @@ public class ShockwaveEnemy : Enemy
         switch (state)
         {
             case State.Default:
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
-                distanceFromPlayer = GetDistanceFromPlayer();
-                scared = GetScared();
+                playerDefeated = strawberry.GetDefeated();
 
-                if (scared && attackTimer > 0f)
+                if (!playerDefeated)
                 {
-                    SetScared();
-                }
-                else if (distanceFromPlayer < attackRange && !abovePlayer)
-                {
-                    state = State.Attacking;
+                    abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                    distanceFromPlayer = GetDistanceFromPlayer();
+                    scared = GetScared();
+
+                    if (scared && attackTimer > 0f)
+                    {
+                        SetScared();
+                    }
+                    else if (distanceFromPlayer < attackRange && !abovePlayer)
+                    {
+                        state = State.Attacking;
+                    }
                 }
                 break;
             case State.Attacking:
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
-                distanceFromPlayer = GetDistanceFromPlayer();
-                scared = GetScared();
-
                 if (attackTimer > 0f)
                 {
-                    if (scared)
+                    playerDefeated = strawberry.GetDefeated();
+
+                    if (!playerDefeated)
                     {
-                        float facingDirection = GetFacingDirection();
-                        float directionToPlayer = GetDirectionToPlayer();
+                        abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                        distanceFromPlayer = GetDistanceFromPlayer();
+                        scared = GetScared();
 
-                        if (trapped && facingDirection != directionToPlayer)
+                        if (scared)
                         {
-                            trapped = false;
+                            float facingDirection = GetFacingDirection();
+                            float directionToPlayer = GetDirectionToPlayer();
+
+                            if (trapped && facingDirection != directionToPlayer)
+                            {
+                                trapped = false;
+                            }
+
+                            if (!trapped)
+                            {
+                                SetScared();
+                            }
                         }
-
-                        if (!trapped)
+                        else if (distanceFromPlayer > attackRange || abovePlayer)
                         {
-                            SetScared();
+                            state = State.Default;
                         }
                     }
-                    else if (distanceFromPlayer > attackRange || abovePlayer)
+                    else
                     {
                         state = State.Default;
                     }

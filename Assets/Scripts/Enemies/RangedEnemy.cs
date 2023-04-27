@@ -94,51 +94,66 @@ public class RangedEnemy : Enemy
     private void UpdateState()
     {
         float distanceFromPlayer;
+        bool playerDefeated;
         bool scared;
         bool abovePlayer;
 
         switch (state)
         {
             case State.Default:
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
-                distanceFromPlayer = GetDistanceFromPlayer();
-                scared = GetScared();
+                playerDefeated = strawberry.GetDefeated();
 
-                if (scared && currentShots == 0)
+                if (!playerDefeated)
                 {
-                    SetScared();
-                }
-                else if (distanceFromPlayer < attackRange && !abovePlayer)
-                {
-                    state = State.Attacking;
-                }
-                break;
-            case State.Attacking:
-                abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
-                distanceFromPlayer = GetDistanceFromPlayer();
-                scared = GetScared();
+                    abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                    distanceFromPlayer = GetDistanceFromPlayer();
+                    scared = GetScared();
 
-                if (scared && currentShots == 0)
-                {
-                    float facingDirection = GetFacingDirection();
-                    float directionToPlayer = GetDirectionToPlayer();
-
-                    if (trapped && facingDirection != directionToPlayer)
-                    {
-                        trapped = false;
-                    }
-
-                    if (!trapped)
+                    if (scared && currentShots == 0)
                     {
                         SetScared();
                     }
+                    else if (distanceFromPlayer < attackRange && !abovePlayer)
+                    {
+                        state = State.Attacking;
+                    }
                 }
-                else if (distanceFromPlayer > attackRange || abovePlayer)
+                break;
+            case State.Attacking:
+                playerDefeated = strawberry.GetDefeated();
+
+                if (playerDefeated)
                 {
                     state = State.Default;
                 }
+                else
+                {
+                    abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
+                    distanceFromPlayer = GetDistanceFromPlayer();
+                    scared = GetScared();
+
+                    if (scared && currentShots == 0)
+                    {
+                        float facingDirection = GetFacingDirection();
+                        float directionToPlayer = GetDirectionToPlayer();
+
+                        if (trapped && facingDirection != directionToPlayer)
+                        {
+                            trapped = false;
+                        }
+
+                        if (!trapped)
+                        {
+                            SetScared();
+                        }
+                    }
+                    else if (distanceFromPlayer > attackRange || abovePlayer)
+                    {
+                        state = State.Default;
+                    }
+                }
                 break;
-            case State.Scared:
+            case State.Scared:                    
                 if (trapped)
                 {
                     state = State.Attacking;

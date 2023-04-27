@@ -489,7 +489,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1092705707 stripped
 MonoBehaviour:
@@ -533,6 +533,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strawberry: {fileID: 6151032129827649289, guid: 19aa797db8c8c5b40b0085fe5bcc35b1, type: 3}
+  cameraBehaviour: {fileID: 519420033}
+  levelReloadDelay: 3
 --- !u!4 &1596736252
 Transform:
   m_ObjectHideFlags: 0
@@ -826,7 +828,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2045538996
 GameObject:
@@ -974,7 +976,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5779259542848692628, guid: da8102546d99e9641b5862c1312e5bb5, type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5779259542848692628, guid: da8102546d99e9641b5862c1312e5bb5, type: 3}
       propertyPath: m_LocalPosition.x

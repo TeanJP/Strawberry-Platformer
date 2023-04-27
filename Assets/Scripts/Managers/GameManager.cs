@@ -1,9 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 { 
+    private enum GameState
+    {
+        Default,
+        Escape,
+        GameOver
+    }
+
+    private GameState gameState = GameState.Default;
+
     private static GameManager gameManagerInstance;
 
     public static GameManager Instance
@@ -19,6 +29,12 @@ public class GameManager : MonoBehaviour
     private Strawberry strawberryInstance = null;
 
     private CheckpointManager checkpointManager = null;
+    [SerializeField]
+    private CameraBehaviour cameraBehaviour = null;
+
+    [SerializeField]
+    private float levelReloadDelay = 3f;
+    private float levelReloadTimer = 0f;
 
     void Awake()
     {
@@ -40,7 +56,26 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        
+        switch (gameState)
+        {
+            case GameState.Default:
+
+                break;
+            case GameState.Escape:
+
+                break;
+            case GameState.GameOver:
+                if (levelReloadTimer > 0f)
+                {
+                    levelReloadTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    checkpointManager.SaveCurrentCheckpoint();
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
+                break;
+        }
     }
 
     private Strawberry SpawnPlayer(Vector2 spawnPosition)
@@ -76,5 +111,14 @@ public class GameManager : MonoBehaviour
     public CheckpointManager GetCheckpointManager()
     {
         return checkpointManager;
+    }
+
+    public void SetGameOver()
+    {
+        gameState = GameState.GameOver;
+
+        levelReloadTimer = levelReloadDelay;
+
+        cameraBehaviour.enabled = false;
     }
 }

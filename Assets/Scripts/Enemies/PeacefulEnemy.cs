@@ -43,16 +43,22 @@ public class PeacefulEnemy : Enemy
 
     private void UpdateState()
     {
+        bool playerDefeated;
         bool scared;
 
         switch (state)
         {
             case State.Default:
-                scared = GetScared();
+                playerDefeated = strawberry.GetDefeated();
 
-                if (scared)
+                if (!playerDefeated)
                 {
-                    SetScared();
+                    scared = GetScared();
+
+                    if (scared)
+                    {
+                        SetScared();
+                    }
                 }
                 break;
             case State.Scared:

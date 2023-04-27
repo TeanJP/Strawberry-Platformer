@@ -11,7 +11,8 @@ public class Strawberry : MonoBehaviour
         Running,
         Crawling,
         BellyFlopping,
-        Stunned
+        Stunned,
+        Defeated
     }
 
     private enum RunState
@@ -1272,7 +1273,7 @@ public class Strawberry : MonoBehaviour
         {
             if (hearts == 0 || damage > maxHearts)
             {
-                Debug.Log("GAME OVER");
+                SetDefeated();
             }
             else
             {
@@ -1312,6 +1313,28 @@ public class Strawberry : MonoBehaviour
     {
         rb.velocity = repelDirection * repelStrength;
     }
+
+    private void SetDefeated()
+    {
+        movementState = MovementState.Defeated;
+        
+        activeCollider.enabled = false;
+        
+        if (fullTrigger.enabled)
+        {
+            fullTrigger.enabled = false;
+        }
+        else
+        {
+            halfTrigger.enabled = false;
+        }
+
+        GameObject leche = transform.GetChild(1).gameObject;
+        leche.GetComponent<Leche>().enabled = false;
+        leche.transform.parent = null;
+
+        GameManager.Instance.SetGameOver();
+    }
     #endregion
 
     private void SwapActiveCollider()
@@ -1340,6 +1363,11 @@ public class Strawberry : MonoBehaviour
     public bool GetRunning()
     {
         return movementState == MovementState.Running;
+    }
+
+    public bool GetDefeated()
+    {
+        return movementState == MovementState.Defeated;
     }
 
     public bool GetAbovePlayer(float position)
