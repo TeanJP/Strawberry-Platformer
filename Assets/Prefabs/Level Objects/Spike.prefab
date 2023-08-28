@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4273f53fb7180ad4085602fbdcb639cc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -146,6 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f7dd847dae548f479f95e9423175b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 20
+  playerDamage: 20
+  enemyDamage: 100
+  enemyStunDuration: 3
   repelDirection: {x: 0.3, y: 0.7}
   repelStrength: 6
