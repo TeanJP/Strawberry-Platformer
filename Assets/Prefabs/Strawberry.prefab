@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6151032129060581385}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.25, y: 0, z: 0}
+  m_LocalPosition: {x: 1.25, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -100,12 +100,15 @@ MonoBehaviour:
   strawberry: {fileID: 6151032129827649329}
   projectile: {fileID: 5618896338841325216, guid: 7251c5843c3d485488594a246fc48e48, type: 3}
   attackDelay: 0.25
+  projectileOffset: {x: 0, y: 0.05}
   platformMask:
     serializedVersion: 2
     m_Bits: 32832
   maxOffset: {x: 1.25, y: 0}
   movementSpeed: 3
-  halfColliderOffset: -0.25
+  halfColliderOffset: -0.65
+  raycastOffset: {x: 0, y: 0.18}
+  raycastSpacing: 0.98
 --- !u!1 &6151032129391701610
 GameObject:
   m_ObjectHideFlags: 0

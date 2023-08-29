@@ -14,7 +14,8 @@ public class Leche : MonoBehaviour
     private float attackDelay = 0.25f;
     private float attackTimer = 0f;
 
-    private Vector2 projectileOffset = new Vector2(0.75f, 0f);
+    [SerializeField]
+    private Vector2 projectileOffset = new Vector2(0.25f, 0f);
 
     [SerializeField]
     private LayerMask platformMask;
@@ -32,6 +33,11 @@ public class Leche : MonoBehaviour
     private Vector2 halfDimensions;
     private float raycastLength;
 
+    [SerializeField]
+    private Vector2 raycastOffset = new Vector2(0f, 0.18f);
+    [SerializeField]
+    private float raycastSpacing = 1f;
+
     void Start()
     {
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
@@ -41,6 +47,7 @@ public class Leche : MonoBehaviour
 
         UpdateDirection();
         targetOffset = maxOffset * new Vector2(strawberry.GetPlayerDirection() * -1f, 1f);
+
         currentOffset = targetOffset;
     }
 
@@ -81,9 +88,8 @@ public class Leche : MonoBehaviour
             currentOffset.y = 0f;
         }
 
-        float horizontalDirection = strawberry.GetPlayerDirection();
-
-        transform.localPosition = currentOffset * new Vector2(horizontalDirection, 1f);
+        float playerDirection = strawberry.GetPlayerDirection();
+        transform.localPosition = currentOffset * new Vector2(playerDirection * -1f, 1f);
     }
 
     private void UpdateOffset()
@@ -92,16 +98,18 @@ public class Leche : MonoBehaviour
 
         Vector2 raycastDirection = new Vector2(playerDirection * -1f, 0f);
 
-        Vector2 raycastOrigin = strawberry.GetCentre();
-        Vector2 offset = new Vector2(0f, halfDimensions.y * Mathf.Sign(strawberry.GetVerticalVelocity()));
+        Vector2 raycastOrigin = new Vector2(strawberry.GetCentre().x, spriteRenderer.bounds.center.y) + raycastOffset;
+        Vector2 offset = new Vector2(0f, raycastSpacing * 0.5f * Mathf.Sign(strawberry.GetVerticalVelocity()));
 
         for (int i = 0; i < 2; i++)
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin + offset, raycastDirection, raycastLength, platformMask);
 
+            Debug.DrawRay(raycastOrigin + offset, raycastDirection * raycastLength, Color.green);
+
             if (hit.collider != null)
             {
-                targetOffset.x = (hit.distance - halfDimensions.x) * (playerDirection * -1f);
+                targetOffset.x = Mathf.Abs(hit.distance - halfDimensions.x) * (playerDirection * -1f);
                 return;
             }
 
@@ -111,22 +119,16 @@ public class Leche : MonoBehaviour
         targetOffset.x = maxOffset.x * (playerDirection * -1f);
     }
 
+    private float GetLecheDirection()
+    {
+        return strawberry.GetPlayerDirection() * Mathf.Sign(transform.localScale.x);
+    }
+
     private void UpdateDirection()
     {
         bool wallRunning = strawberry.GetWallRunning();
-        float playerDirection = strawberry.GetPlayerDirection();
-        float newDirection;
-
-        if (wallRunning)
-        {
-            newDirection = playerDirection * -1f;
-        }
-        else
-        {
-            newDirection = playerDirection;
-        }
-
-        if (newDirection != Mathf.Sign(transform.localScale.x))
+        
+        if ((wallRunning && Mathf.Sign(transform.localScale.x) != -1f) || (!wallRunning && Mathf.Sign(transform.localScale.x) != 1f))
         {
             transform.localScale *= new Vector2(-1f, 1f);
         }
@@ -142,8 +144,8 @@ public class Leche : MonoBehaviour
             {
                 if (projectile != null)
                 {
-                    float horizontalDirection = Mathf.Sign(transform.localScale.x);
-                    PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * horizontalDirection, Quaternion.identity).GetComponent<PlayerProjectile>();
+                    float horizontalDirection = GetLecheDirection();
+                    PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * new Vector2 (horizontalDirection, 1f), Quaternion.identity).GetComponent<PlayerProjectile>();
                     createdProjectile.SetDirection(new Vector2(horizontalDirection, 0f));
                 }
 

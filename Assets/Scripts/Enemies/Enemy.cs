@@ -172,7 +172,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected float GetFacingDirection()
     {
-        return Mathf.Sign(transform.localScale.x);
+        return Mathf.Sign(transform.localScale.x) * -1f;
     }
     #endregion
 

@@ -855,7 +855,8 @@ public class Strawberry : MonoBehaviour
     #region Player Direction
     private bool GetFacingIncorrectDirection()
     {
-        return horizontalInput != 0f && horizontalInput != Mathf.Sign(transform.localScale.x);
+        float currentDirection = GetPlayerDirection();
+        return horizontalInput != 0f && horizontalInput != currentDirection;
     }
 
     private void FlipPlayerDirection()
@@ -865,7 +866,7 @@ public class Strawberry : MonoBehaviour
 
     public float GetPlayerDirection()
     {
-        return Mathf.Sign(transform.localScale.x);
+        return Mathf.Sign(transform.localScale.x) * -1f;
     }
     #endregion
 
