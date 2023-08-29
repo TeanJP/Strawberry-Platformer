@@ -30,6 +30,8 @@ public class Leche : MonoBehaviour
     private float halfColliderOffset = -0.25f;
 
     private SpriteRenderer spriteRenderer = null;
+    private Animator animator = null;
+
     private Vector2 halfDimensions;
     private float raycastLength;
 
@@ -41,6 +43,10 @@ public class Leche : MonoBehaviour
     void Start()
     {
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        
+        animator = gameObject.GetComponent<Animator>();
+        animator.Play("Leche Default");
+
         halfDimensions = spriteRenderer.bounds.extents;
 
         raycastLength = maxOffset.x + halfDimensions.x;
@@ -104,8 +110,6 @@ public class Leche : MonoBehaviour
         for (int i = 0; i < 2; i++)
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin + offset, raycastDirection, raycastLength, platformMask);
-
-            Debug.DrawRay(raycastOrigin + offset, raycastDirection * raycastLength, Color.green);
 
             if (hit.collider != null)
             {
