@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 6541706149240724463}
   - component: {fileID: 6541706149240724460}
   - component: {fileID: 6541706149240724461}
+  - component: {fileID: 8502024558691964556}
   m_Layer: 8
-  m_Name: Ranged Enemy
+  m_Name: Cowboy Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -169,6 +170,26 @@ MonoBehaviour:
   gunBarrelOffset: {x: 0.25, y: 0}
   reloadDuration: 3
   maxShots: 6
+--- !u!95 &8502024558691964556
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6541706149240724466}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9f24ecef89d149b4e850e2a824106e87, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &6541706149546895562
 GameObject:
   m_ObjectHideFlags: 0

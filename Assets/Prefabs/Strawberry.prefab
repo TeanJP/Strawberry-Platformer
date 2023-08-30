@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 6151032129827649334}
   - component: {fileID: 6151032129827649328}
   - component: {fileID: 6151032129827649329}
+  - component: {fileID: 2127565012179767498}
   m_Layer: 7
   m_Name: Strawberry
   m_TagString: Player
@@ -440,3 +441,23 @@ MonoBehaviour:
   minimumSpeed: 8
   minimumDamage: 1
   minimumRepelStrength: 1
+--- !u!95 &2127565012179767498
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6151032129827649289}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0

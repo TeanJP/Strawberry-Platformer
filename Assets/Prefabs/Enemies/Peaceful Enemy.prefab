@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 285470092303479538}
   - component: {fileID: 285470092303479539}
   - component: {fileID: 285470092303479536}
+  - component: {fileID: 6452661561474645860}
   m_Layer: 8
   m_Name: Peaceful Enemy
   m_TagString: Enemy
@@ -162,3 +163,23 @@ MonoBehaviour:
   fallSpeed: 2.5
   health: 10
   immunityDuration: 1
+--- !u!95 &6452661561474645860
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285470092303479537}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0

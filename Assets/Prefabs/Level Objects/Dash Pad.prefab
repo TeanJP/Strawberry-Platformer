@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8244608422480122284}
   - component: {fileID: 8244608422480122283}
   - component: {fileID: 8244608422480122282}
+  - component: {fileID: 1913558}
   m_Layer: 14
   m_Name: Dash Pad
   m_TagString: Untagged
@@ -125,3 +126,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 8
+--- !u!95 &1913558
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8244608422480122281}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e4f71ddc01489c94fb32fb7abb287151, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0

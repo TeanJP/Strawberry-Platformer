@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7396121547233079152}
   - component: {fileID: 7396121547233079159}
   - component: {fileID: 7396121547233079155}
+  - component: {fileID: 2947659649932720287}
   m_Layer: 8
   m_Name: Shockwave Enemy
   m_TagString: Enemy
@@ -170,3 +171,23 @@ MonoBehaviour:
   jumpStrength: 6
   bellyFlopStrength: 10
   shockwave: {fileID: 6198345821625920949, guid: 6161cc35af1f457498a97c78aafb51c3, type: 3}
+--- !u!95 &2947659649932720287
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7396121547233079157}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
