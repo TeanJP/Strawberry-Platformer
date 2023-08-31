@@ -42,10 +42,8 @@ public class Leche : MonoBehaviour
 
     void Start()
     {
-        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        
+        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();        
         animator = gameObject.GetComponent<Animator>();
-        animator.Play("Leche Default");
 
         halfDimensions = spriteRenderer.bounds.extents;
 

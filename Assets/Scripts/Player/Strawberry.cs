@@ -53,6 +53,8 @@ public class Strawberry : MonoBehaviour
     private bool movementApplied = false;
 
     private bool bouncing = false;
+
+    private string currentAnimation = "Strawberry Idle";
     #endregion
 
     #region Collision Checking
@@ -91,10 +93,7 @@ public class Strawberry : MonoBehaviour
     private CapsuleCollider2D fullTrigger = null;
     [SerializeField]
     private CapsuleCollider2D halfTrigger = null;
-    [SerializeField]
-    private Sprite fullSprite = null;
-    [SerializeField]
-    private Sprite halfSprite = null;
+    private Animator animator = null;
     #endregion
 
     #region Inputs
@@ -251,8 +250,7 @@ public class Strawberry : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
-        spriteRenderer.sprite = fullSprite;
+        animator = GetComponent<Animator>();
 
         fullColliderHeight = fullCollider.bounds.extents.y * 2f;
 
@@ -288,6 +286,7 @@ public class Strawberry : MonoBehaviour
         Move(grounded);
         Attack();
         DecrementTimers(Time.deltaTime);
+        ApplyAnimation();
 
         if (movementState != MovementState.Stunned)
         {
@@ -852,6 +851,141 @@ public class Strawberry : MonoBehaviour
     }
     #endregion
 
+    private void ApplyAnimation()
+    {
+        string animationToPlay = currentAnimation;
+
+        switch (movementState)
+        {
+            case MovementState.Default:
+                if (rb.velocity.y > 0f)
+                {
+                    animationToPlay = "Strawberry Jump";
+                }
+                else
+                {
+                    if (grounded)
+                    {
+                        if (horizontalInput == 0f)
+                        {
+                            animationToPlay = "Strawberry Idle";
+                        }
+                        else
+                        {
+                            animationToPlay = "Strawberry Walk";
+                        }
+                    }
+                    else
+                    {
+                        animationToPlay = "Strawberry Fall";
+                    }
+                }
+                break;
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Default:
+                        if (grounded)
+                        {
+                            animationToPlay = "Strawberry Run";
+                        }
+                        else
+                        {
+                            animationToPlay = "Strawberry Run Jump";
+                        }
+                        break;
+                    case RunState.Rolling:
+                        animationToPlay = "Strawberry Roll";
+                        break;
+                    case RunState.Turning:
+                        animationToPlay = "Strawberry Run Turn";
+                        break;
+                    case RunState.Stopping:
+                        animationToPlay = "Strawberry Run Drift";
+                        break;
+                    case RunState.WallRunning:
+                        animationToPlay = "Strawberry Wall Run";
+                        break;
+                    case RunState.WallJumping:
+                        animationToPlay = "Strawberry Run Jump";
+                        break;
+                    case RunState.Diving:
+                        animationToPlay = "Strawberry Dive";
+                        break;
+                    case RunState.SuperJumping:
+                        animationToPlay = "Strawberry Super Jump";
+                        break;
+                    case RunState.ChargingSuperJump:
+                        if (horizontalInput == 0f || !grounded)
+                        {
+                            animationToPlay = "Strawberry Charge Idle";
+                        }
+                        else
+                        {
+                            animationToPlay = "Strawberry Charge Move";
+                        }
+                        break;
+                    case RunState.CancellingSuperJump:
+                        animationToPlay = "Strawberry Run Jump";
+                        break;
+                }
+                break;
+            case MovementState.Crawling:
+                if (rb.velocity.y > 0f)
+                {
+                    animationToPlay = "Strawberry Dive";
+                }
+                else
+                {
+                    if (grounded)
+                    {
+                        if (horizontalInput == 0f)
+                        {
+                            animationToPlay = "Strawberry Crawl Idle";
+                        }
+                        else
+                        {
+                            animationToPlay = "Strawberry Crawl";
+                        }
+                    }
+                    else
+                    {
+                        animationToPlay = "Strawberry Lying Fall";
+                    }
+                }
+                break;
+            case MovementState.BellyFlopping:
+                animationToPlay = "Strawberry Flop";
+                break;
+            case MovementState.Stunned:
+                if (activeCollider == halfCollider)
+                {
+                    animationToPlay = "Strawberry Lying Fall";
+                }
+                else
+                {
+                    animationToPlay = "Strawberry Fall";
+                }
+                break;
+            case MovementState.Defeated:
+                if (activeCollider == halfCollider)
+                {
+                    animationToPlay = "Strawberry Lying Fall";
+                }
+                else
+                {
+                    animationToPlay = "Strawberry Fall";
+                }
+                break;
+        }
+
+        if (animationToPlay != currentAnimation)
+        {
+            animator.Play(animationToPlay);
+            currentAnimation = animationToPlay;
+        }
+    }
+
     #region Player Direction
     private bool GetFacingIncorrectDirection()
     {
@@ -1348,12 +1482,10 @@ public class Strawberry : MonoBehaviour
 
         if (halfCollider.enabled)
         {
-            spriteRenderer.sprite = halfSprite;
             activeCollider = halfCollider;
         }
         else
         {
-            spriteRenderer.sprite = fullSprite;
             activeCollider = fullCollider;
         }
         
