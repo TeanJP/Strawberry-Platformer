@@ -80,7 +80,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.11, y: 2.72}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -177,7 +177,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.075}
-  m_Size: {x: 0.4, y: 1.75}
+  m_Size: {x: 0.3, y: 1.75}
   m_Direction: 0
 --- !u!70 &6151032129391701527
 CapsuleCollider2D:
@@ -193,7 +193,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.525}
-  m_Size: {x: 0.4, y: 0.85}
+  m_Size: {x: 0.3, y: 0.85}
   m_Direction: 0
 --- !u!1 &6151032129827649289
 GameObject:
@@ -280,7 +280,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 4.22, y: 4.61}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -324,14 +324,14 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.1075, y: 2.3025}
-    newSize: {x: 1, y: 2}
+    oldSize: {x: 2.11, y: 2.305}
+    newSize: {x: 4.22, y: 4.61}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8, y: 1.8}
+  m_Size: {x: 0.5, y: 1.8}
   m_EdgeRadius: 0
 --- !u!61 &6151032129827649328
 BoxCollider2D:
@@ -350,14 +350,14 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.1075, y: 2.3025}
-    newSize: {x: 1, y: 2}
+    oldSize: {x: 2.11, y: 2.305}
+    newSize: {x: 4.22, y: 4.61}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8, y: 0.9}
+  m_Size: {x: 0.5, y: 0.9}
   m_EdgeRadius: 0
 --- !u!114 &6151032129827649329
 MonoBehaviour:
@@ -389,8 +389,6 @@ MonoBehaviour:
   halfCollider: {fileID: 6151032129827649328}
   fullTrigger: {fileID: 6151032129391701524}
   halfTrigger: {fileID: 6151032129391701527}
-  fullSprite: {fileID: 21300000, guid: b4b713b442df71a41bd43479324ff130, type: 3}
-  halfSprite: {fileID: 21300000, guid: ecabf6bf12024a349b67d24230a4c28a, type: 3}
   jumpBuffer: 0.2
   groundedBuffer: 0.15
   boostBuffer: 1
