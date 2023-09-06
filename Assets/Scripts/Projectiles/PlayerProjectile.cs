@@ -34,10 +34,13 @@ public class PlayerProjectile : MonoBehaviour
 
         if (enemy)
         {
-            other.gameObject.GetComponent<Enemy>().TakeDamage(true, damage, 0f, Vector2.zero, 0f);
+            Vector2 repelDirection = new Vector2(Mathf.Sign(other.transform.position.x - transform.position.x), 1f);
+            repelDirection.Normalize();
+            other.gameObject.GetComponent<Enemy>().TakeDamage(true, damage, 0f, repelDirection, 0f);
         }
         else if (launchedEnemy)
         {
+            //Maybe add knockback for when the enemy is defeated.
             other.gameObject.GetComponent<LaunchedEnemy>().TakeDamage(damage);
         }
 

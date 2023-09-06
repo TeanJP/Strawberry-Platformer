@@ -29,6 +29,8 @@ public class RangedEnemy : Enemy
         currentShots = maxShots;
 
         gunTransform = transform.GetChild(0).transform;
+
+        currentAnimation = "Cowboy Enemy Idle";
     }
 
     void Update()
@@ -85,6 +87,8 @@ public class RangedEnemy : Enemy
 
                 break;
         }
+
+        ApplyAnimation(grounded);
 
         UpdateGravityScale();
 
@@ -211,6 +215,65 @@ public class RangedEnemy : Enemy
 
     protected override void SetDefeated()
     {
-        Destroy(gameObject);
+        state = State.Defeated;
+        activeCollider.enabled = false;
+    }
+
+    private void ApplyAnimation(bool grounded)
+    {
+        string animationToPlay = currentAnimation;
+
+        switch (state)
+        {
+            case State.Default:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Cowboy Enemy Moving";
+                    }
+                    else
+                    {
+                        animationToPlay = "Cowboy Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Cowboy Enemy Idle";
+                }
+                break;
+            case State.Attacking:
+                animationToPlay = "Cowboy Enemy Idle";
+                break;
+            case State.Scared:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Cowboy Enemy Moving";
+                    }
+                    else
+                    {
+                        animationToPlay = "Cowboy Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Cowboy Enemy Idle";
+                }
+                break;
+            case State.Stunned:
+                animationToPlay = "Cowboy Enemy Idle";
+                break;
+            case State.Defeated:
+                animationToPlay = "Cowboy Enemy Idle";
+                break;
+        }
+
+        if (animationToPlay != currentAnimation)
+        {
+            animator.Play(animationToPlay);
+            currentAnimation = animationToPlay;
+        }
     }
 }

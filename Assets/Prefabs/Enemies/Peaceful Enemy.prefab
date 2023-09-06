@@ -126,7 +126,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.40125, y: 1.26125}
+    oldSize: {x: 1.4, y: 1.26}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   patrol: 0
-  scaredDistance: 4
+  scaredDistance: 6
   fearDuration: 2
   fearLevel: 2
   platformMask:
@@ -173,7 +173,7 @@ Animator:
   m_GameObject: {fileID: 285470092303479537}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 50a8e390a865b3a49a848beb0cea4e75, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

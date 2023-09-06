@@ -29,6 +29,8 @@ public class ShockwaveEnemy : Enemy
     protected override void Start()
     {
         base.Start();
+
+        currentAnimation = "Shockwave Enemy Idle";
     }
 
     void Update()
@@ -80,6 +82,8 @@ public class ShockwaveEnemy : Enemy
                 break;
         }
 
+        ApplyAnimation(grounded);
+
         UpdateGravityScale();
 
         if (state != State.Stunned)
@@ -89,6 +93,7 @@ public class ShockwaveEnemy : Enemy
 
         DecrementImmunityTimer(Time.deltaTime);
     }
+
 
     private void OnCollisionEnter2D(Collision2D other)
     {
@@ -254,6 +259,65 @@ public class ShockwaveEnemy : Enemy
 
     protected override void SetDefeated()
     {
-        Destroy(gameObject);
+        state = State.Defeated;
+        activeCollider.enabled = false;
+    }
+
+    private void ApplyAnimation(bool grounded)
+    {
+        string animationToPlay = currentAnimation;
+
+        switch (state)
+        {
+            case State.Default:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Shockwave Enemy Moving";
+                    }
+                    else
+                    {        
+                        animationToPlay = "Shockwave Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Shockwave Enemy Idle";
+                }
+                break;
+            case State.Attacking:
+                animationToPlay = "Shockwave Enemy Idle";
+                break;
+            case State.Scared:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Shockwave Enemy Moving";
+                    }
+                    else
+                    {
+                        animationToPlay = "Shockwave Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Shockwave Enemy Idle";
+                }
+                break;
+            case State.Stunned:
+                animationToPlay = "Shockwave Enemy Idle";
+                break;
+            case State.Defeated:
+                animationToPlay = "Shockwave Enemy Idle";
+                break;
+        }
+
+        if (animationToPlay != currentAnimation)
+        {
+            animator.Play(animationToPlay);
+            currentAnimation = animationToPlay;
+        }
     }
 }

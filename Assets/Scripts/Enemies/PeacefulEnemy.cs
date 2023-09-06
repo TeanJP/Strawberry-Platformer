@@ -9,6 +9,8 @@ public class PeacefulEnemy : Enemy
     protected override void Start()
     {
         base.Start();
+
+        currentAnimation = "Default Enemy Idle";
     }
 
     void Update()
@@ -36,10 +38,13 @@ public class PeacefulEnemy : Enemy
                 break;
         }
 
+        ApplyAnimation(grounded);
+
         UpdateGravityScale();
 
         DecrementImmunityTimer(Time.deltaTime);
     }
+
 
     private void UpdateState()
     {
@@ -97,6 +102,62 @@ public class PeacefulEnemy : Enemy
     protected override void SetDefeated()
     {
         SpreadFear();
-        Destroy(gameObject);
+        state = State.Defeated;
+        activeCollider.enabled = false;
+    }
+
+    private void ApplyAnimation(bool grounded)
+    {
+        string animationToPlay = currentAnimation;
+
+        switch (state)
+        {
+            case State.Default:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Default Enemy Moving";
+                    }
+                    else
+                    {
+                        animationToPlay = "Default Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Default Enemy Idle";
+                }
+                break;
+            case State.Scared:
+                if (grounded)
+                {
+                    if (rb.velocity.x != 0f)
+                    {
+                        animationToPlay = "Default Enemy Moving";
+                    }
+                    else
+                    {
+                        animationToPlay = "Default Enemy Idle";
+                    }
+                }
+                else
+                {
+                    animationToPlay = "Default Enemy Idle";
+                }
+                break;
+            case State.Stunned:
+                animationToPlay = "Default Enemy Idle";
+                break;
+            case State.Defeated:
+                animationToPlay = "Default Enemy Idle";
+                break;
+        }
+
+        if (animationToPlay != currentAnimation)
+        {
+            animator.Play(animationToPlay);
+            currentAnimation = animationToPlay;
+        }
     }
 }

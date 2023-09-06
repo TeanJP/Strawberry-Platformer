@@ -9,10 +9,21 @@ public class Leche : MonoBehaviour
 
     [SerializeField]
     private GameObject projectile = null;
+    [SerializeField]
+    private List<Color> projectileColours = new List<Color>();
+    private int currentColour = 0;
 
     [SerializeField]
     private float attackDelay = 0.25f;
     private float attackTimer = 0f;
+
+    [SerializeField]
+    private float maxEnergy = 12f;
+    private float currentEnergy;
+    [SerializeField]
+    private float projectileCost = 1f;
+    [SerializeField]
+    private float energyRechargeRate = 2f;
 
     [SerializeField]
     private Vector2 projectileOffset = new Vector2(0.25f, 0f);
@@ -53,6 +64,13 @@ public class Leche : MonoBehaviour
         targetOffset = maxOffset * new Vector2(strawberry.GetPlayerDirection() * -1f, 1f);
 
         currentOffset = targetOffset;
+
+        if (projectileColours.Count < 1)
+        {
+            projectileColours.Add(Color.white);
+        }
+
+        currentEnergy = maxEnergy;
     }
 
     void LateUpdate()
@@ -61,9 +79,26 @@ public class Leche : MonoBehaviour
         UpdateOffset();
         Move(Time.deltaTime);
 
-        if (Input.GetKey(KeyCode.C))
+        bool playerStunned = strawberry.GetStunned();
+
+        if (!playerStunned)
         {
-            Attack();
+            if (Input.GetKey(KeyCode.C) && attackTimer <= 0f && currentEnergy >= projectileCost)
+            {
+                Attack();
+            }
+            else 
+            {
+                if (attackTimer > 0f)
+                {
+                    attackTimer -= Time.deltaTime;
+                }
+
+                if (currentEnergy < maxEnergy)
+                {
+                    currentEnergy = Mathf.Min(currentEnergy + Time.deltaTime * energyRechargeRate, maxEnergy);
+                }
+            }
         }
     }
 
@@ -138,26 +173,23 @@ public class Leche : MonoBehaviour
 
     private void Attack()
     {
-        bool playerStunned = strawberry.GetStunned();
-
-        if (!playerStunned)
+        if (projectile != null)
         {
-            if (attackTimer <= 0f)
-            {
-                if (projectile != null)
-                {
-                    float horizontalDirection = GetLecheDirection();
-                    PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * new Vector2 (horizontalDirection, 1f), Quaternion.identity).GetComponent<PlayerProjectile>();
-                    createdProjectile.SetDirection(new Vector2(horizontalDirection, 0f));
-                }
+            float horizontalDirection = GetLecheDirection();
+            PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * new Vector2 (horizontalDirection, 1f), Quaternion.identity).GetComponent<PlayerProjectile>();
+            createdProjectile.SetDirection(new Vector2(horizontalDirection, 0f));
 
-                attackTimer = attackDelay;
-            }
+            createdProjectile.GetComponent<SpriteRenderer>().color = projectileColours[currentColour];
 
-            if (attackTimer > 0f)
+            currentColour++;
+
+            if (currentColour == projectileColours.Count)
             {
-                attackTimer -= Time.deltaTime;
+                currentColour = 0;
             }
         }
+
+        attackTimer = attackDelay;
+        currentEnergy -= projectileCost;
     }
 }

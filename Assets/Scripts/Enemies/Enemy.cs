@@ -9,7 +9,8 @@ public abstract class Enemy : MonoBehaviour
         Default,
         Attacking,
         Scared,
-        Stunned
+        Stunned,
+        Defeated
     }
 
     protected enum FearLevel
@@ -23,9 +24,11 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     protected bool patrol = false;
     protected bool trapped = false;
+    protected string currentAnimation;
 
     protected Rigidbody2D rb = null;
     protected BoxCollider2D activeCollider = null;
+    protected Animator animator = null;
 
     protected Strawberry strawberry = null;
     [SerializeField]
@@ -68,16 +71,31 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     protected float immunityDuration = 1f;
     protected float immunityTimer = 0f;
+    [SerializeField]
+    protected float lethalHitRepelStrength = 2f;
+
+    [SerializeField]
+    protected int score = 100;
+    protected ScoreManager scoreManager = null;
 
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         activeCollider = GetComponent<BoxCollider2D>();
+        animator = GetComponent<Animator>();
 
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
 
         strawberry = GameManager.Instance.GetStrawberryInstance();
+    }
+
+    void OnBecameInvisible()
+    {
+        if (state == State.Defeated)
+        {
+            Destroy(gameObject);
+        }
     }
 
     #region Movement
@@ -318,6 +336,11 @@ public abstract class Enemy : MonoBehaviour
             if (health == 0)
             {
                 SetDefeated();
+
+                if (repelStrength < lethalHitRepelStrength)
+                {
+                    repelStrength = lethalHitRepelStrength;
+                }
             }
             else
             {
