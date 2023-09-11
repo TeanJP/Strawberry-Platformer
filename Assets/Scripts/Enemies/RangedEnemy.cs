@@ -217,6 +217,8 @@ public class RangedEnemy : Enemy
     {
         state = State.Defeated;
         activeCollider.enabled = false;
+
+        gameManager.GetScoreManager().AddScore(score);
     }
 
     private void ApplyAnimation(bool grounded)

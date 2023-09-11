@@ -199,4 +199,6 @@ MonoBehaviour:
   maxSpeed: 32
   acceleration: 12
   targetLeniency: 0.02
+  score: 0
   lifeSpanDuration: 8
+  groundedDrag: 3

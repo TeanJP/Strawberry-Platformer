@@ -20,6 +20,9 @@ public class Heart : MonoBehaviour
     [SerializeField]
     private float targetLeniency = 0.02f;
 
+    [SerializeField]
+    private int score = 50;
+
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -48,7 +51,7 @@ public class Heart : MonoBehaviour
 
             if (!stunned)
             {
-                strawberry.AddHeart();
+                strawberry.AddHeart(score);
                 Destroy(gameObject);
             }
         }

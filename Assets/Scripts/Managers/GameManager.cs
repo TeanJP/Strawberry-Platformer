@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
     {
         Default,
         Escape,
-        GameOver
+        GameOver,
+        Paused
     }
 
     private GameState gameState = GameState.Default;
@@ -28,6 +29,7 @@ public class GameManager : MonoBehaviour
     private GameObject strawberry = null;
     private Strawberry strawberryInstance = null;
 
+    private ScoreManager scoreManager = null;
     private CheckpointManager checkpointManager = null;
     [SerializeField]
     private CameraBehaviour cameraBehaviour = null;
@@ -35,6 +37,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float levelReloadDelay = 3f;
     private float levelReloadTimer = 0f;
+
+    [SerializeField]
+    private GameObject lecheEnergyDisplay = null;
 
     void Awake()
     {
@@ -46,6 +51,8 @@ public class GameManager : MonoBehaviour
         {
             gameManagerInstance = this;
         }
+
+        scoreManager = GetComponent<ScoreManager>();
 
         checkpointManager = GetComponent<CheckpointManager>();
         checkpointManager.LoadCurrentCheckpoint();
@@ -120,5 +127,15 @@ public class GameManager : MonoBehaviour
         levelReloadTimer = levelReloadDelay;
 
         cameraBehaviour.enabled = false;
+    }
+
+    public ScoreManager GetScoreManager()
+    {
+        return scoreManager;
+    }
+
+    public GameObject GetLecheEnergyDisplay()
+    {
+        return lecheEnergyDisplay;
     }
 }

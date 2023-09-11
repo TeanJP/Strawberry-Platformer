@@ -96,6 +96,11 @@ public class Strawberry : MonoBehaviour
     private Animator animator = null;
     #endregion
 
+    #region Managers
+    private GameManager gameManager = null;
+    private ScoreManager scoreManager = null;
+    #endregion
+
     #region Inputs
     private float horizontalInput = 0f;
     private bool releasedJumpInput = false;
@@ -251,6 +256,9 @@ public class Strawberry : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+
+        gameManager = GameManager.Instance;
+        scoreManager = gameManager.GetScoreManager();
 
         fullColliderHeight = fullCollider.bounds.extents.y * 2f;
 
@@ -1628,9 +1636,14 @@ public class Strawberry : MonoBehaviour
     }
 
     #region Hearts
-    public void AddHeart()
+    public void AddHeart(int score)
     {
-        hearts = Mathf.Min(hearts++, maxHearts);
+        hearts = Mathf.Min(hearts + 1, maxHearts);
+
+        if (score > 0)
+        {
+            scoreManager.AddScore(score);
+        }
     }
 
     private void ActivateHearts()

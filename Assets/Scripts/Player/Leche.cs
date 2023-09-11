@@ -1,12 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Leche : MonoBehaviour
 {
     [SerializeField]
     private Strawberry strawberry = null;
 
+    #region Components
+    private SpriteRenderer spriteRenderer = null;
+    private Animator animator = null;
+    #endregion
+
+    #region Attack Values
     [SerializeField]
     private GameObject projectile = null;
     [SerializeField]
@@ -27,21 +34,14 @@ public class Leche : MonoBehaviour
 
     [SerializeField]
     private Vector2 projectileOffset = new Vector2(0.25f, 0f);
+    #endregion
 
+    #region Obstacle Detection
     [SerializeField]
     private LayerMask platformMask;
-    [SerializeField]
-    private Vector2 maxOffset = new Vector2(1.25f, 0f);
-    private Vector2 targetOffset;
-    private Vector2 currentOffset;
-    [SerializeField]
-    private float movementSpeed = 2f;
-
+    
     [SerializeField]
     private float halfColliderOffset = -0.25f;
-
-    private SpriteRenderer spriteRenderer = null;
-    private Animator animator = null;
 
     private Vector2 halfDimensions;
     private float raycastLength;
@@ -50,6 +50,22 @@ public class Leche : MonoBehaviour
     private Vector2 raycastOffset = new Vector2(0f, 0.18f);
     [SerializeField]
     private float raycastSpacing = 1f;
+    #endregion
+
+    #region Movement
+    [SerializeField]
+    private Vector2 maxOffset = new Vector2(1.25f, 0f);
+    private Vector2 targetOffset;
+    private Vector2 currentOffset;
+    [SerializeField]
+    private float movementSpeed = 2f;
+    #endregion
+
+    private GameObject energyDisplay = null;
+    private RectTransform energyDisplayTransform = null;
+    private Image energyBar = null;
+    [SerializeField]
+    private Vector2 energyDisplayOffset = new Vector2(0f, 0.078f);
 
     void Start()
     {
@@ -71,6 +87,13 @@ public class Leche : MonoBehaviour
         }
 
         currentEnergy = maxEnergy;
+
+        energyDisplay = GameManager.Instance.GetLecheEnergyDisplay();
+        energyDisplayTransform = energyDisplay.GetComponent<RectTransform>();
+        energyBar = energyDisplay.transform.GetChild(1).GetComponent<Image>();
+
+        energyDisplay.SetActive(false);
+        UpdateEnergyDisplay();
     }
 
     void LateUpdate()
@@ -97,8 +120,19 @@ public class Leche : MonoBehaviour
                 if (currentEnergy < maxEnergy)
                 {
                     currentEnergy = Mathf.Min(currentEnergy + Time.deltaTime * energyRechargeRate, maxEnergy);
+                    UpdateEnergyDisplay();
+
+                    if (energyDisplay.activeInHierarchy && currentEnergy == maxEnergy)
+                    {
+                        energyDisplay.SetActive(false);
+                    }
                 }
             }
+        }
+
+        if (energyDisplay.activeInHierarchy)
+        {
+            energyDisplayTransform.position = Camera.main.WorldToScreenPoint(transform.position) + (Vector3)(energyDisplayOffset * new Vector2(Screen.width, Screen.height));
         }
     }
 
@@ -191,5 +225,17 @@ public class Leche : MonoBehaviour
 
         attackTimer = attackDelay;
         currentEnergy -= projectileCost;
+
+        if (!energyDisplay.activeInHierarchy)
+        {
+            energyDisplay.SetActive(true);
+        }
+
+        UpdateEnergyDisplay();
+    }
+
+    private void UpdateEnergyDisplay()
+    {
+        energyBar.fillAmount = Mathf.Max(currentEnergy / maxEnergy, 0f);
     }
 }

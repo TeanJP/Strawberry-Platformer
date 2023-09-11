@@ -30,6 +30,8 @@ public abstract class Enemy : MonoBehaviour
     protected BoxCollider2D activeCollider = null;
     protected Animator animator = null;
 
+    protected GameManager gameManager = null;
+
     protected Strawberry strawberry = null;
     [SerializeField]
     protected float scaredDistance = 3f;
@@ -76,10 +78,11 @@ public abstract class Enemy : MonoBehaviour
 
     [SerializeField]
     protected int score = 100;
-    protected ScoreManager scoreManager = null;
 
     protected virtual void Start()
     {
+        gameManager = GameManager.Instance;
+
         rb = GetComponent<Rigidbody2D>();
         activeCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
@@ -87,7 +90,7 @@ public abstract class Enemy : MonoBehaviour
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
 
-        strawberry = GameManager.Instance.GetStrawberryInstance();
+        strawberry = gameManager.GetStrawberryInstance();
     }
 
     void OnBecameInvisible()
