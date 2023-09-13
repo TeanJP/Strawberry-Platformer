@@ -31,6 +31,10 @@ public class CameraBehaviour : MonoBehaviour
 
     private Vector3 cameraOffest = new Vector3(0f, 0f, -10f);
 
+    private bool playerOffscreen = false;
+    private float offscreenAllowance = 3f;
+    private float offscreenTimer;
+
     void Start()
     {
         strawberry = GameManager.Instance.GetStrawberryInstance();

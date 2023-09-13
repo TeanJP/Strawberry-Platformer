@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Strawberry : MonoBehaviour
 {
@@ -251,6 +253,11 @@ public class Strawberry : MonoBehaviour
     private float minimumRepelStrength = 1f;
     #endregion
 
+    #region HUD Elements
+    private TextMeshProUGUI heartsCounter = null;
+    private Image heartsLevel = null;
+    #endregion
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -273,6 +280,12 @@ public class Strawberry : MonoBehaviour
         wallJumpDirection.Normalize();
         superJumpCancelDirection.Normalize();
         collisionRepelDirection.Normalize();
+
+        Transform heartsDisplay = gameManager.GetStrawberryHeartsDisplay().transform;
+        heartsCounter = heartsDisplay.GetChild(1).GetComponent<TextMeshProUGUI>();
+        heartsLevel = heartsDisplay.GetChild(2).GetChild(1).GetComponent<Image>();
+
+        UpdateHeartsDisplay();
     }
 
     void Update()
@@ -339,7 +352,6 @@ public class Strawberry : MonoBehaviour
                 else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall && !(breakable && horizontalAttack))
                 {
                     applyStun = true;
-                    SwapActiveCollider();
                 }
                 else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling && !(breakable && verticalAttack))
                 {
@@ -1431,6 +1443,8 @@ public class Strawberry : MonoBehaviour
             }
 
             RepelPlayer(repelDirection, repelStrength);
+
+            UpdateHeartsDisplay();
         }
     }
 
@@ -1644,6 +1658,8 @@ public class Strawberry : MonoBehaviour
         {
             scoreManager.AddScore(score);
         }
+
+        UpdateHeartsDisplay();
     }
 
     private void ActivateHearts()
@@ -1680,6 +1696,12 @@ public class Strawberry : MonoBehaviour
 
             dropDirection = rotation * dropDirection;
         }      
+    }
+
+    private void UpdateHeartsDisplay()
+    {
+        heartsCounter.text = hearts.ToString();
+        heartsLevel.fillAmount = (float)hearts / (float)maxHearts;
     }
     #endregion
 }

@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject lecheEnergyDisplay = null;
+    [SerializeField]
+    private GameObject strawberryHeartsDisplay = null;
 
     void Awake()
     {
@@ -137,5 +139,10 @@ public class GameManager : MonoBehaviour
     public GameObject GetLecheEnergyDisplay()
     {
         return lecheEnergyDisplay;
+    }
+
+    public GameObject GetStrawberryHeartsDisplay()
+    {
+        return strawberryHeartsDisplay;
     }
 }
