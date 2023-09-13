@@ -617,6 +617,11 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.ChargingSuperJump:
+                        if (GetFacingIncorrectDirection())
+                        {
+                            FlipPlayerDirection();
+                        }
+
                         if (!upInput)
                         {
                             runState = RunState.SuperJumping;
@@ -1471,7 +1476,7 @@ public class Strawberry : MonoBehaviour
         rb.velocity = repelDirection * repelStrength;
     }
 
-    private void SetDefeated()
+    public void SetDefeated()
     {
         movementState = MovementState.Defeated;
         
@@ -1702,6 +1707,59 @@ public class Strawberry : MonoBehaviour
     {
         heartsCounter.text = hearts.ToString();
         heartsLevel.fillAmount = (float)hearts / (float)maxHearts;
+    }
+    #endregion
+
+    #region Offscreen Checks
+    public bool GetLyingDown()
+    {
+        bool lyingDown = false;
+
+        switch (movementState)
+        {
+            case MovementState.Running:
+                switch (runState)
+                {
+                    case RunState.Diving:
+                        lyingDown = true;
+                    break;
+                }
+                break;
+            case MovementState.Crawling:
+                    lyingDown = true;
+                break;
+            case MovementState.BellyFlopping:
+                    lyingDown = true;
+                break;
+            case MovementState.Stunned:
+                if (halfCollider.enabled)
+                {
+                    lyingDown = true;
+                }
+                break;
+        }
+
+        return lyingDown;
+    }
+
+    public Vector2 GetColliderBoundsMax()
+    {
+        return activeCollider.bounds.max;
+    }   
+    
+    public Vector2 GetColliderBoundsMin()
+    {
+        return activeCollider.bounds.min;
+    }
+
+    public Vector2 GetSpriteRendererCentre()
+    {
+        return spriteRenderer.bounds.center;
+    }
+
+    public float GetSpriteRendererWidth()
+    {
+        return spriteRenderer.bounds.size.x;
     }
     #endregion
 }

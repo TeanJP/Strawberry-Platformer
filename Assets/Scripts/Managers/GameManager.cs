@@ -125,9 +125,9 @@ public class GameManager : MonoBehaviour
     public void SetGameOver()
     {
         gameState = GameState.GameOver;
-
+        
         levelReloadTimer = levelReloadDelay;
-
+        
         cameraBehaviour.enabled = false;
     }
 

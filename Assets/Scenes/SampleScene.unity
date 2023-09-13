@@ -549,6 +549,8 @@ MonoBehaviour:
     right: 35
     top: 20
     bottom: -20
+  offscreenAllowance: 3
+  offscreenLeniency: 0.8
 --- !u!1 &539486382
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,8 +1251,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 998890849}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13, y: 2, z: 0}
-  m_LocalScale: {x: 16, y: 1, z: 1}
+  m_LocalPosition: {x: 15, y: 2, z: 0}
+  m_LocalScale: {x: 20, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1988,7 +1990,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strawberry: {fileID: 6151032129827649289, guid: 19aa797db8c8c5b40b0085fe5bcc35b1, type: 3}
   cameraBehaviour: {fileID: 519420033}
-  levelReloadDelay: 3
+  levelReloadDelay: 2
   lecheEnergyDisplay: {fileID: 441993906}
   strawberryHeartsDisplay: {fileID: 97539749}
 --- !u!4 &1596736252
@@ -2293,7 +2295,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1757413748}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 14, y: 4, z: 0}
+  m_LocalPosition: {x: -12, y: -2, z: 0}
   m_LocalScale: {x: 4, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
