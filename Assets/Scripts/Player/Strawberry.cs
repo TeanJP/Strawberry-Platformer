@@ -42,6 +42,12 @@ public class Strawberry : MonoBehaviour
         Horizontal,
         Vertical
     }
+
+    private enum VerticalDirection
+    {
+        Above,
+        Below
+    }
     #endregion
 
     #region States
@@ -49,8 +55,6 @@ public class Strawberry : MonoBehaviour
     private RunState runState = RunState.Default;
 
     private bool grounded = false;
-    private bool horizontalAttack = false;
-    private bool verticalAttack = false;
 
     private bool movementApplied = false;
 
@@ -290,7 +294,7 @@ public class Strawberry : MonoBehaviour
 
     void Update()
     {
-        grounded = GetGrounded();
+        grounded = GetVerticalCollision(platformMask, VerticalDirection.Below);
         
         if (grounded)
         {
@@ -300,10 +304,12 @@ public class Strawberry : MonoBehaviour
         
         bool hittingWall = GetHittingWall(platformMask);
         bool hittingNonBreakableWall = GetHittingWall(nonBreakableWallMask);
-        bool hittingCeiling = GetHittingCeiling();
+        bool hittingCeiling = GetVerticalCollision(platformMask, VerticalDirection.Above);
+        bool hittingNonBreakableCeiling = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Above);
+        bool hittingNonBreakableFloor = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Below);
 
         GetInputs();
-        ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling);
+        ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling, hittingNonBreakableCeiling, hittingNonBreakableFloor);
         Move(grounded);
         Attack();
         DecrementTimers(Time.deltaTime);
@@ -312,65 +318,6 @@ public class Strawberry : MonoBehaviour
         if (movementState != MovementState.Stunned)
         {
             ActivateHearts();
-        }
-    }
-
-    void OnCollisionEnter2D(Collision2D other)
-    {
-        bool platform = other.gameObject.CompareTag("Platform");
-        bool breakable = other.gameObject.CompareTag("Breakable");
-
-        if (platform || breakable)
-        {
-            bool applyStun = false, isWall = false, isFloor = false, isCeiling = false;
-
-            ContactPoint2D[] contacts = new ContactPoint2D[other.contactCount];
-            other.GetContacts(contacts);
-
-            for (int i = 0; i < contacts.Length; i++)
-            {
-                if (contacts[i].normal.x == GetPlayerDirection() * -1f)
-                {
-                    isWall = true;
-                }
-                else if (contacts[i].normal.y == 1f)
-                {
-                    isFloor = true;
-                }
-                else if (contacts[i].normal.y == -1f)
-                {
-                    isCeiling = true;
-                }
-            }
-
-            if (movementState == MovementState.Running)
-            {
-                if (((runState == RunState.Default && grounded) || runState == RunState.Stopping) && isWall && !(breakable && horizontalAttack))
-                {
-                    applyStun = true;
-                }
-                else if ((runState == RunState.Rolling || runState == RunState.Diving) && isWall && !(breakable && horizontalAttack))
-                {
-                    applyStun = true;
-                }
-                else if ((runState == RunState.WallRunning || runState == RunState.SuperJumping) && isCeiling && !(breakable && verticalAttack))
-                {
-                    movementState = MovementState.Default;
-                    runState = RunState.Default;
-                    rb.velocity = Vector2.zero;
-                }
-            }
-            else if (movementState == MovementState.BellyFlopping && isFloor && !(breakable && verticalAttack))
-            {
-                flopRecoveryTimer = flopRecoveryDuration;
-                movementApplied = true;
-            }
-
-            if (applyStun)
-            {
-                ApplyStun(StunType.Collision);
-                RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
-            }
         }
     }
 
@@ -418,7 +365,7 @@ public class Strawberry : MonoBehaviour
         }
     }
 
-    private void ApplyInputs(bool grounded, bool hittingWall, bool hittingNonBreakableWall, bool hittingCeiling)
+    private void ApplyInputs(bool grounded, bool hittingWall, bool hittingNonBreakableWall, bool hittingCeiling, bool hittingNonBreakableCeiling, bool hittingNonBreakableFloor)
     {
         switch (movementState)
         {
@@ -452,7 +399,12 @@ public class Strawberry : MonoBehaviour
                 switch (runState)
                 {
                     case RunState.Default:
-                        if (!runInput && boostTimer <= 0f)
+                        if (hittingNonBreakableWall && grounded)
+                        {
+                            ApplyStun(StunType.Collision);
+                            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+                        }
+                        else if (!runInput && boostTimer <= 0f && grounded)
                         {
                             runState = RunState.Stopping;
                         }
@@ -494,7 +446,12 @@ public class Strawberry : MonoBehaviour
                         }                    
                         break;
                     case RunState.Rolling:
-                        if (!downInput && !hittingCeiling)
+                        if (hittingNonBreakableWall)
+                        {
+                            ApplyStun(StunType.Collision);
+                            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+                        }
+                        else if (!downInput && !hittingCeiling)
                         {
                             if (runInput)
                             {
@@ -513,8 +470,21 @@ public class Strawberry : MonoBehaviour
                             boostTimer = 0f;
                         }
                         break;
+                    case RunState.Stopping:
+                        if (hittingNonBreakableWall)
+                        {
+                            ApplyStun(StunType.Collision);
+                            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+                        }
+                        break;
                     case RunState.WallRunning:
-                        if (runInput)
+                        if (hittingNonBreakableCeiling)
+                        {
+                            movementState = MovementState.Default;
+                            runState = RunState.Default;
+                            rb.velocity = Vector2.zero;
+                        }
+                        else if (runInput)
                         {
                             if (hittingWall)
                             {
@@ -573,7 +543,12 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.Diving:
-                        if (jumpTimer > 0f)
+                        if (hittingNonBreakableWall)
+                        {
+                            ApplyStun(StunType.Collision);
+                            RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
+                        }
+                        else if (jumpTimer > 0f)
                         {
                             movementState = MovementState.BellyFlopping;
                             runState = RunState.Default;
@@ -603,7 +578,13 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.SuperJumping:
-                        if (jumpTimer > 0f)
+                        if (hittingNonBreakableCeiling)
+                        {
+                            movementState = MovementState.Default;
+                            runState = RunState.Default;
+                            rb.velocity = Vector2.zero;
+                        }
+                        else if (jumpTimer > 0f)
                         {
                             if (GetFacingIncorrectDirection())
                             {
@@ -622,17 +603,26 @@ public class Strawberry : MonoBehaviour
                             FlipPlayerDirection();
                         }
 
-                        if (!upInput)
+                        if (!upInput && grounded)
                         {
                             runState = RunState.SuperJumping;
                             SwapActiveCollider();
                         }
                         break;
                     case RunState.CancellingSuperJump:
-                        if (hittingNonBreakableWall && runInput)
+                        if (hittingNonBreakableWall)
                         {
-                            runState = RunState.WallRunning;
-                            currentSpeed = wallRunSpeed;
+                            if (runInput)
+                            {
+                                runState = RunState.WallRunning;
+                                currentSpeed = wallRunSpeed;
+                            }
+                            else
+                            {
+                                movementState = MovementState.Default;
+                                runState = RunState.Default;
+                                rb.velocity = Vector2.zero;
+                            }
                         }
                         else if (grounded)
                         {
@@ -662,7 +652,12 @@ public class Strawberry : MonoBehaviour
                 }
                 break;
             case MovementState.BellyFlopping:
-                if (!grounded && flopRecoveryTimer > 0f)
+                if (hittingNonBreakableFloor && !movementApplied)
+                {
+                    flopRecoveryTimer = flopRecoveryDuration;
+                    movementApplied = true;
+                }
+                else if (!grounded && flopRecoveryTimer > 0f)
                 {
                     if (downInput)
                     {
@@ -1090,14 +1085,48 @@ public class Strawberry : MonoBehaviour
     }
 
     #region Collision Checks
-    private bool GetGrounded()
+    private bool GetHittingWall(LayerMask maskToUse)
     {
-        Vector2 raycastDirection = Vector2.down;
-        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
+        Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
+        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
+
+        for (int i = 0; i < horizontalRaycasts; i++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
+
+            Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.green);
+
+            if (hit.collider != null)
+            {
+                return true;
+            }
+
+            raycastOrigin.y += horizontalRaycastSpacing;
+        }
+
+        return false;
+    }    
+
+    private bool GetVerticalCollision(LayerMask maskToUse, VerticalDirection verticalDirection)
+    {
+        Vector2 raycastDirection, raycastOrigin;
+
+        if (verticalDirection == VerticalDirection.Above)
+        {
+            raycastDirection = Vector2.up;
+            raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y + fullColliderHeight);
+        }
+        else
+        {
+            raycastDirection = Vector2.down;
+            raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
+        }
 
         for (int i = 0; i < verticalRaycasts; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
+
+            Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.red);
 
             if (hit.collider != null)
             {
@@ -1110,15 +1139,28 @@ public class Strawberry : MonoBehaviour
         raycastOrigin.x = activeCollider.bounds.min.x - raycastLeniency;
 
         Vector2 wallCheckDirection = Vector2.left;
-        Vector2 wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
+        Vector2 wallCheckOrigin;
+
+        if (verticalDirection == VerticalDirection.Above)
+        {
+            wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.max.y);
+        }
+        else
+        {
+            wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
+        }
 
         for (int i = 0; i < 2; i++)
         {
-            RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, platformMask);
+            RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, maskToUse);
+
+            Debug.DrawRay(wallCheckOrigin, wallCheckDirection * raycastLength, Color.blue);
+
 
             if (wallHit.collider == null)
             {
-                RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
+                RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
+                Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.blue);
 
                 if (hit.collider != null)
                 {
@@ -1133,54 +1175,11 @@ public class Strawberry : MonoBehaviour
 
         return false;
     }
-
-    private bool GetHittingWall(LayerMask maskToUse)
-    {
-        Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
-        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
-
-        for (int i = 0; i < horizontalRaycasts; i++)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
-
-            if (hit.collider != null)
-            {
-                return true;
-            }
-
-            raycastOrigin.y += horizontalRaycastSpacing;
-        }
-
-        return false;
-    }
-        
-    private bool GetHittingCeiling()
-    {
-        Vector2 raycastDirection = Vector2.up;
-        Vector2 raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y + fullColliderHeight);
-
-        for (int i = 0; i < verticalRaycasts;  i++)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
-
-            if (hit.collider != null)
-            {
-                return true;
-            }
-
-            raycastOrigin.x += verticalRaycastSpacing;
-        }
-
-        return false;
-    }
     #endregion
 
     #region Attacks
     private void Attack()
     {
-        horizontalAttack = false;
-        verticalAttack = false;
-
         bool falling = rb.velocity.y <= 0f;
 
         switch (movementState)
@@ -1320,8 +1319,6 @@ public class Strawberry : MonoBehaviour
         Vector2 boxSize = new Vector2(attackCheckWidth, activeCollider.bounds.size.y - attackReduction * 2f);
 
         DealDamage(damage, repelStrength, breakBlocks, false, boxPosition, boxSize, AttackDirection.Horizontal);
-
-        horizontalAttack = true;
     }
     
     private void PerformDownwardsAttack(int damage, float repelStrength, bool breakBlocks, bool bounce)
@@ -1335,8 +1332,6 @@ public class Strawberry : MonoBehaviour
         {
             Bounce();
         }
-
-        verticalAttack = true;
     }
 
     private void PerformUpwardsAttack(int damage, float repelStrength, bool breakBlocks)
@@ -1345,8 +1340,6 @@ public class Strawberry : MonoBehaviour
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction * 2f, attackCheckWidth);
 
         DealDamage(damage, repelStrength, breakBlocks, false, boxPosition, boxSize, AttackDirection.Vertical);
-
-        verticalAttack = true;
     }
 
     private bool DealDamage(int damage, float repelStrength, bool breakBlocks, bool destroyProjectiles, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)

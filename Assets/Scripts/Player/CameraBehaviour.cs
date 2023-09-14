@@ -31,10 +31,6 @@ public class CameraBehaviour : MonoBehaviour
 
     private Vector3 cameraOffest = new Vector3(0f, 0f, -10f);
 
-    private bool strawberryOffscreen = false;
-    [SerializeField]
-    private float offscreenAllowance = 3f;
-    private float offscreenTimer;
     [SerializeField]
     private float offscreenLeniency = 0.8f;
 
@@ -52,17 +48,6 @@ public class CameraBehaviour : MonoBehaviour
         ClampCameraPosiion();
 
         CheckStrawberryOffscreen();
-        /*
-        if (strawberryOffscreen)
-        {
-            offscreenTimer = Mathf.Max(offscreenTimer - Time.deltaTime, 0f);
-
-            if (offscreenTimer == 0f)
-            {
-                strawberry.SetDefeated();
-            }
-        }
-        */
     }
 
     private void ClampCameraPosiion()
@@ -91,20 +76,7 @@ public class CameraBehaviour : MonoBehaviour
 
         if (strawberryMin.x > levelBoundaries.right || strawberryMin.y > levelBoundaries.top || strawberryMax.x < levelBoundaries.left || strawberryMax.y < levelBoundaries.bottom)
         {
-            /*
-            if (!strawberryOffscreen)
-            {
-                offscreenTimer = offscreenAllowance;
-            }
-            
-            strawberryOffscreen = true;
-            */
-
             strawberry.SetDefeated();
-        }
-        else
-        {
-            strawberryOffscreen = false;
         }
     }
 }
