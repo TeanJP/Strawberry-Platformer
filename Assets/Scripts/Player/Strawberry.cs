@@ -294,30 +294,34 @@ public class Strawberry : MonoBehaviour
 
     void Update()
     {
-        grounded = GetVerticalCollision(platformMask, VerticalDirection.Below);
-        
-        if (grounded)
-        {
-            groundedTimer = groundedBuffer;
-            bouncing = false;
-        }
-        
-        bool hittingWall = GetHittingWall(platformMask);
-        bool hittingNonBreakableWall = GetHittingWall(nonBreakableWallMask);
-        bool hittingCeiling = GetVerticalCollision(platformMask, VerticalDirection.Above);
-        bool hittingNonBreakableCeiling = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Above);
-        bool hittingNonBreakableFloor = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Below);
-
         GetInputs();
-        ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling, hittingNonBreakableCeiling, hittingNonBreakableFloor);
-        Move(grounded);
-        Attack();
-        DecrementTimers(Time.deltaTime);
-        ApplyAnimation();
 
-        if (movementState != MovementState.Stunned)
+        if (!gameManager.GetGamePaused())
         {
-            ActivateHearts();
+            grounded = GetVerticalCollision(platformMask, VerticalDirection.Below);
+
+            if (grounded)
+            {
+                groundedTimer = groundedBuffer;
+                bouncing = false;
+            }
+
+            bool hittingWall = GetHittingWall(platformMask);
+            bool hittingNonBreakableWall = GetHittingWall(nonBreakableWallMask);
+            bool hittingCeiling = GetVerticalCollision(platformMask, VerticalDirection.Above);
+            bool hittingNonBreakableCeiling = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Above);
+            bool hittingNonBreakableFloor = GetVerticalCollision(nonBreakableWallMask, VerticalDirection.Below);
+
+            ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling, hittingNonBreakableCeiling, hittingNonBreakableFloor);
+            Move(grounded);
+            Attack();
+            DecrementTimers(Time.deltaTime);
+            ApplyAnimation();
+
+            if (movementState != MovementState.Stunned)
+            {
+                ActivateHearts();
+            }
         }
     }
 
@@ -1094,8 +1098,6 @@ public class Strawberry : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
-            Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.green);
-
             if (hit.collider != null)
             {
                 return true;
@@ -1126,8 +1128,6 @@ public class Strawberry : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
-            Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.red);
-
             if (hit.collider != null)
             {
                 return true;
@@ -1154,13 +1154,9 @@ public class Strawberry : MonoBehaviour
         {
             RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, maskToUse);
 
-            Debug.DrawRay(wallCheckOrigin, wallCheckDirection * raycastLength, Color.blue);
-
-
             if (wallHit.collider == null)
             {
                 RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
-                Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.blue);
 
                 if (hit.collider != null)
                 {

@@ -9,6 +9,13 @@ public class CheckpointManager : MonoBehaviour
 
     private int currentCheckpoint = 0;
 
+    private ScoreManager scoreManager = null;
+
+    void Start()
+    {
+        scoreManager = GetComponent<ScoreManager>();
+    }
+
     public void LoadCurrentCheckpoint()
     {
         if (PlayerPrefs.HasKey("Current Checkpoint"))
@@ -37,6 +44,13 @@ public class CheckpointManager : MonoBehaviour
             {
                 currentCheckpoint = checkpointIndex;
             }
+
+            scoreManager.SetCheckpointScore();
         }
+    }
+
+    public void ResetCurrentCheckpoint()
+    {
+        PlayerPrefs.SetInt("Current Checkpoint", 0);
     }
 }

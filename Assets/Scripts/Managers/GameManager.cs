@@ -9,11 +9,12 @@ public class GameManager : MonoBehaviour
     {
         Default,
         Escape,
-        GameOver,
-        Paused
+        GameOver
     }
 
     private GameState gameState = GameState.Default;
+
+    private bool gamePaused = false;
 
     private static GameManager gameManagerInstance;
 
@@ -42,9 +43,12 @@ public class GameManager : MonoBehaviour
     private GameObject lecheEnergyDisplay = null;
     [SerializeField]
     private GameObject strawberryHeartsDisplay = null;
+    [SerializeField]
+    private GameObject pauseScreen = null;
+    private PauseMenuManager pauseMenuManager = null;
 
     void Awake()
-    {
+    {      
         if (gameManagerInstance != null && gameManagerInstance != this)
         {
             Destroy(gameObject);
@@ -61,10 +65,31 @@ public class GameManager : MonoBehaviour
 
         Vector2 spawnPosition = checkpointManager.GetCurrentCheckpointPosition();
         strawberryInstance = SpawnPlayer(spawnPosition);
+
+        pauseMenuManager = GetComponent<PauseMenuManager>();
+        pauseScreen.SetActive(gamePaused);
+
+        Time.timeScale = 1f;
     }
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gamePaused = !gamePaused;
+            pauseScreen.SetActive(gamePaused);
+
+            if (gamePaused)
+            {
+                pauseMenuManager.ResetCurrentScreen();
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                Time.timeScale = 1f;
+            }
+        }
+
         switch (gameState)
         {
             case GameState.Default:
@@ -80,6 +105,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
+                    scoreManager.SaveCheckpointScore();
                     checkpointManager.SaveCurrentCheckpoint();
                     SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                 }
@@ -144,5 +170,20 @@ public class GameManager : MonoBehaviour
     public GameObject GetStrawberryHeartsDisplay()
     {
         return strawberryHeartsDisplay;
+    }
+
+    public bool GetGamePaused()
+    {
+        return gamePaused;
+    }
+
+    public void ResumeGame()
+    {
+        if (gamePaused)
+        {
+            gamePaused = false;
+            pauseScreen.SetActive(gamePaused);
+            Time.timeScale = 1f;
+        }
     }
 }

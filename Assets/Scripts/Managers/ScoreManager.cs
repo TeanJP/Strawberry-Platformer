@@ -16,6 +16,8 @@ public class ScoreManager : MonoBehaviour
 
     private int totalScore = 0;
 
+    private int checkpointScore = 0;
+
     private int comboCount = 0;
     private int comboScore = 0;
 
@@ -29,6 +31,11 @@ public class ScoreManager : MonoBehaviour
 
     void Start()
     {
+        if (PlayerPrefs.HasKey("Checkpoint Score"))
+        {
+            totalScore = PlayerPrefs.GetInt("Checkpoint Score");
+        }
+
         UpdateScoreText();
 
         comboTimer = comboDecayTime;
@@ -96,5 +103,20 @@ public class ScoreManager : MonoBehaviour
     {
         comboCountText.text = "x" + comboCount;
         comboScoreText.text = comboScore + " x " + comboMultiplier;
+    }
+
+    public void SetCheckpointScore()
+    {
+        checkpointScore = totalScore + Mathf.RoundToInt(comboScore * comboMultiplier);
+    }
+
+    public void ResetCheckpointScore()
+    {
+        PlayerPrefs.SetInt("Checkpoint Score", 0);
+    }
+
+    public void SaveCheckpointScore()
+    {
+        PlayerPrefs.SetInt("Checkpoint Score", checkpointScore);
     }
 }

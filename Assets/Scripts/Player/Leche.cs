@@ -67,8 +67,12 @@ public class Leche : MonoBehaviour
     [SerializeField]
     private Vector2 energyDisplayOffset = new Vector2(0f, 0.078f);
 
+    private GameManager gameManager = null;
+
     void Start()
     {
+        gameManager = GameManager.Instance;
+
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();        
         animator = gameObject.GetComponent<Animator>();
 
@@ -98,41 +102,44 @@ public class Leche : MonoBehaviour
 
     void LateUpdate()
     {
-        UpdateDirection();
-        UpdateOffset();
-        Move(Time.deltaTime);
-
-        bool playerStunned = strawberry.GetStunned();
-
-        if (!playerStunned)
+        if (!gameManager.GetGamePaused())
         {
-            if (Input.GetKey(KeyCode.C) && attackTimer <= 0f && currentEnergy >= projectileCost)
+            UpdateDirection();
+            UpdateOffset();
+            Move(Time.deltaTime);
+
+            bool playerStunned = strawberry.GetStunned();
+
+            if (!playerStunned)
             {
-                Attack();
-            }
-            else 
-            {
-                if (attackTimer > 0f)
+                if (Input.GetKey(KeyCode.C) && attackTimer <= 0f && currentEnergy >= projectileCost)
                 {
-                    attackTimer -= Time.deltaTime;
+                    Attack();
                 }
-
-                if (currentEnergy < maxEnergy)
+                else
                 {
-                    currentEnergy = Mathf.Min(currentEnergy + Time.deltaTime * energyRechargeRate, maxEnergy);
-                    UpdateEnergyDisplay();
-
-                    if (energyDisplay.activeInHierarchy && currentEnergy == maxEnergy)
+                    if (attackTimer > 0f)
                     {
-                        energyDisplay.SetActive(false);
+                        attackTimer -= Time.deltaTime;
+                    }
+
+                    if (currentEnergy < maxEnergy)
+                    {
+                        currentEnergy = Mathf.Min(currentEnergy + Time.deltaTime * energyRechargeRate, maxEnergy);
+                        UpdateEnergyDisplay();
+
+                        if (energyDisplay.activeInHierarchy && currentEnergy == maxEnergy)
+                        {
+                            energyDisplay.SetActive(false);
+                        }
                     }
                 }
             }
-        }
 
-        if (energyDisplay.activeInHierarchy)
-        {
-            energyDisplayTransform.position = Camera.main.WorldToScreenPoint(transform.position) + (Vector3)(energyDisplayOffset * new Vector2(Screen.width, Screen.height));
+            if (energyDisplay.activeInHierarchy)
+            {
+                energyDisplayTransform.position = Camera.main.WorldToScreenPoint(transform.position) + (Vector3)(energyDisplayOffset * new Vector2(Screen.width, Screen.height));
+            }
         }
     }
 
