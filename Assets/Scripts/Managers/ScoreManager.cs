@@ -34,6 +34,7 @@ public class ScoreManager : MonoBehaviour
         if (PlayerPrefs.HasKey("Checkpoint Score"))
         {
             totalScore = PlayerPrefs.GetInt("Checkpoint Score");
+            checkpointScore = totalScore;
         }
 
         UpdateScoreText();

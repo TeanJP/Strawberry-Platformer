@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 { 
@@ -47,6 +48,12 @@ public class GameManager : MonoBehaviour
     private GameObject pauseScreen = null;
     private PauseMenuManager pauseMenuManager = null;
 
+    [SerializeField]
+    private TextMeshProUGUI escapeTimerText = null;
+    [SerializeField]
+    private float escapeTimeLimit = 30f;
+    private float escapeTimer;
+
     void Awake()
     {      
         if (gameManagerInstance != null && gameManagerInstance != this)
@@ -68,6 +75,8 @@ public class GameManager : MonoBehaviour
 
         pauseMenuManager = GetComponent<PauseMenuManager>();
         pauseScreen.SetActive(gamePaused);
+
+        escapeTimerText.gameObject.SetActive(false);
 
         Time.timeScale = 1f;
     }
@@ -96,7 +105,15 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.Escape:
-
+                if (escapeTimer > 0f)
+                {
+                    escapeTimer -= Time.deltaTime;
+                    UpdateTimer();
+                }
+                else
+                {
+                    strawberryInstance.SetDefeated();
+                }
                 break;
             case GameState.GameOver:
                 if (levelReloadTimer > 0f)
@@ -185,5 +202,64 @@ public class GameManager : MonoBehaviour
             pauseScreen.SetActive(gamePaused);
             Time.timeScale = 1f;
         }
+    }
+
+    public void StartEscape()
+    {
+        gameState = GameState.Escape;
+
+        escapeTimer = escapeTimeLimit;
+        escapeTimerText.gameObject.SetActive(true);
+        UpdateTimer();
+    }
+
+    private void UpdateTimer()
+    {
+        float escapeTimerCopy = escapeTimer;
+        escapeTimerCopy = Mathf.Max(escapeTimerCopy, 0f);
+
+        int minutesCount = 0;
+
+        while (escapeTimerCopy >= 60f)
+        {
+            escapeTimerCopy -= 60f;
+            minutesCount++;
+        }
+
+        string minutes = minutesCount.ToString();
+
+        if (minutesCount < 10)
+        {
+            minutes = "0" + minutes;
+        }
+
+        int secondsCount = Mathf.FloorToInt(escapeTimerCopy);
+        string seconds = secondsCount.ToString();
+
+        if (secondsCount < 10)
+        {
+            seconds = "0" + seconds;
+        }
+
+        escapeTimerCopy -= secondsCount;
+
+        int millisecondsCount = Mathf.CeilToInt(escapeTimerCopy * 100f);
+        string milliseconds = millisecondsCount.ToString();
+
+        if (millisecondsCount < 10)
+        {
+            milliseconds = "0" + milliseconds;
+        }
+        else if (millisecondsCount >= 100)
+        {
+            milliseconds = milliseconds.Substring(0, 2);
+        }
+
+        escapeTimerText.text = minutes + ":" + seconds + ":" + milliseconds;
+    }
+
+    public bool GetEscapeActive()
+    {
+        return gameState == GameState.Escape;
     }
 }

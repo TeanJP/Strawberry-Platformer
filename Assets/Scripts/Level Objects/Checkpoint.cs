@@ -4,20 +4,25 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    private GameManager gameManager = null;
     private CheckpointManager checkpointManager = null;
 
     void Start()
     {
-        checkpointManager = GameManager.Instance.GetCheckpointManager();
+        gameManager = GameManager.Instance;
+        checkpointManager = gameManager.GetCheckpointManager();
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        bool player = other.gameObject.CompareTag("Player");
-
-        if (player)
+        if (!gameManager.GetEscapeActive())
         {
-            checkpointManager.SetCurrentCheckpoint(this);
+            bool player = other.gameObject.CompareTag("Player");
+
+            if (player)
+            {
+                checkpointManager.SetCurrentCheckpoint(this);
+            }
         }
     }
 }
