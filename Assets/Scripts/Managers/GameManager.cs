@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour
     {
         Default,
         Escape,
-        GameOver
+        GameOver,
+        GameWon
     }
 
     private GameState gameState = GameState.Default;
@@ -54,6 +55,9 @@ public class GameManager : MonoBehaviour
     private float escapeTimeLimit = 30f;
     private float escapeTimer;
 
+    [SerializeField]
+    private LevelExit levelExit = null;
+
     void Awake()
     {      
         if (gameManagerInstance != null && gameManagerInstance != this)
@@ -83,7 +87,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && gameState != GameState.GameOver && gameState != GameState.GameWon)
         {
             gamePaused = !gamePaused;
             pauseScreen.SetActive(gamePaused);
@@ -108,7 +112,7 @@ public class GameManager : MonoBehaviour
                 if (escapeTimer > 0f)
                 {
                     escapeTimer -= Time.deltaTime;
-                    UpdateTimer();
+                    escapeTimerText.text = GetTimerText(escapeTimer);
                 }
                 else
                 {
@@ -123,9 +127,14 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     scoreManager.SaveCheckpointScore();
+                    scoreManager.IncrementDeathCount();
+                    scoreManager.SaveTimeInLevel();
                     checkpointManager.SaveCurrentCheckpoint();
                     SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                 }
+                break;
+            case GameState.GameWon:
+
                 break;
         }
     }
@@ -210,19 +219,20 @@ public class GameManager : MonoBehaviour
 
         escapeTimer = escapeTimeLimit;
         escapeTimerText.gameObject.SetActive(true);
-        UpdateTimer();
+        escapeTimerText.text = GetTimerText(escapeTimer);
+
+        levelExit.SetOpen();
     }
 
-    private void UpdateTimer()
+    private string GetTimerText(float timerValue)
     {
-        float escapeTimerCopy = escapeTimer;
-        escapeTimerCopy = Mathf.Max(escapeTimerCopy, 0f);
+        timerValue = Mathf.Max(timerValue, 0f);
 
         int minutesCount = 0;
 
-        while (escapeTimerCopy >= 60f)
+        while (timerValue >= 60f)
         {
-            escapeTimerCopy -= 60f;
+            timerValue -= 60f;
             minutesCount++;
         }
 
@@ -233,7 +243,7 @@ public class GameManager : MonoBehaviour
             minutes = "0" + minutes;
         }
 
-        int secondsCount = Mathf.FloorToInt(escapeTimerCopy);
+        int secondsCount = Mathf.FloorToInt(timerValue);
         string seconds = secondsCount.ToString();
 
         if (secondsCount < 10)
@@ -241,9 +251,9 @@ public class GameManager : MonoBehaviour
             seconds = "0" + seconds;
         }
 
-        escapeTimerCopy -= secondsCount;
+        timerValue -= secondsCount;
 
-        int millisecondsCount = Mathf.CeilToInt(escapeTimerCopy * 100f);
+        int millisecondsCount = Mathf.CeilToInt(timerValue * 100f);
         string milliseconds = millisecondsCount.ToString();
 
         if (millisecondsCount < 10)
@@ -255,11 +265,24 @@ public class GameManager : MonoBehaviour
             milliseconds = milliseconds.Substring(0, 2);
         }
 
-        escapeTimerText.text = minutes + ":" + seconds + ":" + milliseconds;
+        return minutes + ":" + seconds + ":" + milliseconds;
     }
 
     public bool GetEscapeActive()
     {
         return gameState == GameState.Escape;
+    }
+
+    public void SetGameWon()
+    {
+        Debug.Log("GAME WON");
+        gameState = GameState.GameWon;
+
+        scoreManager.EndCombo();
+    }
+
+    public bool GetGameWon()
+    {
+        return gameState == GameState.GameWon;
     }
 }

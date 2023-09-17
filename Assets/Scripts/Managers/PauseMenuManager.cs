@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class PauseMenuManager : MenuManager
 {
@@ -21,14 +22,16 @@ public class PauseMenuManager : MenuManager
     public void LoadCheckpoint()
     {
         //Include penalties for loading checkpoint, void the no death bonus.
-        scoreManager.SaveCheckpointScore();
-        checkpointManager.SaveCurrentCheckpoint();
-        LoadScene(SceneManager.GetActiveScene().name);
+        GameManager gameManager = GameManager.Instance;
+        gameManager.ResumeGame();
+        gameManager.GetStrawberryInstance().SetDefeated();
     }
 
     public void RestartLevel()
     {
         scoreManager.ResetCheckpointScore();
+        scoreManager.ResetDeathCount();
+        scoreManager.ResetTimeInLevel();
         checkpointManager.ResetCurrentCheckpoint();
         LoadScene(SceneManager.GetActiveScene().name);
     }

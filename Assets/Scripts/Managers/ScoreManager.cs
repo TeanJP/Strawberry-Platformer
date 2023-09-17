@@ -29,8 +29,21 @@ public class ScoreManager : MonoBehaviour
     private float comboDecayTime = 4f;
     private float comboTimer;
 
+    private int deathCount = 0;
+    private float timeInLevel = 0f;
+
     void Start()
     {
+        if (PlayerPrefs.HasKey("Death Count"))
+        {
+            deathCount = PlayerPrefs.GetInt("Death Count");
+        }
+
+        if (PlayerPrefs.HasKey("Time in Level"))
+        {
+            timeInLevel = PlayerPrefs.GetFloat("Time in Level");
+        }
+
         if (PlayerPrefs.HasKey("Checkpoint Score"))
         {
             totalScore = PlayerPrefs.GetInt("Checkpoint Score");
@@ -51,6 +64,7 @@ public class ScoreManager : MonoBehaviour
     void Update()
     {
         DecrementComboTimer(Time.deltaTime);
+        timeInLevel += Time.deltaTime;
     }
 
     private void DecrementComboTimer(float deltaTime)
@@ -63,14 +77,7 @@ public class ScoreManager : MonoBehaviour
 
             if (comboTimer <= 0f)
             {
-                totalScore += Mathf.RoundToInt(comboScore * comboMultiplier);
-
-                UpdateScoreText();
-
-                comboCount = 0;
-                comboMultiplier = 1f;
-
-                comboDisplay.SetActive(false);
+                EndCombo();
             }
         }
     }
@@ -119,5 +126,48 @@ public class ScoreManager : MonoBehaviour
     public void SaveCheckpointScore()
     {
         PlayerPrefs.SetInt("Checkpoint Score", checkpointScore);
+    }
+
+    public void EndCombo()
+    {
+        totalScore += Mathf.RoundToInt(comboScore * comboMultiplier);
+
+        UpdateScoreText();
+
+        comboCount = 0;
+        comboMultiplier = 1f;
+
+        comboDisplay.SetActive(false);
+    }
+
+    public int GetDeathCount()
+    {
+        return deathCount;
+    }
+
+    public void IncrementDeathCount()
+    {
+        deathCount++;
+        PlayerPrefs.SetInt("Death Count", deathCount);
+    }
+
+    public void ResetDeathCount()
+    {
+        PlayerPrefs.SetInt("Death Count", 0);
+    }
+
+    public void SaveTimeInLevel()
+    {
+        PlayerPrefs.SetFloat("Time in Level", timeInLevel);
+    }
+
+    public float GetTimeInLevel()
+    {
+        return timeInLevel;
+    }
+
+    public void ResetTimeInLevel()
+    {
+        PlayerPrefs.SetFloat("Time in Level", 0f);
     }
 }

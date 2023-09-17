@@ -1751,4 +1751,9 @@ public class Strawberry : MonoBehaviour
         return spriteRenderer.bounds.size.x;
     }
     #endregion
+
+    public bool GetGrounded()
+    {
+        return grounded;
+    }
 }
