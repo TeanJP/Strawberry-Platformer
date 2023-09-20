@@ -95,6 +95,7 @@ public class GameManager : MonoBehaviour
             if (gamePaused)
             {
                 pauseMenuManager.ResetCurrentScreen();
+                pauseMenuManager.UpdateStatsDisplay();
                 Time.timeScale = 0f;
             }
             else
@@ -275,14 +276,29 @@ public class GameManager : MonoBehaviour
 
     public void SetGameWon()
     {
-        Debug.Log("GAME WON");
         gameState = GameState.GameWon;
 
         scoreManager.EndCombo();
+        scoreManager.OpenScoreScreen();
     }
 
     public bool GetGameWon()
     {
         return gameState == GameState.GameWon;
+    }
+
+    public float GetEscapeTimeLimit()
+    {
+        return escapeTimeLimit;
+    }
+
+    public float GetEscapeTimeRemaining()
+    {
+        return escapeTimer;
+    }
+
+    public string GetActiveSceneName()
+    {
+        return SceneManager.GetActiveScene().name;
     }
 }

@@ -20,6 +20,8 @@ public class MainMenuManager : MenuManager
     {
         PlayerPrefs.SetInt("Current Checkpoint", 0);
         PlayerPrefs.SetInt("Checkpoint Score", 0);
+        PlayerPrefs.SetInt("Death Count", 0);
+        PlayerPrefs.SetFloat("Time in Level", 0f);
         LoadScene(levelToLoad);
     }
 
