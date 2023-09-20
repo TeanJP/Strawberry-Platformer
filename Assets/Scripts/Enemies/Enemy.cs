@@ -27,6 +27,7 @@ public abstract class Enemy : MonoBehaviour
     protected string currentAnimation;
 
     protected Rigidbody2D rb = null;
+    protected SpriteRenderer spriteRenderer = null;
     protected BoxCollider2D activeCollider = null;
     protected Animator animator = null;
 
@@ -84,6 +85,7 @@ public abstract class Enemy : MonoBehaviour
         gameManager = GameManager.Instance;
 
         rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         activeCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
 
@@ -93,9 +95,9 @@ public abstract class Enemy : MonoBehaviour
         strawberry = gameManager.GetStrawberryInstance();
     }
 
-    void OnBecameInvisible()
+    protected virtual void Update()
     {
-        if (state == State.Defeated)
+        if (!spriteRenderer.isVisible && state == State.Defeated)
         {
             Destroy(gameObject);
         }

@@ -13,8 +13,10 @@ public class PeacefulEnemy : Enemy
         currentAnimation = "Default Enemy Idle";
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+
         bool grounded = GetGrounded();
 
         UpdateState();

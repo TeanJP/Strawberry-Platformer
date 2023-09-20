@@ -33,8 +33,10 @@ public class RangedEnemy : Enemy
         currentAnimation = "Cowboy Enemy Idle";
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+
         bool grounded = GetGrounded();
 
         UpdateState();

@@ -184,6 +184,7 @@ public class ScoreManager : MonoBehaviour
         UpdateScoreText();
 
         comboCount = 0;
+        comboScore = 0;
         comboMultiplier = 1f;
 
         comboDisplay.SetActive(false);

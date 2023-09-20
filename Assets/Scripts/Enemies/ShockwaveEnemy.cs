@@ -33,8 +33,10 @@ public class ShockwaveEnemy : Enemy
         currentAnimation = "Shockwave Enemy Idle";
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+
         bool grounded = GetGrounded();
 
         UpdateState();
