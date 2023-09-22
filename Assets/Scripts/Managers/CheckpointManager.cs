@@ -11,6 +11,9 @@ public class CheckpointManager : MonoBehaviour
 
     private ScoreManager scoreManager = null;
 
+    [SerializeField]
+    private float spawnOffset = 0.01f;
+
     void Start()
     {
         scoreManager = GetComponent<ScoreManager>();
@@ -21,6 +24,11 @@ public class CheckpointManager : MonoBehaviour
         if (PlayerPrefs.HasKey("Current Checkpoint"))
         {
             currentCheckpoint = PlayerPrefs.GetInt("Current Checkpoint");
+
+            if (currentCheckpoint < 0 || currentCheckpoint >= checkpoints.Count)
+            {
+                currentCheckpoint = 0;
+            }
         }
     }
 
@@ -31,7 +39,12 @@ public class CheckpointManager : MonoBehaviour
 
     public Vector2 GetCurrentCheckpointPosition()
     {
-        return checkpoints[currentCheckpoint].transform.position;
+        Checkpoint checkpoint = checkpoints[currentCheckpoint];
+
+        float x = checkpoint.transform.position.x;
+        float y = checkpoint.gameObject.GetComponent<SpriteRenderer>().bounds.min.y + spawnOffset;
+
+        return new Vector2(x, y);
     }
 
     public void SetCurrentCheckpoint(Checkpoint checkpoint)

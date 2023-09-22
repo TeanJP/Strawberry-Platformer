@@ -160,6 +160,7 @@ public class GameManager : MonoBehaviour
         GameObject createdPlayer = Instantiate(strawberry);
 
         float halfHeight = 0f;
+        float offset = 0f;
 
         BoxCollider2D[] colliders = createdPlayer.GetComponents<BoxCollider2D>();
 
@@ -168,13 +169,14 @@ public class GameManager : MonoBehaviour
             if (colliders[i].enabled)
             {
                 halfHeight = colliders[i].bounds.extents.y;
+                offset = colliders[i].offset.y;
                 break;
             }
         }
 
-        Vector2 offset = new Vector2(0f, halfHeight);
+        Vector2 spawnOffset = new Vector2(0f, halfHeight + offset * -1f);
 
-        createdPlayer.transform.position = spawnPosition + offset;
+        createdPlayer.transform.position = spawnPosition + spawnOffset;
         createdPlayer.transform.rotation = Quaternion.identity;
 
         return createdPlayer.GetComponent<Strawberry>();
