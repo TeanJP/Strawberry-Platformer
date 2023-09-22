@@ -58,6 +58,11 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private LevelExit levelExit = null;
 
+    [SerializeField]
+    private GameObject defaultToggleBlocks = null;
+    [SerializeField]
+    private GameObject escapeToggleBlocks = null;
+
     void Awake()
     {      
         if (gameManagerInstance != null && gameManagerInstance != this)
@@ -81,6 +86,16 @@ public class GameManager : MonoBehaviour
         pauseScreen.SetActive(gamePaused);
 
         escapeTimerText.gameObject.SetActive(false);
+
+        if (defaultToggleBlocks != null)
+        {
+            defaultToggleBlocks.SetActive(true);
+        }
+
+        if (escapeToggleBlocks != null)
+        {
+            escapeToggleBlocks.SetActive(false);
+        }
 
         Time.timeScale = 1f;
     }
@@ -223,6 +238,16 @@ public class GameManager : MonoBehaviour
         escapeTimerText.text = GetTimerText(escapeTimer);
 
         levelExit.SetOpen();
+
+        if (defaultToggleBlocks != null)
+        {
+            defaultToggleBlocks.SetActive(false);
+        }
+
+        if (escapeToggleBlocks != null)
+        {
+            escapeToggleBlocks.SetActive(true);
+        }
     }
 
     private string GetTimerText(float timerValue)

@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Tiles Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 15e29abd4e57be84f84232373eb11cd6, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: -1072097166, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 578077058, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -395813886, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 2145046766, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 1959451930, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -744273462, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -243694102, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -986873565, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -1086432831, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -433371574, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 470090316, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 366980653, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 1369618469, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -533157233, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -306107799, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -1528876454, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 342392453, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 1320625868, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 1150961358, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 1708474044, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 844007026, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -1296783622, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -322459942, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 753659618, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 378143250, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: -847978362, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  - {fileID: 449439153, guid: b3c26b77bc354a041b373abe1dd47259, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Dark Tiles_25
+  - Dark Tiles_24
+  - Dark Tiles_26
+  - Dark Tiles_21
+  - Dark Tiles_20
+  - Dark Tiles_23
+  - Dark Tiles_22
+  - Dark Tiles_5
+  - Dark Tiles_4
+  - Dark Tiles_7
+  - Dark Tiles_6
+  - Dark Tiles_1
+  - Dark Tiles_0
+  - Dark Tiles_3
+  - Dark Tiles_2
+  - Dark Tiles_9
+  - Dark Tiles_8
+  - Dark Tiles_18
+  - Dark Tiles_19
+  - Dark Tiles_14
+  - Dark Tiles_15
+  - Dark Tiles_16
+  - Dark Tiles_17
+  - Dark Tiles_10
+  - Dark Tiles_11
+  - Dark Tiles_12
+  - Dark Tiles_13
+  m_RenderDataMap: {}
+  m_Tag: Tiles Atlas
+  m_IsVariant: 0

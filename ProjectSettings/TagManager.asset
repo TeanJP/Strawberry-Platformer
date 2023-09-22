@@ -42,6 +42,30 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Platforms
+    uniqueID: 3216423033
+    locked: 0
+  - name: Level Objects
+    uniqueID: 1683095099
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Enemies
+    uniqueID: 157994099
+    locked: 0
+  - name: Player
+    uniqueID: 3613605433
+    locked: 0
+  - name: Companion
+    uniqueID: 3080052443
+    locked: 0
+  - name: Pick Ups
+    uniqueID: 858731139
+    locked: 0
+  - name: Speed Booster
+    uniqueID: 2126997437
+    locked: 0
+  - name: Projectiles
+    uniqueID: 385740731
     locked: 0

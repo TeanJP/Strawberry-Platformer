@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Strawberry Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 2
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 4
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: a109783d80a836a4282394ea362ef164, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 11a3cb9096ac0db42bf8c4078c7b859f, type: 3}
+  - {fileID: 21300000, guid: a3de8a0121765b64b823d9a3f5fce516, type: 3}
+  - {fileID: 21300000, guid: 395531d14746b184c9e994ef6f556c65, type: 3}
+  - {fileID: 21300000, guid: d07ca2b257b8a3748b793b83c1c12cff, type: 3}
+  - {fileID: 21300000, guid: 249a5023912a4e6428dcadc4e1586436, type: 3}
+  - {fileID: 21300000, guid: 67488843c0aec8545aa7a25d660fd10f, type: 3}
+  - {fileID: 21300000, guid: 522bc0a3326db0b449c97f817e1f9892, type: 3}
+  - {fileID: 21300000, guid: b0499d645d070164ba7edbbebfa57642, type: 3}
+  - {fileID: 21300000, guid: cac90284245b2814980243c6bb6ee922, type: 3}
+  - {fileID: 21300000, guid: b4b713b442df71a41bd43479324ff130, type: 3}
+  - {fileID: 21300000, guid: 3d227b2505935b44b941ec6e7c237d96, type: 3}
+  - {fileID: 21300000, guid: 3c384635b5ddfc74f932682b8c3c3dfb, type: 3}
+  - {fileID: 21300000, guid: 11ab2c95ab0fb3844b4393e492801086, type: 3}
+  - {fileID: 21300000, guid: 53d16d954b3ccfd47a6262749c2992b4, type: 3}
+  - {fileID: 21300000, guid: e85259d576ed767408021333664eded6, type: 3}
+  - {fileID: 21300000, guid: 59a200767df3ed7439e0cdf308219ad4, type: 3}
+  - {fileID: 21300000, guid: 9fad05e67d5c13f40b729e8643ae38fa, type: 3}
+  - {fileID: 21300000, guid: 19d1a048fc9d6d0449a1d001e824e8b7, type: 3}
+  - {fileID: 21300000, guid: bd8ed768642b24e4e94b45fa6f8c8102, type: 3}
+  - {fileID: 21300000, guid: 7d576e88528f0284294ac4efc6b6d1ee, type: 3}
+  - {fileID: 21300000, guid: 29365198648fd9644b1e7ee9ae9fdbaf, type: 3}
+  - {fileID: 21300000, guid: ed49a998f8438ca4fbe5ce2488e2f83d, type: 3}
+  - {fileID: 21300000, guid: 01874de942a411f4da0cb5164c952c9c, type: 3}
+  - {fileID: 21300000, guid: a2459c2a85b908748add196f84fa7285, type: 3}
+  - {fileID: 21300000, guid: 9f215ddaa1a2f5b4abccde4d4ba4fba2, type: 3}
+  - {fileID: 21300000, guid: 3a7cd72b57283d240a35c3a067c2bfd9, type: 3}
+  - {fileID: 21300000, guid: 1b98a98bc4937a844b4b8e72c96fd695, type: 3}
+  - {fileID: 21300000, guid: 2abfaa0dd3778004886d1805fdc82d5a, type: 3}
+  - {fileID: 21300000, guid: 295d998d4635bda4a8276711f3aa7d15, type: 3}
+  - {fileID: 21300000, guid: 65ab1dfd2e3bf9647ba8fe63b165334f, type: 3}
+  - {fileID: 21300000, guid: 6862656efbc472844a6f6c95a32436fa, type: 3}
+  - {fileID: 21300000, guid: 1be05c7e4a74d1e44b6b51a265ae18ac, type: 3}
+  - {fileID: 21300000, guid: bab7c2bf3732b5846a4e4a1a4b337cfc, type: 3}
+  - {fileID: 21300000, guid: ecabf6bf12024a349b67d24230a4c28a, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Strawberry Run Drift
+  - Strawberry Crawl Idle
+  - Strawberry Run Turn 1
+  - Strawberry Run 1
+  - Strawberry Wall Run 1
+  - Strawberry Jump 1
+  - Strawberry Roll 10
+  - Strawberry Roll 6
+  - Strawberry Dive 2
+  - Strawberry Idle
+  - Strawberry Flop
+  - Strawberry Super Jump Charge 1
+  - Strawberry Walk 1
+  - Strawberry Walk 2
+  - Strawberry Roll 9
+  - Strawberry Run Turn 2
+  - Strawberry Roll 5
+  - Strawberry Fall
+  - Strawberry Jump 2
+  - Strawberry Dive 1
+  - Strawberry Wall Run 2
+  - Strawberry Roll 7
+  - Strawberry Roll 8
+  - Strawberry Run Jump 2
+  - Strawberry Super Jump
+  - Strawberry Roll 3
+  - Strawberry Run 2
+  - Strawberry Run Jump 1
+  - Strawberry Super Jump Charge 2
+  - Strawberry Roll 2
+  - Strawberry Crawl 2
+  - Strawberry Roll 4
+  - Strawberry Crawl 1
+  - Strawberry Roll 1
+  m_RenderDataMap: {}
+  m_Tag: Strawberry Atlas
+  m_IsVariant: 0
