@@ -79,7 +79,6 @@ public class Strawberry : MonoBehaviour
     private float attackReduction = 0.02f;
     private float raycastLeniency = 0.02f;
     private float raycastLength = 0.02f;
-    private float fullColliderHeight;
     private int horizontalRaycasts = 3;
     private float horizontalRaycastSpacing;
     private int verticalRaycasts = 3;
@@ -270,8 +269,6 @@ public class Strawberry : MonoBehaviour
 
         gameManager = GameManager.Instance;
         scoreManager = gameManager.GetScoreManager();
-
-        fullColliderHeight = fullCollider.bounds.extents.y * 2f;
 
         activeCollider = fullCollider;
 
@@ -1116,7 +1113,7 @@ public class Strawberry : MonoBehaviour
         if (verticalDirection == VerticalDirection.Above)
         {
             raycastDirection = Vector2.up;
-            raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y + fullColliderHeight);
+            raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.max.y);
         }
         else
         {
@@ -1467,24 +1464,27 @@ public class Strawberry : MonoBehaviour
 
     public void SetDefeated()
     {
-        movementState = MovementState.Defeated;
-        
-        activeCollider.enabled = false;
-        
-        if (fullTrigger.enabled)
+        if (movementState != MovementState.Defeated)
         {
-            fullTrigger.enabled = false;
-        }
-        else
-        {
-            halfTrigger.enabled = false;
-        }
+            movementState = MovementState.Defeated;
 
-        GameObject leche = transform.GetChild(1).gameObject;
-        leche.GetComponent<Leche>().enabled = false;
-        leche.transform.parent = null;
+            activeCollider.enabled = false;
 
-        GameManager.Instance.SetGameOver();
+            if (fullTrigger.enabled)
+            {
+                fullTrigger.enabled = false;
+            }
+            else
+            {
+                halfTrigger.enabled = false;
+            }
+
+            GameObject leche = transform.GetChild(1).gameObject;
+            leche.GetComponent<Leche>().enabled = false;
+            leche.transform.parent = null;
+
+            GameManager.Instance.SetGameOver();
+        }
     }
     #endregion
 

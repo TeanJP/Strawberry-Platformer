@@ -14,7 +14,7 @@ public class DisappearingBlock : MonoBehaviour
     private State state = State.Default;
 
     private SpriteRenderer spriteRenderer = null;
-    private BoxCollider2D blockCollider = null;
+    private EdgeCollider2D blockCollider = null;
 
     [SerializeField]
     private LayerMask movingObjects;
@@ -30,9 +30,9 @@ public class DisappearingBlock : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        blockCollider = GetComponent<BoxCollider2D>();
+        blockCollider = GetComponent<EdgeCollider2D>();
 
-        blockDimensions = blockCollider.bounds.size;
+        blockDimensions = spriteRenderer.bounds.size;
     }
 
     void Update()

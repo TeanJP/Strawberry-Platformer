@@ -328,4 +328,9 @@ public class GameManager : MonoBehaviour
     {
         return SceneManager.GetActiveScene().name;
     }
+
+    public float GetLevelBoundary()
+    {
+        return cameraBehaviour.GetLevelBoundary();
+    }
 }

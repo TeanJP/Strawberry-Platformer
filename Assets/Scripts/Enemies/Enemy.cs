@@ -77,6 +77,8 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     protected float lethalHitRepelStrength = 2f;
 
+    protected float levelBoundary;
+
     [SerializeField]
     protected int score = 100;
 
@@ -93,10 +95,17 @@ public abstract class Enemy : MonoBehaviour
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
 
         strawberry = gameManager.GetStrawberryInstance();
+
+        levelBoundary = gameManager.GetLevelBoundary();
     }
 
     protected virtual void Update()
     {
+        if (spriteRenderer.bounds.max.y < levelBoundary)
+        {
+            SetDefeated();
+        }
+
         if (!spriteRenderer.isVisible && state == State.Defeated)
         {
             Destroy(gameObject);

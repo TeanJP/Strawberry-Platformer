@@ -79,4 +79,9 @@ public class CameraBehaviour : MonoBehaviour
             strawberry.SetDefeated();
         }
     }
+
+    public float GetLevelBoundary()
+    {
+        return levelBoundaries.bottom;
+    }
 }
