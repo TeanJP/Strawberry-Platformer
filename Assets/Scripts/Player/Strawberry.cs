@@ -83,6 +83,7 @@ public class Strawberry : MonoBehaviour
     private float horizontalRaycastSpacing;
     private int verticalRaycasts = 3;
     private float verticalRaycastSpacing;
+    private float colliderHeightDifference;
     #endregion
 
     #region Components
@@ -270,6 +271,10 @@ public class Strawberry : MonoBehaviour
         gameManager = GameManager.Instance;
         scoreManager = gameManager.GetScoreManager();
 
+        colliderHeightDifference = fullCollider.bounds.size.y - halfCollider.bounds.size.y;
+        
+        halfCollider.enabled = false;
+        
         activeCollider = fullCollider;
 
         Vector2 activeColliderDimensions = activeCollider.bounds.size;
@@ -604,7 +609,7 @@ public class Strawberry : MonoBehaviour
                             FlipPlayerDirection();
                         }
 
-                        if (!upInput && grounded)
+                        if (!upInput && grounded && !hittingCeiling)
                         {
                             runState = RunState.SuperJumping;
                             SwapActiveCollider();
@@ -1110,10 +1115,17 @@ public class Strawberry : MonoBehaviour
     {
         Vector2 raycastDirection, raycastOrigin;
 
+        float raycastLength = this.raycastLength;
+
         if (verticalDirection == VerticalDirection.Above)
         {
             raycastDirection = Vector2.up;
             raycastOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.max.y);
+
+            if (activeCollider == halfCollider)
+            {
+                raycastLength = colliderHeightDifference;
+            }
         }
         else
         {
@@ -1149,7 +1161,7 @@ public class Strawberry : MonoBehaviour
 
         for (int i = 0; i < 2; i++)
         {
-            RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, raycastLength, maskToUse);
+            RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, this.raycastLength, maskToUse);
 
             if (wallHit.collider == null)
             {

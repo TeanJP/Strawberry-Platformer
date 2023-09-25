@@ -111,7 +111,7 @@ public class LaunchedEnemy : EnemyProjectile
 
         activeCollider = GetComponent<BoxCollider2D>();
 
-        transform.Rotate(0f, 0f, Vector2.SignedAngle(direction * -1f, Vector2.up));
+        transform.Rotate(0f, 0f, Vector2.SignedAngle(direction * new Vector2(-1f, 1f), Vector2.up));
 
         if (transform.rotation.eulerAngles.z % 180f == 0f)
         {

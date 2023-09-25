@@ -351,7 +351,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6151032129827649289}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
@@ -409,7 +409,7 @@ MonoBehaviour:
   initialRunSpeed: 6
   maxRunSpeed: 10
   runAcceleration: 6
-  maxSpeed: 30
+  maxSpeed: 20
   speedReduction: 2
   jumpStrength: 6
   fallSpeed: 2.5

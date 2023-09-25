@@ -14,6 +14,12 @@ public class GameManager : MonoBehaviour
         GameWon
     }
 
+    private enum HorizontalDirection
+    {
+        Left,
+        Right
+    }
+
     private GameState gameState = GameState.Default;
 
     private bool gamePaused = false;
@@ -30,6 +36,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameObject strawberry = null;
+    [SerializeField]
+    private HorizontalDirection initialDirection = HorizontalDirection.Right;
     private Strawberry strawberryInstance = null;
 
     private ScoreManager scoreManager = null;
@@ -178,6 +186,11 @@ public class GameManager : MonoBehaviour
 
         createdPlayer.transform.position = spawnPosition + spawnOffset;
         createdPlayer.transform.rotation = Quaternion.identity;
+
+        if (initialDirection == HorizontalDirection.Right)
+        {
+            createdPlayer.transform.localScale *= new Vector2(-1f, 1f);
+        }
 
         return createdPlayer.GetComponent<Strawberry>();
     }
