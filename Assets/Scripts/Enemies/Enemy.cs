@@ -474,4 +474,9 @@ public abstract class Enemy : MonoBehaviour
     {
         return rb.velocity.x;
     }
+
+    public void SetPatrol(bool patrol)
+    {
+        this.patrol = patrol;
+    }
 }

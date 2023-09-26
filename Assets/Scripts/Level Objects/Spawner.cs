@@ -10,6 +10,12 @@ public class Spawner : MonoBehaviour
         Activated
     }
 
+    private enum HorizontalDirection
+    {
+        Left,
+        Right
+    }
+
     private SpawnerState spawnerState = SpawnerState.Activated;
 
     [SerializeField]
@@ -23,6 +29,11 @@ public class Spawner : MonoBehaviour
     [SerializeField]
     private float spawnOffset = 0.01f;
     private float spawnerBase;
+
+    [SerializeField]
+    private bool patrol = false;
+    [SerializeField]
+    private HorizontalDirection initialDirection = HorizontalDirection.Left;
 
     void Start()
     {
@@ -50,6 +61,13 @@ public class Spawner : MonoBehaviour
                     enemyInstance = Instantiate(enemyToSpawn);
                     float enemyHeight = enemyInstance.GetComponent<SpriteRenderer>().bounds.size.y;
                     enemyInstance.transform.position = new Vector3(transform.position.x, spawnerBase + spawnOffset + enemyHeight * 0.5f, 0f);
+
+                    if (initialDirection == HorizontalDirection.Right)
+                    {
+                        enemyInstance.transform.localScale *= new Vector2(-1f, 1f);
+                    }
+
+                    enemyInstance.GetComponent<Enemy>().SetPatrol(patrol);
 
                     spawnerState = SpawnerState.Idle;
                 }
