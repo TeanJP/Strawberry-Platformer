@@ -5,6 +5,9 @@ using UnityEngine;
 public class EnemyShockwave : EnemyProjectile
 {
     [SerializeField]
+    private float lifeSpan = 4f;
+
+    [SerializeField]
     private float shockwaveDuration = 1f;
     private float shockwaveTimer;
 
@@ -31,6 +34,15 @@ public class EnemyShockwave : EnemyProjectile
 
     void Update()
     {
+        if (lifeSpan > 0f)
+        {
+            lifeSpan -= Time.deltaTime;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         if (shockwaveTimer < 0f)
         {
             Vector2 targetPosition = rb.position + direction * movementStep;

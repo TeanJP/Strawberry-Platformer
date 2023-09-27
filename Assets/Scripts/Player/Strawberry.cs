@@ -1768,4 +1768,14 @@ public class Strawberry : MonoBehaviour
     {
         return grounded;
     }
+
+    public float GetMaxRunSpeed()
+    {
+        return maxRunSpeed;
+    }
+
+    public float GetCurrentSpeed()
+    {
+        return currentSpeed;
+    }
 }

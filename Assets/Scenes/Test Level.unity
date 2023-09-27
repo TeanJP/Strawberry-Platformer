@@ -11268,13 +11268,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   strawberry: {fileID: 6151032129827649289, guid: 19aa797db8c8c5b40b0085fe5bcc35b1, type: 3}
+  initialDirection: 1
   cameraBehaviour: {fileID: 519420033}
   levelReloadDelay: 2
   lecheEnergyDisplay: {fileID: 441993906}
   strawberryHeartsDisplay: {fileID: 97539749}
   pauseScreen: {fileID: 93790328}
   escapeTimerText: {fileID: 1080443429}
-  escapeTimeLimit: 90
+  escapeTimeLimit: 100
   levelExit: {fileID: 796986031}
   defaultToggleBlocks: {fileID: 1655494144}
   escapeToggleBlocks: {fileID: 2127554508}
@@ -11308,6 +11309,7 @@ MonoBehaviour:
   checkpoints:
   - {fileID: 1092705707}
   - {fileID: 1852313083}
+  spawnOffset: 0.01
 --- !u!114 &1596736254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11325,8 +11327,8 @@ MonoBehaviour:
   deathsBonusLimit: 25
   deathsBonusTarget: 0
   timeBonusLimit: 300
-  timeBonusTarget: 30
-  escapeBonusTarget: 30
+  timeBonusTarget: 160
+  escapeBonusTarget: 60
   maxDeathsBonus: 100000
   maxTimeBonus: 100000
   maxEscapeBonus: 100000

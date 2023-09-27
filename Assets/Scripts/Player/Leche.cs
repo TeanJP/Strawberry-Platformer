@@ -34,6 +34,10 @@ public class Leche : MonoBehaviour
 
     [SerializeField]
     private Vector2 projectileOffset = new Vector2(0.25f, 0f);
+
+    [SerializeField]
+    private float projectileSpeed = 16f;
+    private float maxSpeedDifference;
     #endregion
 
     #region Obstacle Detection
@@ -84,6 +88,8 @@ public class Leche : MonoBehaviour
         targetOffset = maxOffset * new Vector2(strawberry.GetPlayerDirection() * -1f, 1f);
 
         currentOffset = targetOffset;
+
+        maxSpeedDifference = projectileSpeed - strawberry.GetMaxRunSpeed();
 
         if (projectileColours.Count < 1)
         {
@@ -219,6 +225,17 @@ public class Leche : MonoBehaviour
             float horizontalDirection = GetLecheDirection();
             PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * new Vector2 (horizontalDirection, 1f), Quaternion.identity).GetComponent<PlayerProjectile>();
             createdProjectile.SetDirection(new Vector2(horizontalDirection, 0f));
+
+            float strawberrySpeed = strawberry.GetCurrentSpeed();
+
+            if (projectileSpeed < strawberrySpeed)
+            {
+                createdProjectile.SetMovementSpeed(strawberrySpeed + maxSpeedDifference);
+            }
+            else
+            {
+                createdProjectile.SetMovementSpeed(projectileSpeed);
+            }
 
             createdProjectile.GetComponent<SpriteRenderer>().color = projectileColours[currentColour];
 

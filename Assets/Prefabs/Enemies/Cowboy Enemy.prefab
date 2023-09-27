@@ -151,6 +151,7 @@ MonoBehaviour:
   patrol: 0
   scaredDistance: 3
   fearDuration: 2
+  alertDuration: 0.5
   fearLevel: 2
   platformMask:
     serializedVersion: 2
@@ -166,7 +167,7 @@ MonoBehaviour:
   immunityDuration: 1
   lethalHitRepelStrength: 2
   score: 100
-  attackRange: 8
+  attackRange: 7.5
   attackCooldown: 1
   projectile: {fileID: 2359528188337511226, guid: 670f20898916f634fa720ea12fb03ebf, type: 3}
   gunBarrelOffset: {x: 0.25, y: 0}

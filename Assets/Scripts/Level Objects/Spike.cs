@@ -64,10 +64,13 @@ public class Spike : MonoBehaviour
 
             if (enemy != null)
             {
-                collisionNormal = other.GetContact(0).normal;
-                modifiedRepelDirection = GetRepelDirection(enemy, collisionNormal);
+                if (enemy.GetVisible())
+                {
+                    collisionNormal = other.GetContact(0).normal;
+                    modifiedRepelDirection = GetRepelDirection(enemy, collisionNormal);
 
-                enemy.TakeDamage(false, enemyDamage, enemyStunDuration, modifiedRepelDirection, repelStrength);
+                    enemy.TakeDamage(false, enemyDamage, enemyStunDuration, modifiedRepelDirection, repelStrength);
+                }
             }
         }
     }
@@ -97,10 +100,13 @@ public class Spike : MonoBehaviour
 
             if (enemy != null)
             {
-                collisionNormal = other.GetContact(0).normal;
-                modifiedRepelDirection = GetRepelDirection(enemy, collisionNormal);
+                if (enemy.GetVisible())
+                {
+                    collisionNormal = other.GetContact(0).normal;
+                    modifiedRepelDirection = GetRepelDirection(enemy, collisionNormal);
 
-                enemy.TakeDamage(false, enemyDamage, enemyStunDuration, modifiedRepelDirection, repelStrength);
+                    enemy.TakeDamage(false, enemyDamage, enemyStunDuration, modifiedRepelDirection, repelStrength);
+                }
             }
         }
     }

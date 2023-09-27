@@ -7,8 +7,7 @@ public class PlayerProjectile : MonoBehaviour
     private Rigidbody2D rb = null;
 
     private Vector2 direction = Vector2.right;
-    [SerializeField]
-    private float movementSpeed = 10f;
+    private float movementSpeed = 16f;
 
     [SerializeField]
     private int damage = 5;
@@ -40,7 +39,6 @@ public class PlayerProjectile : MonoBehaviour
         }
         else if (launchedEnemy)
         {
-            //Maybe add knockback for when the enemy is defeated.
             other.gameObject.GetComponent<LaunchedEnemy>().TakeDamage(damage);
         }
 
@@ -50,5 +48,10 @@ public class PlayerProjectile : MonoBehaviour
     public void SetDirection(Vector2 direction)
     {
         this.direction = direction;
+    }
+
+    public void SetMovementSpeed(float movementSpeed)
+    {
+        this.movementSpeed = movementSpeed;
     }
 }

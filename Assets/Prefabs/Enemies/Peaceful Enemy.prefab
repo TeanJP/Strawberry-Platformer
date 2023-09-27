@@ -150,6 +150,7 @@ MonoBehaviour:
   patrol: 0
   scaredDistance: 6
   fearDuration: 2
+  alertDuration: 1
   fearLevel: 2
   platformMask:
     serializedVersion: 2

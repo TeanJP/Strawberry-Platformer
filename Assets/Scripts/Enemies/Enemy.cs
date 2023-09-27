@@ -9,6 +9,7 @@ public abstract class Enemy : MonoBehaviour
         Default,
         Attacking,
         Scared,
+        Alerted,
         Stunned,
         Defeated
     }
@@ -40,6 +41,9 @@ public abstract class Enemy : MonoBehaviour
     protected float fearDuration = 2f;
     protected float fearTimer = 0f;
     [SerializeField]
+    protected float alertDuration = 0f;
+    protected float alertTimer = 0f;
+    [SerializeField]
     protected FearLevel fearLevel = FearLevel.High;
 
     #region Collision Checking
@@ -53,7 +57,7 @@ public abstract class Enemy : MonoBehaviour
     protected float horizontalRaycastSpacing;
     protected int verticalRaycasts = 3;
     protected float verticalRaycastSpacing;
-    protected float dropCheckOffset = 0.03f;
+    protected float dropCheckOffset = 0.05f;
     #endregion
 
     #region Movement Values
@@ -280,7 +284,23 @@ public abstract class Enemy : MonoBehaviour
 
         RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
-        return hit.collider == null;
+        Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.red);
+
+        if ( hit.collider != null)
+        {
+            if (hit.collider.gameObject.GetComponent<Spike>())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
     }
 
     protected bool GetEnemyAhead()
@@ -478,5 +498,10 @@ public abstract class Enemy : MonoBehaviour
     public void SetPatrol(bool patrol)
     {
         this.patrol = patrol;
+    }
+
+    public bool GetVisible()
+    {
+        return spriteRenderer.isVisible;
     }
 }

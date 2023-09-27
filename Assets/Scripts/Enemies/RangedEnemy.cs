@@ -85,6 +85,9 @@ public class RangedEnemy : Enemy
             case State.Scared:
                 Run(hittingWall, dropAhead, Time.deltaTime);
                 break;
+            case State.Alerted:
+                FacePlayer();
+                break;
             case State.Stunned:
 
                 break;
@@ -121,7 +124,8 @@ public class RangedEnemy : Enemy
                     }
                     else if (distanceFromPlayer < attackRange && !abovePlayer)
                     {
-                        state = State.Attacking;
+                        state = State.Alerted;
+                        alertTimer = alertDuration;
                     }
                 }
                 break;
@@ -176,6 +180,16 @@ public class RangedEnemy : Enemy
                     {
                         DecrementFearTimer(Time.deltaTime);
                     }
+                }
+                break;
+            case State.Alerted:
+                if (alertTimer > 0f)
+                {
+                    alertTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    state = State.Attacking;
                 }
                 break;
             case State.Stunned:

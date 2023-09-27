@@ -35,6 +35,9 @@ public class PeacefulEnemy : Enemy
             case State.Scared:
                 Run(hittingWall, dropAhead, Time.deltaTime);
                 break;
+            case State.Alerted:
+                FacePlayer();
+                break;
             case State.Stunned:
 
                 break;
@@ -64,7 +67,8 @@ public class PeacefulEnemy : Enemy
 
                     if (scared)
                     {
-                        SetScared();
+                        state = State.Alerted;
+                        alertTimer = alertDuration;
                     }
                 }
                 break;
@@ -78,6 +82,16 @@ public class PeacefulEnemy : Enemy
                 else
                 {
                     DecrementFearTimer(Time.deltaTime);
+                }
+                break;
+            case State.Alerted:
+                if (alertTimer > 0f)
+                {
+                    alertTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    SetScared();
                 }
                 break;
             case State.Stunned:

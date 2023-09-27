@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class MainMenuManager : MenuManager
 {
     [SerializeField]
-    private string firstLevel = "Test Level";
+    private string firstLevel = "Level One";
 
     public void NewGame()
     {

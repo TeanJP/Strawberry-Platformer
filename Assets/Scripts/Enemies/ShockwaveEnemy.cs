@@ -79,6 +79,9 @@ public class ShockwaveEnemy : Enemy
             case State.Scared:
                 Run(hittingWall, dropAhead, Time.deltaTime);
                 break;
+            case State.Alerted:
+                FacePlayer();
+                break;
             case State.Stunned:
 
                 break;
@@ -163,7 +166,8 @@ public class ShockwaveEnemy : Enemy
                     }
                     else if (distanceFromPlayer < attackRange && !abovePlayer)
                     {
-                        state = State.Attacking;
+                        state = State.Alerted;
+                        alertTimer = alertDuration;
                     }
                 }
                 break;
@@ -221,6 +225,16 @@ public class ShockwaveEnemy : Enemy
                     {
                         DecrementFearTimer(Time.deltaTime);
                     }
+                }
+                break;
+            case State.Alerted:
+                if (alertTimer > 0f)
+                {
+                    alertTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    state = State.Attacking;
                 }
                 break;
             case State.Stunned:
