@@ -27,12 +27,14 @@ public class LevelExit : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
+        //If the game is not paused and is not already over.
         if (!gameManager.GetGamePaused() && !gameManager.GetGameWon())
         {
             Strawberry strawberry = other.GetComponent<Strawberry>();
 
             if (strawberry != null)
             {
+                //If the player is colliding with the exit and presses the interact key end the game.
                 if (!strawberry.GetStunned() && strawberry.GetGrounded() && Input.GetKey(KeyCode.UpArrow))
                 {
                     gameManager.SetGameWon();

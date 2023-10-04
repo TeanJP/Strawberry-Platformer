@@ -28,10 +28,12 @@ public class DroppedHeart : Heart
 
     protected override void Update()
     {
+        //If the dropped heart has not come in range of the player decrement it's duration.
         if (!activated)
         {
             lifeSpanTimer -= Time.deltaTime;
 
+            //If the duration of the dropped heart has ended destroy it.
             if (lifeSpanTimer < 0f)
             {
                 Destroy(gameObject);
@@ -59,6 +61,7 @@ public class DroppedHeart : Heart
 
     public override void Activate(Strawberry strawberry)
     {
+        //Switch the heart to be kinematic and not use a collider so that it can fly towards the player.
         rb.bodyType = RigidbodyType2D.Kinematic;
         physicsCollider.enabled = false;
 

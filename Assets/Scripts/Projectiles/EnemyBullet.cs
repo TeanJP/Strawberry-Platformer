@@ -14,6 +14,7 @@ public class EnemyBullet : EnemyProjectile
 
     void Update()
     {
+        //Move in the provided direction.
         rb.velocity = direction * movementSpeed;
     }
 
@@ -23,11 +24,13 @@ public class EnemyBullet : EnemyProjectile
 
         if (strawberry != null)
         {
+            //If the projectile hits the player damage them.
             float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
 
             strawberry.TakeDamge(damage, repelDirection * new Vector2(horizontalDirection, 1f), repelStrength);
         }
 
+        //Destroy the projectile upon it hitting anything that it can collide with.
         Destroy(gameObject);
     }
 }

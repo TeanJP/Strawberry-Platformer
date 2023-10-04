@@ -23,6 +23,7 @@ public class PlayerProjectile : MonoBehaviour
 
     void Update()
     {
+        //Move in the provided direction.
         rb.velocity = direction * movementSpeed;
     }
 
@@ -31,6 +32,7 @@ public class PlayerProjectile : MonoBehaviour
         bool enemy = other.gameObject.CompareTag("Enemy");
         bool launchedEnemy = other.gameObject.CompareTag("Launched Enemy");
 
+        //Deal damage to any enemy that is hit by the projectile.
         if (enemy)
         {
             Vector2 repelDirection = new Vector2(Mathf.Sign(other.transform.position.x - transform.position.x), 1f);

@@ -264,10 +264,12 @@ public class Strawberry : MonoBehaviour
 
     void Start()
     {
+        //Get the required components.
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
+        //Get the required managers.
         gameManager = GameManager.Instance;
         scoreManager = gameManager.GetScoreManager();
 
@@ -279,14 +281,17 @@ public class Strawberry : MonoBehaviour
 
         Vector2 activeColliderDimensions = activeCollider.bounds.size;
 
+        //Calculate the amount of spacing to put between the wall and vertical collision raycasts.
         verticalRaycastSpacing = activeColliderDimensions.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeColliderDimensions.y / (horizontalRaycasts - 1);
 
+        //Normalize all direction vectors to ensure that their magnitude will be equal to their associated strengths.
         diveDirection.Normalize();
         wallJumpDirection.Normalize();
         superJumpCancelDirection.Normalize();
         collisionRepelDirection.Normalize();
 
+        //Get the UI elements that display the player's health.
         Transform heartsDisplay = gameManager.GetStrawberryHeartsDisplay().transform;
         heartsCounter = heartsDisplay.GetChild(1).GetComponent<TextMeshProUGUI>();
         heartsLevel = heartsDisplay.GetChild(2).GetChild(1).GetComponent<Image>();
@@ -296,6 +301,7 @@ public class Strawberry : MonoBehaviour
 
     void Update()
     {
+        //Get the status of the player's inputs.
         GetInputs();
 
         if (!gameManager.GetGamePaused())
@@ -308,6 +314,7 @@ public class Strawberry : MonoBehaviour
                 bouncing = false;
             }
 
+            //Get the collision states of the player.
             bool hittingWall = GetHittingWall(platformMask);
             bool hittingNonBreakableWall = GetHittingWall(nonBreakableWallMask);
             bool hittingCeiling = GetVerticalCollision(platformMask, VerticalDirection.Above);
@@ -320,6 +327,7 @@ public class Strawberry : MonoBehaviour
             DecrementTimers(Time.deltaTime);
             ApplyAnimation();
 
+            //If the player is not stunned collect any nearby hearts.
             if (movementState != MovementState.Stunned)
             {
                 ActivateHearts();
@@ -376,6 +384,7 @@ public class Strawberry : MonoBehaviour
         switch (movementState)
         {
             case MovementState.Default:
+                //Adjust the direction the player is facing.
                 if (GetFacingIncorrectDirection())
                 {
                     FlipPlayerDirection();
@@ -407,6 +416,7 @@ public class Strawberry : MonoBehaviour
                     case RunState.Default:
                         if (hittingNonBreakableWall && grounded)
                         {
+                            //Stun the player if they ran into a wall.
                             ApplyStun(StunType.Collision);
                             RepelPlayer(collisionRepelDirection * new Vector2(GetPlayerDirection() * -1f, 1f), collisionRepelStrength);
                         }
@@ -443,7 +453,7 @@ public class Strawberry : MonoBehaviour
                                 boostTimer = 0f;
                             }
                             else if (GetFacingIncorrectDirection() && grounded)
-                            {
+                            {                              
                                 FlipPlayerDirection();
                                 runState = RunState.Turning;
                                 previousSpeed = currentSpeed;
@@ -693,10 +703,12 @@ public class Strawberry : MonoBehaviour
             case MovementState.Default:
                 if (horizontalInput == 0f)
                 {
+                    //Make the player stop whilst they are not inputing a direction.
                     currentSpeed = 0f;
                 }
                 else
                 {
+                    //Adjust the player's walk speed.
                     if (currentSpeed == 0f)
                     {
                         currentSpeed = initialWalkSpeed;
@@ -709,17 +721,20 @@ public class Strawberry : MonoBehaviour
 
                 movement.x = horizontalDirection * currentSpeed;
 
+                //If the player tried to jump and are within the grounded buffer and not already jumping.
                 if (jumpTimer > 0f && groundedTimer > 0f && movement.y <= 0f)
                 {
                     movement.y = jumpStrength;
                     jumpTimer = 0f;
                 }
 
+                //Prevent the effect of releasing the jump button applying multiple times.
                 if (grounded)
                 {
                     movementApplied = false;
                 }
 
+                //If the player releases the jump input reduce the strength of their jump.
                 if (movement.y > 0f && releasedJumpInput && !movementApplied && !bouncing)
                 {
                     movement.y *= incompleteJumpStrength;
@@ -734,27 +749,33 @@ public class Strawberry : MonoBehaviour
                         {
                             if (currentSpeed < initialRunSpeed)
                             {
+                                //If the player just started running set their speed to the initial speed.
                                 currentSpeed = initialRunSpeed;
                             }
                             else if (currentSpeed < maxRunSpeed)
                             {
+                                //Have the player accelerate whilst they are below their max speed.
                                 currentSpeed = Mathf.Min(currentSpeed + runAcceleration * Time.deltaTime, maxRunSpeed);
                             }
                         }
 
+                        //Set the horizontal velocity of the player.
                         movement.x = horizontalDirection * currentSpeed;
 
+                        //If the player tried to jump and are within the grounded buffer and not already jumping.
                         if (jumpTimer > 0f && groundedTimer > 0f && movement.y <= 0f)
                         {
                             movement.y = jumpStrength;
                             jumpTimer = 0f;
                         }
 
+                        //Prevent the effect of releasing the jump button applying multiple times.
                         if (grounded)
                         {
                             movementApplied = false;
                         }
 
+                        //If the player releases the jump input reduce the strength of their jump.
                         if (movement.y > 0f && releasedJumpInput && !movementApplied && !bouncing)
                         {
                             movement.y *= incompleteJumpStrength;
@@ -762,13 +783,17 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.Rolling:
+                        //Set the player's horizontal velocity.
                         movement.x = horizontalDirection * currentSpeed;
                         break;
                     case RunState.Turning:
+                        //Decrement the player's speed.
                         currentSpeed = Mathf.Max(currentSpeed - turnDeceleration * Time.deltaTime, 0f);
 
+                        //Make the player move in the direction opposite to the way they are facing.
                         movement.x = horizontalDirection * -1f * currentSpeed;
 
+                        //If the player has come to a stop set their speed back to what it was before they started turning.
                         if (currentSpeed == 0f && grounded)
                         {
                             runState = RunState.Default;
@@ -776,10 +801,12 @@ public class Strawberry : MonoBehaviour
                         }
                         break;
                     case RunState.Stopping:
+                        //Decrement the player's speed.
                         currentSpeed = Mathf.Max(currentSpeed - slideDeceleration * Time.deltaTime, 0f);
 
                         movement.x = horizontalDirection * currentSpeed;
 
+                        //If the player has come to a stop set them as no longer running.
                         if (currentSpeed == 0f)
                         {
                             movementState = MovementState.Default;
@@ -790,6 +817,7 @@ public class Strawberry : MonoBehaviour
                         movement = new Vector2(0f, currentSpeed);
                         break;
                     case RunState.WallJumping:
+                        //If the wall jump has not started apply the force of the jump.
                         if (!movementApplied)
                         {
                             movement = new Vector2(horizontalDirection, 1f) * wallJumpDirection * wallJumpStrength;
@@ -881,6 +909,7 @@ public class Strawberry : MonoBehaviour
     {
         string animationToPlay = currentAnimation;
 
+        //Check the movement state of the player and apply the appropriate animation.
         switch (movementState)
         {
             case MovementState.Default:
@@ -1005,6 +1034,7 @@ public class Strawberry : MonoBehaviour
                 break;
         }
 
+        //If the animation to play is different to the one already playing, play it.
         if (animationToPlay != currentAnimation)
         {
             animator.Play(animationToPlay);
@@ -1093,21 +1123,26 @@ public class Strawberry : MonoBehaviour
     #region Collision Checks
     private bool GetHittingWall(LayerMask maskToUse)
     {
+        //Get the direction and origin of the initial raycast.
         Vector2 raycastDirection = new Vector2(GetPlayerDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetPlayerDirection(), activeCollider.bounds.min.y);
 
+        //Perform as many raycasts as required.
         for (int i = 0; i < horizontalRaycasts; i++)
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
+            //If any of the raycasts hit a wall return that the player is hitting a wall.
             if (hit.collider != null)
             {
                 return true;
             }
 
+            //Adjust the position of the next raycast.
             raycastOrigin.y += horizontalRaycastSpacing;
         }
 
+        //If none of the raycasts hit anything return that the player is not hitting a wall.
         return false;
     }    
 
@@ -1117,6 +1152,7 @@ public class Strawberry : MonoBehaviour
 
         float raycastLength = this.raycastLength;
 
+        //Adjust the direction and origin of the raycasts based on whether the check is above or below the player.
         if (verticalDirection == VerticalDirection.Above)
         {
             raycastDirection = Vector2.up;
@@ -1137,11 +1173,13 @@ public class Strawberry : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
+            //If any of the raycasts hit something return that there was a vertical collision.
             if (hit.collider != null)
             {
                 return true;
             }
 
+            //Adjust the position of the next raycast.
             raycastOrigin.x += verticalRaycastSpacing;
         }
 
@@ -1150,6 +1188,7 @@ public class Strawberry : MonoBehaviour
         Vector2 wallCheckDirection = Vector2.left;
         Vector2 wallCheckOrigin;
 
+        //Adjust the direction and origin of the raycasts based on whether the check is above or below the player.
         if (verticalDirection == VerticalDirection.Above)
         {
             wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.max.y);
@@ -1159,20 +1198,25 @@ public class Strawberry : MonoBehaviour
             wallCheckOrigin = new Vector2(activeCollider.bounds.min.x, activeCollider.bounds.min.y);
         }
 
+        //Check whether there are walls to the left or right of the player.
         for (int i = 0; i < 2; i++)
         {
             RaycastHit2D wallHit = Physics2D.Raycast(wallCheckOrigin, wallCheckDirection, this.raycastLength, maskToUse);
 
+            //If no wall is detected.
             if (wallHit.collider == null)
             {
                 RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, maskToUse);
 
+                //Check if there is a platform slightly outside of the player's collider in order to avoid cases where the regular raycasts detected nothing but the player is still colliding.
+                //This occurs due to Unity's contact offset.
                 if (hit.collider != null)
                 {
                     return true;
                 }
             }
 
+            //Adjust the positions of the raycasts.
             raycastOrigin.x += (activeCollider.bounds.size.x + raycastLeniency * 2f);
             wallCheckOrigin.x += activeCollider.bounds.size.x;
             wallCheckDirection *= -1f;
@@ -1185,8 +1229,10 @@ public class Strawberry : MonoBehaviour
     #region Attacks
     private void Attack()
     {
+        //Get whether the player is falling.
         bool falling = rb.velocity.y <= 0f;
 
+        //Based on the player's state perform an attack.
         switch (movementState)
         {
             case MovementState.Default:
@@ -1333,6 +1379,7 @@ public class Strawberry : MonoBehaviour
 
         bool attackSuccessful = DealDamage(damage, repelStrength, breakBlocks, true, boxPosition, boxSize, AttackDirection.Vertical);
 
+        //If the attack hit an enemy and it is set to make the player bounce have the player bounce oof the enemy.
         if (attackSuccessful && bounce)
         {
             Bounce();
@@ -1349,10 +1396,12 @@ public class Strawberry : MonoBehaviour
 
     private bool DealDamage(int damage, float repelStrength, bool breakBlocks, bool destroyProjectiles, Vector2 boxPosition, Vector2 boxSize, AttackDirection attackDirection)
     {
+        //Get all of the enemies within the box defined by the parameters.
         Collider2D[] enemies = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, enemyMask);
 
         bool attackSuccessful = false;
 
+        //Loop through all of the enemies that were found.
         for (int i = 0; i < enemies.Length; i++)
         {
             bool enemy = enemies[i].CompareTag("Enemy");
@@ -1369,6 +1418,7 @@ public class Strawberry : MonoBehaviour
 
                 Vector2 repelDirection = Vector2.zero;
 
+                //Set the repel direction of the attack based on which direction it was in.
                 switch (attackDirection)
                 {
                     case AttackDirection.Horizontal:
@@ -1386,6 +1436,7 @@ public class Strawberry : MonoBehaviour
                         break;
                 }                
                 
+                //Apply damage to the current enemy.
                 repelDirection.Normalize();
                 currentEnemy.TakeDamage(false, damage, attackStunDuration, repelDirection, repelStrength);
             }
@@ -1405,10 +1456,12 @@ public class Strawberry : MonoBehaviour
             }
         }
 
+        //If the attack is set to damage breakable blocks.
         if (breakBlocks)
         {
             Collider2D[] breakableBlocks = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, breakableBlockMask);
 
+            //Loop through all the breakable blocks that were found and destroy them.
             for (int i = 0; i < breakableBlocks.Length; i++)
             {
                 BreakableBlock breakableBlock = breakableBlocks[i].GetComponent<BreakableBlock>();
@@ -1427,37 +1480,46 @@ public class Strawberry : MonoBehaviour
     #region Taking Damage
     public void TakeDamge(int damage, Vector2 repelDirection, float repelStrength)
     {
+        //If the player is not currently invincible.
         if (invincibilityTimer <= 0f)
         {
             if (hearts == 0 || damage > maxHearts)
             {
+                //Set the player as defeated if they have run out of hearts or took lethal damage.
                 SetDefeated();
             }
             else
             {
+                //Decrement the player's hearts.
                 int previousHearts = hearts;
                 hearts = Mathf.Max(hearts - damage, 0);
 
+                //Spawn hearts corresponding to how much damage the player took.
                 Vector2 dropDirection = new Vector2(Mathf.Sign(repelDirection.x), 0f);
                 SpawnHearts(Mathf.Min(previousHearts - hearts, maxDroppedHearts), dropDirection);
 
+                //Set the player as invincible and stun them.
                 invincibilityTimer = invincibilityDuratrion;
                 ApplyStun(StunType.Damage);
             }
 
+            //Repel the player based on the direction and strength provided.
             RepelPlayer(repelDirection, repelStrength);
 
+            //Update the hearts UI.
             UpdateHeartsDisplay();
         }
     }
 
     private void ApplyStun(StunType stunType)
     {
+        //Update the player's state to stunned.
         movementState = MovementState.Stunned;
         runState = RunState.Default;
         movementApplied = false;
         currentSpeed = 0f;
 
+        //Based on the cause of the stun set the duration of the stun.
         switch (stunType)
         {
             case StunType.Collision:
@@ -1480,6 +1542,7 @@ public class Strawberry : MonoBehaviour
         {
             movementState = MovementState.Defeated;
 
+            //Disable the player's collider and trigger so they can't take more damage and fall off the level.
             activeCollider.enabled = false;
 
             if (fullTrigger.enabled)
@@ -1491,10 +1554,12 @@ public class Strawberry : MonoBehaviour
                 halfTrigger.enabled = false;
             }
 
+            //Detatch Leche from the player so they stay behind.
             GameObject leche = transform.GetChild(1).gameObject;
             leche.GetComponent<Leche>().enabled = false;
             leche.transform.parent = null;
 
+            //Set the game as over.
             GameManager.Instance.SetGameOver();
         }
     }
@@ -1502,6 +1567,7 @@ public class Strawberry : MonoBehaviour
 
     private void SwapActiveCollider()
     {
+        //Swap the player's colliders and triggers.
         fullCollider.enabled = !fullCollider.enabled;
         halfCollider.enabled = !halfCollider.enabled;
 
@@ -1517,6 +1583,7 @@ public class Strawberry : MonoBehaviour
             activeCollider = fullCollider;
         }
         
+        //Update the spacing for the wall check raycasts to account for the player's new height.
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
     }
 
@@ -1533,6 +1600,7 @@ public class Strawberry : MonoBehaviour
 
     public bool GetAbovePlayer(float position)
     {
+        //If the top of the player is below the provided position return the object as being above the player.
         if (activeCollider.bounds.max.y < position)
         {
             return true;
@@ -1658,6 +1726,7 @@ public class Strawberry : MonoBehaviour
     #region Hearts
     public void AddHeart(int score)
     {
+        //Increment the player's heart count, add any score if it is provided and update the UI.
         hearts = Mathf.Min(hearts + 1, maxHearts);
 
         if (score > 0)
@@ -1673,14 +1742,17 @@ public class Strawberry : MonoBehaviour
         Vector2 capsuleCentre = activeCollider.bounds.center;
         Vector2 capsuleSize = (Vector2)activeCollider.bounds.size + (Vector2.one * heartActivationDistance);
 
+        //Get all hearts within a capsule centered on the player.
         Collider2D[] hearts = Physics2D.OverlapCapsuleAll(capsuleCentre, capsuleSize, CapsuleDirection2D.Vertical, 0f, heartMask);
 
+        //Loop through all of the hearts that were found.
         for (int i = 0; i < hearts.Length; i++)
         {
             Heart heart = hearts[i].gameObject.GetComponent<Heart>();
 
             if (heart != null)
             {
+                //Activate the hearts so that they move towards the player.
                 bool activated = heart.GetActivated();
 
                 if (!activated)
@@ -1693,13 +1765,16 @@ public class Strawberry : MonoBehaviour
 
     private void SpawnHearts(int amount, Vector2 dropDirection)
     {
+        //Work out how much to rotate the direction of the spawned heart each iteration.
         Quaternion rotation = Quaternion.Euler(0f, 0f, 360f / amount);
 
         for (int i = 0; i < amount; i++)
         {
+            //Spawn a heart and set it's velocity.
             DroppedHeart heart = Instantiate(droppedHeart, activeCollider.bounds.center, Quaternion.identity).GetComponent<DroppedHeart>();
             heart.SetInitialVelocity(dropDirection * dropSpeed);
 
+            //Rotate the direction to drop hearts in.
             dropDirection = rotation * dropDirection;
         }      
     }

@@ -40,6 +40,7 @@ public class EnemyShockwave : EnemyProjectile
         }
         else
         {
+            //Destroy the shockwave if it's duration expires.
             Destroy(gameObject);
         }
 
@@ -52,11 +53,13 @@ public class EnemyShockwave : EnemyProjectile
 
             if (!dropAtPosition && !wallAhead)
             {
+                //Move the shockwave in increments.
                 rb.MovePosition(targetPosition);
                 shockwaveTimer = shockwaveDuration;
             }
             else
             {
+                //Destroy the shockwave if there is an obstacle or drop in the way.
                 Destroy(gameObject);
             }
         }
@@ -71,6 +74,7 @@ public class EnemyShockwave : EnemyProjectile
     {
         Strawberry strawberry = other.gameObject.GetComponentInParent<Strawberry>();
 
+        //Deal damage to the player if they were hit.
         if (strawberry != null)
         {
             float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
@@ -82,6 +86,7 @@ public class EnemyShockwave : EnemyProjectile
     {
         Strawberry strawberry = other.gameObject.GetComponentInParent<Strawberry>();
 
+        //Deal damage to the player if they were hit.
         if (strawberry != null)
         {
             float horizontalDirection = Mathf.Sign(other.transform.position.x - transform.position.x);
@@ -96,6 +101,7 @@ public class EnemyShockwave : EnemyProjectile
         Vector2 raycastDirection = Vector2.down;
         Vector2 raycastOrigin = new Vector2(position.x, position.y - spriteRenderer.bounds.extents.y);
 
+        //Check whether there are no platforms in front of and below the shockwave.
         RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
         return hit.collider == null;
@@ -112,9 +118,11 @@ public class EnemyShockwave : EnemyProjectile
 
             if (hit.collider != null)
             {
+                //If there are any walls in front of the shockwave return that there was a collision.
                 return true;
             }
 
+            //Adjust the position of the next raycast.
             raycastOrigin.y += horizontalRaycastSpacing;
         }
 

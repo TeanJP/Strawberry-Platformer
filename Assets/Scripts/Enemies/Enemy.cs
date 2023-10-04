@@ -90,11 +90,13 @@ public abstract class Enemy : MonoBehaviour
     {
         gameManager = GameManager.Instance;
 
+        //Get the required components.
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         activeCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
 
+        //Get the spacing of the raycasts for the wall and ground checks.
         verticalRaycastSpacing = activeCollider.bounds.size.x / (verticalRaycasts - 1);
         horizontalRaycastSpacing = activeCollider.bounds.size.y / (horizontalRaycasts - 1);
 
@@ -105,11 +107,13 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
+        //If the enemy fall of the bottom of the level set them as defeated.
         if (spriteRenderer.bounds.max.y < levelBoundary)
         {
             SetDefeated();
         }
 
+        //If the enemy has been defeated and can't be seen destroy them.
         if (!spriteRenderer.isVisible && state == State.Defeated)
         {
             Destroy(gameObject);
@@ -123,11 +127,13 @@ public abstract class Enemy : MonoBehaviour
 
         bool enemyAhead = GetEnemyAhead();
 
+        //Have the enemy turn around if it reaches an obstacle.
         if (hittingWall || dropAhead || enemyAhead)
         {
             FlipDirection();
         }
 
+        //Have the enemy move in the direction it is facing.
         movement.x = initialSpeed * GetFacingDirection();
 
         rb.velocity = movement;
@@ -142,10 +148,12 @@ public abstract class Enemy : MonoBehaviour
 
         if (trapped && facingDirection != directionToPlayer)
         {
+            //If the enemy has space to run away from the player set them as no longer trapped.
             trapped = false;
         }
         else if (!trapped && (hittingWall || dropAhead))
         {
+            //If there is an obstacle in the way of the enemy set them as trapped and stop them from moving. 
             trapped = true;
             currentSpeed = 0f;
             FacePlayer();
@@ -153,6 +161,7 @@ public abstract class Enemy : MonoBehaviour
 
         if (!trapped)
         {
+            //Make the enemy face away from the player.
             if (facingDirection == directionToPlayer)
             {
                 FlipDirection();
@@ -163,16 +172,19 @@ public abstract class Enemy : MonoBehaviour
 
             if (enemyAhead)
             {
+                //If there is another enemy in the way of this enemy stop it from moving.
                 currentSpeed = 0f;
             }
             else
             {
                 if (currentSpeed < initialSpeed)
                 {
+                    //If the enemy just started running set their speed to the initial run speed.
                     currentSpeed = initialSpeed;
                 }
                 else
                 {
+                    //Have the enemy accelerate to it's max speed.
                     currentSpeed = Mathf.Min(currentSpeed + acceleration * deltaTime, maxSpeed);
                 }
             }
@@ -181,6 +193,7 @@ public abstract class Enemy : MonoBehaviour
         }
         else
         {
+            //If the enemy is trapped stop them from moving.
             movement.x = 0f;
         }
 
@@ -189,6 +202,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected void UpdateGravityScale()
     {
+        //If the enemy is falling have them use a different gravity scale.
         if (rb.velocity.y < 0f)
         {
             rb.gravityScale = fallSpeed;
@@ -266,11 +280,13 @@ public abstract class Enemy : MonoBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
 
+            //If a platform was hit return that there is a wall in front of the enemy.
             if (hit.collider != null)
             {
                 return true;
             }
 
+            //Adjust the position of the next raycast.
             raycastOrigin.y += horizontalRaycastSpacing;
         }
 
@@ -282,12 +298,12 @@ public abstract class Enemy : MonoBehaviour
         Vector2 raycastDirection = Vector2.down;
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + (activeCollider.bounds.extents.x + dropCheckOffset) * GetFacingDirection(), activeCollider.bounds.min.y);
 
+        //Perform a raycast in front of the enemypointing down.
         RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, raycastDirection, raycastLength, platformMask);
-
-        Debug.DrawRay(raycastOrigin, raycastDirection * raycastLength, Color.red);
 
         if ( hit.collider != null)
         {
+            //If a platform was hit that wasn't a spike return there as being no drop ahead.
             if (hit.collider.gameObject.GetComponent<Spike>())
             {
                 return true;
@@ -299,6 +315,7 @@ public abstract class Enemy : MonoBehaviour
         }
         else
         {
+            //If no platform was hit return there as being a drop ahead.
             return true;
         }
     }
@@ -308,10 +325,12 @@ public abstract class Enemy : MonoBehaviour
         Vector2 raycastDirection = new Vector2(GetFacingDirection(), 0f);
         Vector2 raycastOrigin = new Vector2(activeCollider.bounds.center.x + activeCollider.bounds.extents.x * GetFacingDirection(), activeCollider.bounds.min.y);
 
+        //Perform a raycast in front of the enemy pointing in the direction they are facing.
         RaycastHit2D[] hits = Physics2D.RaycastAll (raycastOrigin, raycastDirection, raycastLength, enemyMask);
 
         for (int i = 0; i < hits.Length; i++)
         {
+            //If any enemies were hit by the raycast return there as being an enemy in the way.
             if (hits[i].collider != null && hits[i].collider.gameObject != gameObject)
             {
                 return true;
@@ -329,6 +348,7 @@ public abstract class Enemy : MonoBehaviour
         {
             stunTimer -= deltaTime;
 
+            //If the stun effect has expired set the enemy as no longer stunned.
             if (stunTimer <= 0f)
             {
                 state = State.Default;
@@ -344,6 +364,7 @@ public abstract class Enemy : MonoBehaviour
 
             if (fearTimer <= 0f)
             {
+                //If the enemies fear timer has expired set them as not scared and stop them from running.
                 state = State.Default;
                 rb.velocity = Vector2.zero;
                 currentSpeed = 0f;
@@ -353,6 +374,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected void DecrementImmunityTimer(float deltaTime)
     {
+        //Decrement the immunity timer whilst there is time left on it.
         if (immunityTimer > 0f)
         {
             immunityTimer -= deltaTime;
@@ -363,14 +385,17 @@ public abstract class Enemy : MonoBehaviour
     #region Taking Damage
     public void TakeDamage(bool projectile, int damage, float stunDuration, Vector2 repelDirection, float repelStrength)
     {
+        //If the attack that attempted to damage the enemy is a projectile or the enemy is not immune have them take damage.
         if (projectile || immunityTimer <= 0f)
         {
             health = Mathf.Max(health - damage, 0);
 
             if (health == 0)
             {
+                //If the enemy has run out of health set them as defeated.
                 SetDefeated();
 
+                //Apply a stronger knockback if the knockback from the damage source is too weak.
                 if (repelStrength < lethalHitRepelStrength)
                 {
                     repelStrength = lethalHitRepelStrength;
@@ -378,17 +403,18 @@ public abstract class Enemy : MonoBehaviour
             }
             else
             {
+                //If the damage source was not a projectile stun the enemy.
                 if (!projectile)
                 {
                     state = State.Stunned;
                     stunTimer = stunDuration;
                 }
-
             }
 
             RepelEnemy(repelDirection, repelStrength);
             currentSpeed = 0f;
 
+            //If the damage source was not a projectile make the enemy temporarily immune to damage.
             if (!projectile)
             {
                 immunityTimer = immunityDuration;
@@ -425,6 +451,7 @@ public abstract class Enemy : MonoBehaviour
     {
         bool facingPlayer = GetFacingPlayer();
 
+        //Make the enemy face the player if they are not already facing them.
         if (!facingPlayer)
         {
             FlipDirection();

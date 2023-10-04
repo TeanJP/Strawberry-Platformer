@@ -47,6 +47,7 @@ public class Spawner : MonoBehaviour
             case SpawnerState.Idle:
                 if (enemyInstance == null)
                 {
+                    //If the enemy that was spawned no longer exists set the spawner to spawn another.
                     enemySpawnTimer = enemySpawnDelay;
                     spawnerState = SpawnerState.Activated;
                 }
@@ -58,17 +59,22 @@ public class Spawner : MonoBehaviour
                 }
                 else
                 {
+                    //Spawn an enemy and store it.
                     enemyInstance = Instantiate(enemyToSpawn);
+                    //Adjust the enemy position to be just above the ground.
                     float enemyHeight = enemyInstance.GetComponent<SpriteRenderer>().bounds.size.y;
                     enemyInstance.transform.position = new Vector3(transform.position.x, spawnerBase + spawnOffset + enemyHeight * 0.5f, 0f);
 
+                    //Set the initial direction of the enemy.
                     if (initialDirection == HorizontalDirection.Right)
                     {
                         enemyInstance.transform.localScale *= new Vector2(-1f, 1f);
                     }
 
+                    //Set whether the enemy should patrol.
                     enemyInstance.GetComponent<Enemy>().SetPatrol(patrol);
 
+                    //Set the spawner as no longer having to spawn an enemy.
                     spawnerState = SpawnerState.Idle;
                 }
                 break;

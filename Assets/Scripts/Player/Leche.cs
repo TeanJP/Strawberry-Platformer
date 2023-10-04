@@ -98,6 +98,7 @@ public class Leche : MonoBehaviour
 
         currentEnergy = maxEnergy;
 
+        //Get the necessary UI elements.
         energyDisplay = GameManager.Instance.GetLecheEnergyDisplay();
         energyDisplayTransform = energyDisplay.GetComponent<RectTransform>();
         energyBar = energyDisplay.transform.GetChild(1).GetComponent<Image>();
@@ -142,6 +143,7 @@ public class Leche : MonoBehaviour
                 }
             }
 
+            //Adjust the position of the energy display to be above Leche.
             if (energyDisplay.activeInHierarchy)
             {
                 energyDisplayTransform.position = Camera.main.WorldToScreenPoint(transform.position) + (Vector3)(energyDisplayOffset * new Vector2(Screen.width, Screen.height));
@@ -153,6 +155,7 @@ public class Leche : MonoBehaviour
     {
         if (currentOffset != targetOffset)
         {
+            //Move towards the target offset.
             if (currentOffset.x < targetOffset.x)
             {
                 currentOffset.x = Mathf.Min(currentOffset.x + movementSpeed * deltaTime, targetOffset.x);
@@ -165,6 +168,7 @@ public class Leche : MonoBehaviour
 
         bool usingHalfCollider = strawberry.GetUsingHalfCollider();
         
+        //Have Leche match the height of the player.
         if (usingHalfCollider)
         {
             currentOffset.y = halfColliderOffset;
@@ -174,6 +178,7 @@ public class Leche : MonoBehaviour
             currentOffset.y = 0f;
         }
 
+        //Set Leche's offset.
         float playerDirection = strawberry.GetPlayerDirection();
         transform.localPosition = currentOffset * new Vector2(playerDirection * -1f, 1f);
     }
@@ -187,12 +192,14 @@ public class Leche : MonoBehaviour
         Vector2 raycastOrigin = new Vector2(strawberry.GetCentre().x, spriteRenderer.bounds.center.y) + raycastOffset;
         Vector2 offset = new Vector2(0f, raycastSpacing * 0.5f * Mathf.Sign(strawberry.GetVerticalVelocity()));
 
+        //Check if there is a wall in the way of the target position.
         for (int i = 0; i < 2; i++)
         {
             RaycastHit2D hit = Physics2D.Raycast(raycastOrigin + offset, raycastDirection, raycastLength, platformMask);
 
             if (hit.collider != null)
             {
+                //Update the target position to account for any walls in the way.
                 targetOffset.x = Mathf.Abs(hit.distance - halfDimensions.x) * (playerDirection * -1f);
                 return;
             }
@@ -212,6 +219,7 @@ public class Leche : MonoBehaviour
     {
         bool wallRunning = strawberry.GetWallRunning();
         
+        //If the player was wall running have Leche face behind the player, revert this when they stop wall running.
         if ((wallRunning && Mathf.Sign(transform.localScale.x) != -1f) || (!wallRunning && Mathf.Sign(transform.localScale.x) != 1f))
         {
             transform.localScale *= new Vector2(-1f, 1f);
@@ -222,12 +230,14 @@ public class Leche : MonoBehaviour
     {
         if (projectile != null)
         {
+            //Create a projectile and make it fire in the direction that Leche is facing.
             float horizontalDirection = GetLecheDirection();
             PlayerProjectile createdProjectile = Instantiate(projectile, (Vector2)transform.position + projectileOffset * new Vector2 (horizontalDirection, 1f), Quaternion.identity).GetComponent<PlayerProjectile>();
             createdProjectile.SetDirection(new Vector2(horizontalDirection, 0f));
 
             float strawberrySpeed = strawberry.GetCurrentSpeed();
 
+            //If the player is under the effect of a speed booster adjust the projectile speed to remain faster than the player.
             if (projectileSpeed < strawberrySpeed)
             {
                 createdProjectile.SetMovementSpeed(strawberrySpeed + maxSpeedDifference);
@@ -237,8 +247,10 @@ public class Leche : MonoBehaviour
                 createdProjectile.SetMovementSpeed(projectileSpeed);
             }
 
+            //Set the colour of the projectile.
             createdProjectile.GetComponent<SpriteRenderer>().color = projectileColours[currentColour];
 
+            //Loop through the projectile colours.
             currentColour++;
 
             if (currentColour == projectileColours.Count)

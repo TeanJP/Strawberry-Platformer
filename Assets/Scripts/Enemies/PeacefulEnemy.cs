@@ -67,6 +67,7 @@ public class PeacefulEnemy : Enemy
 
                     if (scared)
                     {
+                        //Set the enemy as alerted.
                         state = State.Alerted;
                         alertTimer = alertDuration;
                     }
@@ -91,6 +92,7 @@ public class PeacefulEnemy : Enemy
                 }
                 else
                 {
+                    //If the enemy is no longer alerted set them as scared.
                     SetScared();
                 }
                 break;
@@ -102,12 +104,14 @@ public class PeacefulEnemy : Enemy
 
     private void SpreadFear()
     {
+        //Get all nearby enemies.
         Collider2D[] enemies = Physics2D.OverlapCircleAll(activeCollider.bounds.center, fearSpreadDistance, enemyMask);
 
         for (int i = 0; i < enemies.Length; i++)
         {
             PeacefulEnemy peacefulEnemy = enemies[i].gameObject.GetComponent<PeacefulEnemy>();
 
+            //Set all of the peaceful enemies that were found as scared.
             if (peacefulEnemy != null && peacefulEnemy != this)
             {
                 peacefulEnemy.SetScared();

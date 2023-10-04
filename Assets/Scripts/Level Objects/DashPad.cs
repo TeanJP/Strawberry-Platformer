@@ -19,6 +19,7 @@ public class DashPad : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
+        //If the speed booster has not been used yet.
         if (!used)
         {
             Strawberry strawberry = other.gameObject.GetComponent<Strawberry>();
@@ -29,6 +30,7 @@ public class DashPad : MonoBehaviour
 
                 if (canAddSpeed)
                 {
+                    //Add speed to the player.
                     strawberry.AddSpeed(direction, speed);
                     used = true;
                 }
@@ -38,6 +40,7 @@ public class DashPad : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D other)
     {
+        //When the player moves out of the speed booster set it as not being used.
         if (other.gameObject.layer == player)
         {
             used = false;

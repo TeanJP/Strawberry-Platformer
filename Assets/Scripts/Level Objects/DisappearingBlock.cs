@@ -50,6 +50,7 @@ public class DisappearingBlock : MonoBehaviour
                     state = State.Reappearing;
                     timer = timeToReappear;
 
+                    //Make the block invisible and prevent it being collided with.
                     spriteRenderer.enabled = false;
                     blockCollider.enabled = false;
                 }
@@ -61,6 +62,7 @@ public class DisappearingBlock : MonoBehaviour
 
                     if (movingObject == null)
                     {
+                        //If there is no object in the way of where the block should be make it reappear.
                         state = State.Default;
 
                         spriteRenderer.enabled = true;
@@ -84,6 +86,7 @@ public class DisappearingBlock : MonoBehaviour
             {
                 if (contacts[i].normal.y >= 0f)
                 {
+                    //Get whether the player hit the bottom of the block.
                     playerBelowBlock = true;
                     break;
                 }
@@ -91,6 +94,7 @@ public class DisappearingBlock : MonoBehaviour
 
             if (!playerBelowBlock)
             {
+                //If the player did not hit the bottom of the block set it to disappear.
                 state = State.Disappearing;
                 timer = timeToDisappear;
             }

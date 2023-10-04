@@ -19,6 +19,7 @@ public class Spike : MonoBehaviour
     {
         repelDirection.Normalize();
 
+        //Adjust the repel direction of the spike based on it's rotation.
         if (transform.rotation.eulerAngles.z % 360f != 0f)
         {
             Quaternion rotation = Quaternion.Euler(0f, 0f, transform.rotation.z);
@@ -52,6 +53,7 @@ public class Spike : MonoBehaviour
 
             if (strawberry != null)
             {
+                //If the player hit the spike damage them.
                 collisionNormal = other.GetContact(0).normal;
                 modifiedRepelDirection = GetRepelDirection(strawberry, collisionNormal);
 
@@ -64,6 +66,7 @@ public class Spike : MonoBehaviour
 
             if (enemy != null)
             {
+                //If an enemy hit the spike damage them.
                 if (enemy.GetVisible())
                 {
                     collisionNormal = other.GetContact(0).normal;
@@ -77,6 +80,7 @@ public class Spike : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D other)
     {
+        //Damage the player or enemy if they couldn't be damaged upon entering a collision with the spike.
         bool isPlayer = other.gameObject.CompareTag("Player");
         bool isEnemy = other.gameObject.CompareTag("Enemy");
 
@@ -86,6 +90,7 @@ public class Spike : MonoBehaviour
         {
             Strawberry strawberry = other.gameObject.GetComponent<Strawberry>();
 
+            //If the player hit the spike damage them.
             if (strawberry != null)
             {
                 collisionNormal = other.GetContact(0).normal;
@@ -98,6 +103,7 @@ public class Spike : MonoBehaviour
         {
             Enemy enemy = other.gameObject.GetComponent<Enemy>();
 
+            //If an enemy hit the spike damage them.
             if (enemy != null)
             {
                 if (enemy.GetVisible())
@@ -119,15 +125,18 @@ public class Spike : MonoBehaviour
 
         if (collisionNormal.x == 0f)
         {
+            //If the collision was vertical.
             float horizontalVelocity = strawberry.GetHorizontalVelocity();
 
             if (horizontalVelocity == 0f)
             {
+                //If the player is not moving only repel them vertically.
                 modifiedRepelDirection.x = 0f;
                 modifiedRepelDirection.Normalize();
             }
             else
             {
+                //Use the player's velocity to set the direction of the repel force.
                 modifiedRepelDirection.x *= Mathf.Sign(horizontalVelocity);
             }
 
@@ -135,8 +144,10 @@ public class Spike : MonoBehaviour
         }
         else
         {
+            //If the collision was horizontal.
             Quaternion rotation = Quaternion.Euler(0f, 0f, 90f);
             
+            //Rotate the repel direction to be horizontal.
             modifiedRepelDirection = rotation * modifiedRepelDirection;
             modifiedRepelDirection.y = Mathf.Abs(modifiedRepelDirection.y);
             modifiedRepelDirection.x *= collisionNormal.x;
@@ -151,15 +162,18 @@ public class Spike : MonoBehaviour
 
         if (collisionNormal.x == 0f)
         {
+            //If the collision was vertical.
             float horizontalVelocity = enemy.GetHorizontalVelocity();
 
             if (horizontalVelocity == 0f)
             {
+                //If the enemy is not moving only repel them vertically.
                 modifiedRepelDirection.x = 0f;
                 modifiedRepelDirection.Normalize();
             }
             else
             {
+                //Use the enemy's velocity to set the direction of the repel force.
                 modifiedRepelDirection.x *= Mathf.Sign(horizontalVelocity);
             }
 
@@ -167,8 +181,10 @@ public class Spike : MonoBehaviour
         }
         else
         {
+            //If the collision was horizontal.
             Quaternion rotation = Quaternion.Euler(0f, 0f, 90f);
 
+            //Rotate the repel direction to be horizontal.
             modifiedRepelDirection = rotation * modifiedRepelDirection;
             modifiedRepelDirection.y = Mathf.Abs(modifiedRepelDirection.y);
             modifiedRepelDirection.x *= collisionNormal.x;

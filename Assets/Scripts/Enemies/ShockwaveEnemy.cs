@@ -57,6 +57,7 @@ public class ShockwaveEnemy : Enemy
                 {
                     FacePlayer();
 
+                    //If the enemy can attack jump.
                     if (attackTimer <= 0f && grounded)
                     {
                         rb.velocity = new Vector2(0f, jumpStrength);
@@ -67,11 +68,13 @@ public class ShockwaveEnemy : Enemy
                 {
                     if (!startedAttack && rb.velocity.y <= 0f)
                     {
+                        //If the enemy hasn't already started going down, move downwards.
                         rb.velocity = new Vector2(0f, -bellyFlopStrength);
                         startedAttack = true;
                     }
                     else if (startedAttack)
                     {
+                        //Whilst the enemy is moving down damage the player if they are hit.
                         PerformDownwardsAttack();
                     }
                 }             
@@ -114,6 +117,7 @@ public class ShockwaveEnemy : Enemy
 
             for (int i = 0; i < contacts.Length; i++)
             {
+                //Get whether the platform that was hit is below the enemy.
                 if (contacts[i].normal.y == 1f)
                 {
                     isFloor = true;
@@ -121,12 +125,14 @@ public class ShockwaveEnemy : Enemy
                 }
             }
 
+            //If the enemy was attacking and hit the floor.
             if (state == State.Attacking && isFloor)
             {
                 if (shockwave != null)
                 {
                     Vector2 shockwaveDirection = Vector2.left;
 
+                    //Create two shockwaves, with one going left and the other going right.
                     for (int i = 0; i < 2; i++)
                     {
                         CreateShockwave(shockwaveDirection);
@@ -134,6 +140,7 @@ public class ShockwaveEnemy : Enemy
                     }
                 }
 
+                //Set the enemy as no longer attacking.
                 attackTimer = attackCooldown;
                 startedJump = false;
                 startedAttack = false;
@@ -148,7 +155,6 @@ public class ShockwaveEnemy : Enemy
         bool scared;
         bool abovePlayer;
 
-
         switch (state)
         {
             case State.Default:
@@ -162,10 +168,12 @@ public class ShockwaveEnemy : Enemy
 
                     if (scared && attackTimer > 0f)
                     {
+                        //If the enemy can't attack set it to be scared.
                         SetScared();
                     }
                     else if (distanceFromPlayer < attackRange && !abovePlayer)
                     {
+                        //If the player is in range of the enemy set it to attack.
                         state = State.Alerted;
                         alertTimer = alertDuration;
                     }
@@ -176,6 +184,7 @@ public class ShockwaveEnemy : Enemy
                 {
                     playerDefeated = strawberry.GetDefeated();
 
+                    //If the enemy can't attack yet and the player is alive check whether they should be set as scared.
                     if (!playerDefeated)
                     {
                         abovePlayer = strawberry.GetAbovePlayer(activeCollider.bounds.min.y);
@@ -248,10 +257,12 @@ public class ShockwaveEnemy : Enemy
         Vector2 boxPosition = new Vector2(activeCollider.bounds.center.x, activeCollider.bounds.min.y - attackCheckWidth * 0.5f);
         Vector2 boxSize = new Vector2(activeCollider.bounds.size.x, attackCheckWidth);
 
+        //Check if the player is within a box below the enemy.
         Collider2D player = Physics2D.OverlapBox(boxPosition, boxSize, 0f, playerMask);
 
         if (player != null)
         {
+            //If the player as hit damage them.
             float directionToPlayer = GetDirectionToPlayer();
             strawberry.TakeDamge(bellyFlopDamage, bellyFlopRepelDirection * new Vector2(directionToPlayer, 1f), bellyFlopRepelStrength);
         }
@@ -259,6 +270,7 @@ public class ShockwaveEnemy : Enemy
 
     private void CreateShockwave(Vector2 direction)
     {
+        //Instantiate the shockwave object and set it's position and direction.
         GameObject createdShockwave = Instantiate(shockwave);
         float shockwaveHeight = createdShockwave.GetComponent<SpriteRenderer>().bounds.extents.y;
         createdShockwave.transform.position = new Vector2(transform.position.x, activeCollider.bounds.min.y + shockwaveHeight);

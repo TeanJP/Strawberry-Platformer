@@ -32,6 +32,7 @@ public class Heart : MonoBehaviour
     {
         if (activated)
         {
+            //Move towards the player.
             Vector2 movementDirection = GetMovementDirection();            
             Vector2 movement = rb.velocity + (movementDirection * acceleration * Time.deltaTime);
 
@@ -51,6 +52,7 @@ public class Heart : MonoBehaviour
 
             if (!stunned)
             {
+                //If the player is not stunned pick up the heart.
                 strawberry.AddHeart(score);
                 Destroy(gameObject);
             }
@@ -67,11 +69,13 @@ public class Heart : MonoBehaviour
         this.strawberry = strawberry;
         activated = true;
 
+        //Set the heart to move towards the player.
         rb.velocity = GetMovementDirection() * initialSpeed;
     }
 
     protected Vector2 GetMovementDirection()
     {
+        //Adjust the direction of the heart to move towards that of the player.
         Vector2 currentDirection = rb.velocity.normalized;
         Vector2 targetDirection = strawberry.GetCentre() - (Vector2)transform.position;
         targetDirection.Normalize();
@@ -80,6 +84,7 @@ public class Heart : MonoBehaviour
 
         if (difference.magnitude < targetLeniency)
         {
+            //If the difference between the direction to the player and the current direction is small enough don't change the direction.
             return currentDirection;
         }
         else

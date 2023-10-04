@@ -43,17 +43,20 @@ public class Key : MonoBehaviour
 
             Collider2D other = Physics2D.OverlapCapsule(capsuleCentre, capsuleSize, CapsuleDirection2D.Vertical, 0f, playerMask);
 
+            //If the player is within range of the key.
             if (other != null)
             {
                 Strawberry strawberry = other.GetComponent<Strawberry>();
 
                 if (strawberry != null)
                 {
+                    //If the player is not stunned.
                     if (!strawberry.GetStunned())
                     {
+                        //Activate the key.
                         this.strawberry = strawberry;
                         activated = true;
-
+                      
                         rb.velocity = GetMovementDirection() * initialSpeed;
                     }
                 }
@@ -61,6 +64,7 @@ public class Key : MonoBehaviour
         }
         else if (activated)
         {
+            //Move towards the player if the key is activated.
             Vector2 movementDirection = GetMovementDirection();
             Vector2 movement = rb.velocity + (movementDirection * acceleration * Time.deltaTime);
 
@@ -78,6 +82,7 @@ public class Key : MonoBehaviour
         {
             bool stunned = strawberry.GetStunned();
 
+            //If the player collided with the key and were not stunned set the game as in the escape phase.
             if (!stunned)
             {
                 GameManager.Instance.StartEscape();
@@ -98,6 +103,7 @@ public class Key : MonoBehaviour
 
     private Vector2 GetMovementDirection()
     {
+        //Adjust the direction of the key to move towards that of the player.
         Vector2 currentDirection = rb.velocity.normalized;
         Vector2 targetDirection = strawberry.GetCentre() - (Vector2)transform.position;
         targetDirection.Normalize();
@@ -106,6 +112,7 @@ public class Key : MonoBehaviour
 
         if (difference.magnitude < targetLeniency)
         {
+            //If the difference between the direction to the player and the current direction is small enough don't change the direction.
             return currentDirection;
         }
         else

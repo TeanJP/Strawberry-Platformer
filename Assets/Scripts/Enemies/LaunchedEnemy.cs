@@ -38,6 +38,7 @@ public class LaunchedEnemy : EnemyProjectile
     {
         if (activated)
         {
+            //If the launched enemy has been fired out of a cannon make it move and deal damage to anything in front of it.
             rb.velocity = direction * movementSpeed;
             Attack();
         }
@@ -48,6 +49,7 @@ public class LaunchedEnemy : EnemyProjectile
         bool platform = other.gameObject.CompareTag("Platform");
         bool breakable = other.gameObject.CompareTag("Breakable");
 
+        //If the launched enemy collided with a platform destroy it unless it is the cannon that it was fired from.
         if ((platform || breakable) && other.gameObject != cannon && activated)
         {
             Crash();
@@ -58,8 +60,10 @@ public class LaunchedEnemy : EnemyProjectile
     {
         Vector2 boxPosition = (Vector2)activeCollider.bounds.center + relativeBoxPosition;
 
+        //Get all the targets of the launched enemy.
         Collider2D[] targets = Physics2D.OverlapBoxAll(boxPosition, boxSize, 0f, targetMask);
 
+        //Loop through all the targets that were found.
         for (int i = 0; i < targets.Length; i++)
         {
             GameObject target = targets[i].gameObject;
@@ -76,6 +80,7 @@ public class LaunchedEnemy : EnemyProjectile
 
             Vector2 modifiedRepelDirection = repelDirection;
 
+            //Set the repel direction of the launched enemy based on whether it is flying vertically or horizontally.
             if (direction.x == 0f)
             {
                 modifiedRepelDirection.x *= Mathf.Sign(target.transform.position.x - activeCollider.bounds.center.x);
@@ -85,14 +90,13 @@ public class LaunchedEnemy : EnemyProjectile
                 modifiedRepelDirection.x *= Mathf.Sign(direction.x);
             }
 
+            //Deal damage to the target based on whether they were the player, an enemy or another launched enemy.
             if (player)
             {
                 target.GetComponentInParent<Strawberry>().TakeDamge(damage, modifiedRepelDirection, repelStrength);
             }
             else if (enemy)
             {
-
-
                 target.GetComponent<Enemy>().TakeDamage(false, lethalDamage, 0f, modifiedRepelDirection, repelStrength);
             }
             else if (launchedEnemy && target != gameObject)
@@ -113,6 +117,7 @@ public class LaunchedEnemy : EnemyProjectile
 
         transform.Rotate(0f, 0f, Vector2.SignedAngle(direction * new Vector2(-1f, 1f), Vector2.up));
 
+        //Adjust the position of the attack hit box based on whether the launched enemy if travelling horizontally or vertically.
         if (transform.rotation.eulerAngles.z % 180f == 0f)
         {
             boxSize = new Vector2(activeCollider.bounds.size.x - attackReduction, attackWidth);
@@ -144,6 +149,7 @@ public class LaunchedEnemy : EnemyProjectile
     {
         health -= damage;
 
+        //If the launched enemy has run out of health destroy it.
         if (health <= 0)
         {
             Destroy(gameObject);

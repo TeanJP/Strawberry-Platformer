@@ -65,6 +65,7 @@ public class RangedEnemy : Enemy
 
                         if (currentShots == 0)
                         {
+                            //If the enemy ran out of shots set it to reload.
                             reloadTimer = reloadDuration;
                         }
                         else
@@ -120,10 +121,12 @@ public class RangedEnemy : Enemy
 
                     if (scared && currentShots == 0)
                     {
+                        //If the enemy should be scared of the player and can't attack set it to be scared.
                         SetScared();
                     }
                     else if (distanceFromPlayer < attackRange && !abovePlayer)
                     {
+                        //If the player is within range and can be seen by the enemy set the enemy to start attacking.
                         state = State.Alerted;
                         alertTimer = alertDuration;
                     }
@@ -134,6 +137,7 @@ public class RangedEnemy : Enemy
 
                 if (playerDefeated)
                 {
+                    //If the player was defeated stop attacking.
                     state = State.Default;
                 }
                 else
@@ -142,6 +146,7 @@ public class RangedEnemy : Enemy
                     distanceFromPlayer = GetDistanceFromPlayer();
                     scared = GetScared();
 
+                    //If the enemy should be scared of the player and can't attack set it to be scared.
                     if (scared && currentShots == 0)
                     {
                         float facingDirection = GetFacingDirection();
@@ -159,6 +164,7 @@ public class RangedEnemy : Enemy
                     }
                     else if (distanceFromPlayer > attackRange || abovePlayer)
                     {
+                        //If the player goes out of range and sight of the enemy stop them from attacking.
                         state = State.Default;
                     }
                 }
@@ -200,6 +206,7 @@ public class RangedEnemy : Enemy
 
     private void CreateProjectile()
     {
+        //Create a projectile and set it's direction and position based on that of the enemy.
         GameObject createdProjectile = Instantiate(projectile, (Vector2)gunTransform.position + gunBarrelOffset, Quaternion.identity);
 
         float horizontalDirection = GetFacingDirection();
@@ -222,6 +229,7 @@ public class RangedEnemy : Enemy
         {
             reloadTimer -= deltaTime;
 
+            //If the enemy has completed it's reload, give it more shots.
             if (reloadTimer <= 0f)
             {
                 currentShots = maxShots;
