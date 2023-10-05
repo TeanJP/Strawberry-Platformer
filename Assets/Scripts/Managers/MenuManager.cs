@@ -10,6 +10,7 @@ public abstract class MenuManager : MonoBehaviour
 
     public void OpenScreen(GameObject newScreen)
     {
+        //Hide the current menu screen and make the provided one visible.
         currentScreen.SetActive(false);
         newScreen.SetActive(true);
         currentScreen = newScreen;

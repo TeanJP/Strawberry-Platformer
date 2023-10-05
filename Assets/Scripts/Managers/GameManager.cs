@@ -87,6 +87,7 @@ public class GameManager : MonoBehaviour
         checkpointManager = GetComponent<CheckpointManager>();
         checkpointManager.LoadCurrentCheckpoint();
 
+        //Spawn and save an instance of the player.
         Vector2 spawnPosition = checkpointManager.GetCurrentCheckpointPosition();
         strawberryInstance = SpawnPlayer(spawnPosition);
 
@@ -105,24 +106,30 @@ public class GameManager : MonoBehaviour
             escapeToggleBlocks.SetActive(false);
         }
 
+        //Make sure the game is not paused.
         Time.timeScale = 1f;
     }
 
     void Update()
     {
+        //If the player tries to pause the game and is in a state where the game can be paused.
         if (Input.GetKeyDown(KeyCode.Escape) && gameState != GameState.GameOver && gameState != GameState.GameWon)
         {
+            //Toggle whether the game is paused.
             gamePaused = !gamePaused;
             pauseScreen.SetActive(gamePaused);
 
             if (gamePaused)
             {
+                //Display the player's stats on the pause screen.
                 pauseMenuManager.ResetCurrentScreen();
                 pauseMenuManager.UpdateStatsDisplay();
+                //Pause the game.
                 Time.timeScale = 0f;
             }
             else
             {
+                //Set the game to play.
                 Time.timeScale = 1f;
             }
         }
@@ -140,6 +147,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
+                    //Set the player as defeated when they run out of time.
                     strawberryInstance.SetDefeated();
                 }
                 break;
@@ -150,6 +158,7 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
+                    //Save the player's stats and reload the level.
                     scoreManager.SaveCheckpointScore();
                     scoreManager.IncrementDeathCount();
                     scoreManager.SaveTimeInLevel();
@@ -174,6 +183,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < colliders.Length; i++)
         {
+            //Get the values of the collider that is active on the player.
             if (colliders[i].enabled)
             {
                 halfHeight = colliders[i].bounds.extents.y;
@@ -184,9 +194,11 @@ public class GameManager : MonoBehaviour
 
         Vector2 spawnOffset = new Vector2(0f, halfHeight + offset * -1f);
 
+        //Set the position and rotation of the player.
         createdPlayer.transform.position = spawnPosition + spawnOffset;
         createdPlayer.transform.rotation = Quaternion.identity;
 
+        //Set the inital direction of the player.
         if (initialDirection == HorizontalDirection.Right)
         {
             createdPlayer.transform.localScale *= new Vector2(-1f, 1f);
@@ -211,6 +223,7 @@ public class GameManager : MonoBehaviour
         
         levelReloadTimer = levelReloadDelay;
         
+        //Stop the camera from following the player.
         cameraBehaviour.enabled = false;
     }
 
@@ -238,6 +251,7 @@ public class GameManager : MonoBehaviour
     {
         if (gamePaused)
         {
+            //Hide the pause screen and set the game as not paused.
             gamePaused = false;
             pauseScreen.SetActive(gamePaused);
             Time.timeScale = 1f;
@@ -248,6 +262,7 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.Escape;
 
+        //Start and display the escape timer.
         escapeTimer = escapeTimeLimit;
         escapeTimerText.gameObject.SetActive(true);
         escapeTimerText.text = GetTimerText(escapeTimer);

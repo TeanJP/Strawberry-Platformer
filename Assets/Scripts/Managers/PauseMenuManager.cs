@@ -34,6 +34,7 @@ public class PauseMenuManager : MenuManager
 
     public void RestartLevel()
     {
+        //Reset all the values associated with the player's progress in the level.
         scoreManager.ResetCheckpointScore();
         scoreManager.ResetDeathCount();
         scoreManager.ResetTimeInLevel();
@@ -51,6 +52,7 @@ public class PauseMenuManager : MenuManager
 
     public void UpdateStatsDisplay()
     {
+        //Display the player's stats in the pause menu.
         deathCountText.text = scoreManager.GetDeathCount().ToString("n0");
         timeInLevelText.text = GetTimerText(scoreManager.GetTimeInLevel());
     }
@@ -61,6 +63,7 @@ public class PauseMenuManager : MenuManager
 
         int minutesCount = 0;
 
+        //Work out how many minutes are in the timer.
         while (timerValue >= 60f)
         {
             timerValue -= 60f;
@@ -69,14 +72,17 @@ public class PauseMenuManager : MenuManager
 
         string minutes = minutesCount.ToString();
 
+        //When the minutes are a single digit add a 0 in front.
         if (minutesCount < 10)
         {
             minutes = "0" + minutes;
         }
 
+        //Get how many seconds are left in the timer.
         int secondsCount = Mathf.FloorToInt(timerValue);
         string seconds = secondsCount.ToString();
 
+        //When the seconds are a single digit add a 0 in front.
         if (secondsCount < 10)
         {
             seconds = "0" + seconds;
@@ -84,9 +90,11 @@ public class PauseMenuManager : MenuManager
 
         timerValue -= secondsCount;
 
+        //Round the milliseconds to 2 decimal places.
         int millisecondsCount = Mathf.CeilToInt(timerValue * 100f);
         string milliseconds = millisecondsCount.ToString();
 
+        //Add a 0 in front of the millisecond when they are a single digit.
         if (millisecondsCount < 10)
         {
             milliseconds = "0" + milliseconds;
@@ -96,6 +104,7 @@ public class PauseMenuManager : MenuManager
             milliseconds = milliseconds.Substring(0, 2);
         }
 
+        //Return a complete string of the timer.
         return minutes + ":" + seconds + ":" + milliseconds;
     }
 }

@@ -18,6 +18,7 @@ public class MainMenuManager : MenuManager
 
     public void LoadLevel(string levelToLoad)
     {
+        //Reset all of the values associated with the player's progress in the level.
         PlayerPrefs.SetInt("Current Checkpoint", 0);
         PlayerPrefs.SetInt("Checkpoint Score", 0);
         PlayerPrefs.SetInt("Death Count", 0);

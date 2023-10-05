@@ -110,12 +110,14 @@ public class SettingsManager : MonoBehaviour
 
         if (PlayerPrefs.HasKey("Settings"))
         {
+            //If the player's settings have been saved before load them.
             settings = JsonUtility.FromJson<Settings>(PlayerPrefs.GetString("Settings"));
 
             int resolutionIndex = GetResolutionIndex(settings.GetResolution(), settings.GetRefreshRate());
 
             if (resolutionIndex == -1)
             {
+                //If the saved resolution isn't available load the default resolution.
                 int lastResolution = resolutions.Length - 1;
                 Vector2Int resolution = new Vector2Int(resolutions[lastResolution].width, resolutions[lastResolution].height);
                 int refreshRate = resolutions[lastResolution].refreshRate;
@@ -130,6 +132,7 @@ public class SettingsManager : MonoBehaviour
         }
         else
         {
+            //If the player's settings can't be found save the default settings.
             int lastResolution = resolutions.Length - 1;
             Vector2Int resolution = new Vector2Int(resolutions[lastResolution].width, resolutions[lastResolution].height);
             int refreshRate = resolutions[lastResolution].refreshRate;
@@ -139,19 +142,23 @@ public class SettingsManager : MonoBehaviour
             SaveSettings();
         }
 
+        //Apply the loaded settings to the game.
         ApplySettings();
 
+        //Update the full screen mode UI.
         fullScreenModeDropDown.AddOptions(GetFullScreenModeStrings());
         fullScreenModeDropDown.value = FullScreenModeToValue();
 
         vSyncCountDropDown.value = settings.GetVSyncCount();
 
+        //Get the UI elements that are used for the target frame rate setting.
         targetFrameRateToggle = targetFrameRateSettings.transform.GetChild(0).GetComponent<Toggle>();
         targetFrameRateSlider = targetFrameRateSettings.transform.GetChild(1).GetComponent<Slider>();
         targetFrameRateField = targetFrameRateSettings.transform.GetChild(2).GetComponent<TMP_InputField>();
 
         int targetFrameRate = settings.GetTargetFrameRate();
         
+        //Update the target frame rate UI.
         targetFrameRateToggle.isOn = targetFrameRate > 0;
         targetFrameRateSlider.value = targetFrameRate;
         targetFrameRateField.text = targetFrameRateSlider.value.ToString();
@@ -161,6 +168,7 @@ public class SettingsManager : MonoBehaviour
     {
         List<string> resolutionStrings = new List<string>();
 
+        //Convert all the resolutions provided into strings in the correct format for the drop down list.
         foreach (Resolution resolution in resolutions)
         {
             resolutionStrings.Add(resolution.width + "x" + resolution.height + " " + resolution.refreshRate + "Hz");
@@ -176,6 +184,7 @@ public class SettingsManager : MonoBehaviour
         fullScreenModes.Add("Windowed");
         fullScreenModes.Add("Borderless Full Screen");
 
+        //Add the exclusive full screen option if the platform is Windows.
         if (Application.platform == RuntimePlatform.WindowsPlayer)
         {
             fullScreenModes.Add("Exclusive Full Screen");
@@ -186,6 +195,7 @@ public class SettingsManager : MonoBehaviour
 
     public void OnFrameRateLimitToggleChange()
     {
+        //Adjust whether the player can change the target frame rate if the toggle for it is changed.
         bool active = targetFrameRateToggle.isOn;
 
         targetFrameRateSlider.interactable = active;
@@ -195,11 +205,13 @@ public class SettingsManager : MonoBehaviour
     public void OnFrameRateLimitFieldEdit()
     {
         int value = int.Parse(targetFrameRateField.text);
+        //Prevent the player from setting the frame rate above or below the limits.
         value = Mathf.Clamp(value, (int)targetFrameRateSlider.minValue, (int)targetFrameRateSlider.maxValue);
         targetFrameRateField.text = value.ToString();
 
         if (targetFrameRateSlider.value != value)
         {
+            //Make the target frame rate slider reflect the target frame rate field.
             targetFrameRateSlider.value = value;
         }
     }
@@ -210,12 +222,14 @@ public class SettingsManager : MonoBehaviour
 
         if (targetFrameRateField.text != value)
         {
+            //Make the target frame rate field reflect the target frame rate slider.
             targetFrameRateField.text = value;
         }
     }
 
     public void ApplyChanges()
     {
+        //Update the settings object.
         Vector2Int resolution = new Vector2Int(resolutions[resolutionDropDown.value].width, resolutions[resolutionDropDown.value].height);
         settings.SetResolution(resolution);
         settings.SetRefreshRate(resolutions[resolutionDropDown.value].refreshRate);
@@ -230,12 +244,15 @@ public class SettingsManager : MonoBehaviour
             settings.SetTargetFrameRate(-1);
         }
 
+        //Set the game's settings based on the player's choices.
         ApplySettings();
+        //Save the player's settings.
         SaveSettings();
     }
 
     private void ApplySettings()
     {
+        //Set the game's settings using the values in the settings object.
         Vector2Int resolution = settings.GetResolution();
         int refreshRate = settings.GetRefreshRate();
         Screen.SetResolution(resolution.x, resolution.y, settings.GetFullScreenMode(), refreshRate);
@@ -243,6 +260,7 @@ public class SettingsManager : MonoBehaviour
         QualitySettings.vSyncCount = vSyncCount;
         if (vSyncCount == 0)
         {
+            //If VSync is not applied use the target frame rate that the player set.
             Application.targetFrameRate = settings.GetTargetFrameRate();
         }
     }
@@ -254,6 +272,7 @@ public class SettingsManager : MonoBehaviour
 
     private int GetResolutionIndex(Vector2 searchResolution, int searchRefreshRate)
     {
+        //Search the list of the resolutions that the monitor supports and compare them against the resolution to find.
         for (int i = 0; i < resolutions.Length; i++)
         {
             if (resolutions[i].width == searchResolution.x && resolutions[i].height == searchResolution.y && resolutions[i].refreshRate == searchRefreshRate)
@@ -267,6 +286,7 @@ public class SettingsManager : MonoBehaviour
 
     private FullScreenMode GetFullScreenMode()
     {
+        //Convert the string value of the full screen mode drop down to a full screen mode.
         string value = fullScreenModeDropDown.options[fullScreenModeDropDown.value].text;
 
         if (value == "Exclusive Full Screen")
@@ -285,6 +305,7 @@ public class SettingsManager : MonoBehaviour
 
     private int FullScreenModeToValue()
     {
+        //Convert the full screen mode to the value of the drop down list.
         FullScreenMode fullScreenMode = settings.GetFullScreenMode();
 
         if (fullScreenMode == FullScreenMode.ExclusiveFullScreen)
@@ -303,6 +324,7 @@ public class SettingsManager : MonoBehaviour
 
     public void Back(GameObject previousScreen)
     {
+        //If the player exits the settings screen update the settings UI to reflect the currently saved settings.
         int resolutionIndex = GetResolutionIndex(settings.GetResolution(), settings.GetRefreshRate());
         
         if (resolutionIndex == -1)

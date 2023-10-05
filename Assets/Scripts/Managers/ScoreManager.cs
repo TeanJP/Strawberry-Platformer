@@ -82,6 +82,7 @@ public class ScoreManager : MonoBehaviour
             timeInLevel = PlayerPrefs.GetFloat("Time in Level");
         }
 
+        //Load the player's score at the last checkpoint they hit.
         if (PlayerPrefs.HasKey("Checkpoint Score"))
         {
             score = PlayerPrefs.GetInt("Checkpoint Score");
@@ -90,6 +91,7 @@ public class ScoreManager : MonoBehaviour
 
         string levelHighScore = gameManager.GetActiveSceneName() + " High Score";
 
+        //Get the player's high score fore this level.
         if (PlayerPrefs.HasKey(levelHighScore))
         {
             highScore = PlayerPrefs.GetInt(levelHighScore);
@@ -101,12 +103,15 @@ public class ScoreManager : MonoBehaviour
 
         comboTimer = comboDecayTime;
 
+        //Get the combo UI.
         comboCountText = comboDisplay.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         comboTimerDisplay = comboDisplay.transform.GetChild(2).transform.GetChild(1).GetComponent<Image>();
         comboScoreText = comboDisplay.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
 
+        //Hide the combo screen.
         comboDisplay.SetActive(false);
 
+        //Hide the results screen.
         scoreScreen.SetActive(false);
     }
 
@@ -124,6 +129,7 @@ public class ScoreManager : MonoBehaviour
 
             comboTimerDisplay.fillAmount = Mathf.Max(0f, comboTimer / comboDecayTime);
 
+            //If the player's combo has ended updated their score.
             if (comboTimer <= 0f)
             {
                 EndCombo();
@@ -133,6 +139,7 @@ public class ScoreManager : MonoBehaviour
 
     public void AddScore(int scoreToAdd)
     {
+        //If the player is starting a combo display the UI for it.
         if (!comboDisplay.activeInHierarchy)
         {
             comboDisplay.SetActive(true);
@@ -140,12 +147,14 @@ public class ScoreManager : MonoBehaviour
 
         comboCount++;
 
+        //Work out how much to multiply the combo score by.
         if (comboCount % comboStep == 0 && comboMultiplier != maxComboMultiplier)
         {
             comboMultiplier = 1f + (multiplierStep * comboCount / 10);
         }
 
-        comboScore += scoreToAdd; 
+        comboScore += scoreToAdd;
+        //Reset the time until the combo expires.
         comboTimer = comboDecayTime;
 
         UpdateComboText();
@@ -179,10 +188,12 @@ public class ScoreManager : MonoBehaviour
 
     public void EndCombo()
     {
+        //Add to the player's total score.
         score += Mathf.RoundToInt(comboScore * comboMultiplier);
 
         UpdateScoreText();
 
+        //Reset the values associated with combos.
         comboCount = 0;
         comboScore = 0;
         comboMultiplier = 1f;
@@ -227,6 +238,7 @@ public class ScoreManager : MonoBehaviour
 
         finalScoreText.text = score.ToString("n0");
 
+        //Get the bonuses the the player receives based on their number of deaths, overall time taken and escape time and then display them.
         int timeBonus = GetBonus(timeInLevel, timeBonusLimit, timeBonusTarget, maxTimeBonus);
         
         DisplayBonus(timeBonusDisplay, GetTimerText(timeInLevel), timeInLevel, timeBonusLimit, timeBonusTarget, timeBonus.ToString("n0"));
@@ -248,6 +260,7 @@ public class ScoreManager : MonoBehaviour
 
         if (totalScore > highScore)
         {
+            //If the player's total score is better than their previous high score, save it as their new high score.
             PlayerPrefs.SetInt(gameManager.GetActiveSceneName() + " High Score", totalScore);
         }
     }
