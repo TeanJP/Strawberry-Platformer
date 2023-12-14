@@ -27,7 +27,7 @@ public class EnemyShockwave : EnemyProjectile
 
         shockwaveTimer = shockwaveDuration;
 
-        movementStep = spriteRenderer.bounds.extents.x;
+        movementStep = spriteRenderer.bounds.size.x;
 
         horizontalRaycastSpacing = spriteRenderer.bounds.size.y / (horizontalRaycasts - 1);
     }

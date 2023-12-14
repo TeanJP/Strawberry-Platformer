@@ -170,7 +170,7 @@ MonoBehaviour:
   attackRange: 7.5
   attackCooldown: 1
   projectile: {fileID: 2359528188337511226, guid: 670f20898916f634fa720ea12fb03ebf, type: 3}
-  gunBarrelOffset: {x: 0.25, y: 0}
+  gunBarrelOffset: {x: 0.385, y: 0.08}
   reloadDuration: 3
   maxShots: 6
 --- !u!95 &8502024558691964556

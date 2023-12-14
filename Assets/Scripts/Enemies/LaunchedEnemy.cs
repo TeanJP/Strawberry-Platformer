@@ -4,8 +4,19 @@ using UnityEngine;
 
 public class LaunchedEnemy : EnemyProjectile
 {
+    private enum State
+    {
+        Loading,
+        Activated,
+        Defeated
+    }
+
+    private State state = State.Loading;
+
     [SerializeField]
     private float movementSpeed = 5f;
+    [SerializeField]
+    private float fallSpeed = 2.5f;
 
     [SerializeField]
     private LayerMask targetMask;
@@ -27,32 +38,67 @@ public class LaunchedEnemy : EnemyProjectile
 
     private GameObject cannon = null;
 
-    private bool activated = false;
+    [SerializeField]
+    private float collisionRepelStrength = 3f;
+    [SerializeField]
+    private Vector2 collisionRepelDirection = new Vector2(1f, 1f);
 
     protected override void Start()
     {
         base.Start();
+        collisionRepelDirection.Normalize();
     }
 
     void Update()
     {
-        if (activated)
+        //If the launched enemy has been fired out of a cannon make it move and deal damage to anything in front of it.
+        switch (state)
         {
-            //If the launched enemy has been fired out of a cannon make it move and deal damage to anything in front of it.
-            rb.velocity = direction * movementSpeed;
-            Attack();
+            case State.Activated:
+                rb.velocity = direction * movementSpeed;
+                Attack();
+                break;
+            case State.Defeated:
+                if (!spriteRenderer.isVisible)
+                {
+                    Destroy(gameObject);
+                }
+                break;
         }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        bool platform = other.gameObject.CompareTag("Platform");
-        bool breakable = other.gameObject.CompareTag("Breakable");
-
-        //If the launched enemy collided with a platform destroy it unless it is the cannon that it was fired from.
-        if ((platform || breakable) && other.gameObject != cannon && activated)
+        if (state == State.Activated)
         {
-            Crash();
+            bool platform = other.gameObject.CompareTag("Platform");
+            bool breakable = other.gameObject.CompareTag("Breakable");
+
+            //If the launched enemy collided with a platform destroy it unless it is the cannon that it was fired from.
+            if ((platform || breakable) && other.gameObject != cannon)
+            {
+                Vector2 repelDirection = Vector2.zero;
+
+                if (direction.x == 0f)
+                {
+                    repelDirection.y = direction.y * -1f;
+                    repelDirection.x = 1f;
+
+                    if (Random.value < 0.5f)
+                    {
+                        repelDirection.x *= -1f;
+                    }
+                }
+                else
+                {
+                    repelDirection.x = direction.x * -1f;
+                    repelDirection.y = 1f;
+                }
+
+                //Apply knockback from the wall based on travel direction.
+                rb.velocity = (repelDirection * collisionRepelDirection) * collisionRepelStrength;
+                Crash();
+            }
         }
     }
 
@@ -137,22 +183,32 @@ public class LaunchedEnemy : EnemyProjectile
 
     public void Crash()
     {
-        Destroy(gameObject);
+        state = State.Defeated;
+        
+        activeCollider.enabled = false;
+
+        spriteRenderer.maskInteraction = SpriteMaskInteraction.None;
+
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = fallSpeed;
     }
 
     public void Activate()
     {
-        activated = true;
+        state = State.Activated;
     }
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-
-        //If the launched enemy has run out of health destroy it.
-        if (health <= 0)
+        if (state == State.Activated)
         {
-            Destroy(gameObject);
+            health -= damage;
+
+            //If the launched enemy has run out of health destroy it.
+            if (health <= 0)
+            {
+                Crash();
+            }
         }
     }
 }

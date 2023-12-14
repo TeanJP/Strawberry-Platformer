@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    [SerializeField]
+    private Sprite activatedSprite = null;
+    private bool activated = false;
+
     private GameManager gameManager = null;
     private CheckpointManager checkpointManager = null;
 
@@ -24,7 +28,20 @@ public class Checkpoint : MonoBehaviour
             {
                 //If the player collided with the checkpoint set the current checkpoint to this checkpoint.
                 checkpointManager.SetCurrentCheckpoint(this);
+
+                if (!activated)
+                {
+                    ActivateCheckpoint();
+                }
             }
         }
+    }
+
+    public void ActivateCheckpoint()
+    {
+        activated = true;
+
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = activatedSprite;
     }
 }

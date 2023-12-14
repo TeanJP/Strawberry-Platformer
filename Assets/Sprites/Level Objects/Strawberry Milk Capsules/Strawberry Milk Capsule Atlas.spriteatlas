@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Strawberry Milk Capsule Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 3fae2d292f7e2bd4092e7601563ca12c, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 03611260a322be440b80b116f9881b05, type: 3}
+  - {fileID: 21300000, guid: 45409c90880cda642a3e43a4de8fde49, type: 3}
+  - {fileID: 21300000, guid: ce3322d207dbd494d9739e0c8980bfc1, type: 3}
+  - {fileID: 21300000, guid: cf9d98d2e01e01a428cfa31994348843, type: 3}
+  - {fileID: 21300000, guid: 66af17e2a59820543b93ce7eda374430, type: 3}
+  - {fileID: 21300000, guid: 35041ed3ef60ca84da5bc502256b7610, type: 3}
+  - {fileID: 21300000, guid: 1051a834e0f65b448a568cecb973d4df, type: 3}
+  - {fileID: 21300000, guid: 732702a4817e9c845a76a846d8242d39, type: 3}
+  - {fileID: 21300000, guid: aa0a2cb4135f0ad4999c4d030acf243a, type: 3}
+  - {fileID: 21300000, guid: 67921a775c6190641bc521a796f77cf9, type: 3}
+  - {fileID: 21300000, guid: c2f685a7e4e397e499aa4ae73705b0c7, type: 3}
+  - {fileID: 21300000, guid: 411ed7288025c924da5536b52c3decbb, type: 3}
+  - {fileID: 21300000, guid: e7b1a809a4fe3ab4685061418e2bad0a, type: 3}
+  - {fileID: 21300000, guid: dc71cb2af88c6ed40aa8bb67d4983c20, type: 3}
+  - {fileID: 21300000, guid: 49d125ba83f5f1941822d94c0dfdf609, type: 3}
+  - {fileID: 21300000, guid: 8d830aba79eb2c040ac0b89c003f3bc8, type: 3}
+  - {fileID: 21300000, guid: d7bdceda5a6b976409e482e866936804, type: 3}
+  - {fileID: 21300000, guid: 7788fa1b87dad054fb9a62265ddaa7dc, type: 3}
+  - {fileID: 21300000, guid: 9a81256c589554c4f95494b001e6cc04, type: 3}
+  - {fileID: 21300000, guid: 276c838cf8ff9064cb1d32d185343c7c, type: 3}
+  - {fileID: 21300000, guid: 6145469cd2d31b74b89a5ddeabdeb797, type: 3}
+  - {fileID: 21300000, guid: 2d64708ef39a1474db400020ea30cba5, type: 3}
+  - {fileID: 21300000, guid: 6eb53b8ec29d2774eb4872fb63f5e3c6, type: 3}
+  - {fileID: 21300000, guid: 5a8c830f729d10f4b914359bf4163f4b, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Strawberry Milk Capsule 1
+  - Strawberry Milk Capsule 3
+  - Strawberry Milk Capsule 9
+  - Strawberry Milk Capsule 2
+  - Strawberry Milk Capsule 11
+  - Strawberry Milk Capsule 15
+  - Strawberry Milk Capsule 24
+  - Strawberry Milk Capsule 4
+  - Strawberry Milk Capsule 22
+  - Strawberry Milk Capsule 8
+  - Strawberry Milk Capsule 16
+  - Strawberry Milk Capsule 13
+  - Strawberry Milk Capsule 6
+  - Strawberry Milk Capsule 19
+  - Strawberry Milk Capsule 10
+  - Strawberry Milk Capsule 21
+  - Strawberry Milk Capsule 5
+  - Strawberry Milk Capsule 7
+  - Strawberry Milk Capsule 17
+  - Strawberry Milk Capsule 18
+  - Strawberry Milk Capsule 12
+  - Strawberry Milk Capsule 20
+  - Strawberry Milk Capsule 14
+  - Strawberry Milk Capsule 23
+  m_RenderDataMap: {}
+  m_Tag: Strawberry Milk Capsule Atlas
+  m_IsVariant: 0

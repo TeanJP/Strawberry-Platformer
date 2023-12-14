@@ -206,8 +206,10 @@ public class RangedEnemy : Enemy
 
     private void CreateProjectile()
     {
+        Vector2 enemyDirection = new Vector2(GetFacingDirection(), 1f);
+
         //Create a projectile and set it's direction and position based on that of the enemy.
-        GameObject createdProjectile = Instantiate(projectile, (Vector2)gunTransform.position + gunBarrelOffset, Quaternion.identity);
+        GameObject createdProjectile = Instantiate(projectile, (Vector2)gunTransform.position + gunBarrelOffset * enemyDirection, Quaternion.identity);
 
         float horizontalDirection = GetFacingDirection();
         Vector2 projectileDirection = new Vector2(horizontalDirection, 0f);

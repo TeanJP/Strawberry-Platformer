@@ -31,6 +31,8 @@ public class CheckpointManager : MonoBehaviour
                 //If the saved checkpoint is not valid for this level, set the current checkpoint as the first one.
                 currentCheckpoint = 0;
             }
+
+            checkpoints[currentCheckpoint].ActivateCheckpoint();
         }
     }
 

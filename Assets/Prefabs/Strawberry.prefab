@@ -107,11 +107,12 @@ MonoBehaviour:
   - {r: 0.73333335, g: 0.85490197, b: 0.75686276, a: 1}
   - {r: 0.73333335, g: 0.7607843, b: 0.92941177, a: 1}
   - {r: 0.81960785, g: 0.5921569, b: 0.92941177, a: 1}
-  attackDelay: 0.2
+  attackDelay: 0.1
   maxEnergy: 18
   projectileCost: 1
   energyRechargeRate: 2
   projectileOffset: {x: 0, y: 0.05}
+  projectileSpeed: 16
   platformMask:
     serializedVersion: 2
     m_Bits: 32832

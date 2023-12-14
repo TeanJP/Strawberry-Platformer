@@ -107,7 +107,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &3686210856205472202
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -150,9 +150,12 @@ MonoBehaviour:
   repelDirection: {x: 1, y: 1}
   repelStrength: 6
   movementSpeed: 5
+  fallSpeed: 2.5
   targetMask:
     serializedVersion: 2
     m_Bits: 4352
   attackWidth: 0.04
   attackReduction: 0.02
   health: 5
+  collisionRepelStrength: 6
+  collisionRepelDirection: {x: 1, y: 1}
