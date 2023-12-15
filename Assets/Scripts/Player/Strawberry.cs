@@ -100,6 +100,7 @@ public class Strawberry : MonoBehaviour
     [SerializeField]
     private CapsuleCollider2D halfTrigger = null;
     private Animator animator = null;
+    private AfterImageEffect afterImageEffect = null;
     #endregion
 
     #region Managers
@@ -297,6 +298,8 @@ public class Strawberry : MonoBehaviour
         heartsLevel = heartsDisplay.GetChild(2).GetChild(1).GetComponent<Image>();
 
         UpdateHeartsDisplay();
+
+        afterImageEffect = GetComponent<AfterImageEffect>();
     }
 
     void Update()
@@ -908,6 +911,7 @@ public class Strawberry : MonoBehaviour
     private void ApplyAnimation()
     {
         string animationToPlay = currentAnimation;
+        bool displayAfterImage = false;
 
         //Check the movement state of the player and apply the appropriate animation.
         switch (movementState)
@@ -948,15 +952,35 @@ public class Strawberry : MonoBehaviour
                         {
                             animationToPlay = "Strawberry Run Jump";
                         }
+
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            displayAfterImage = true;
+                        }
                         break;
                     case RunState.Rolling:
                         animationToPlay = "Strawberry Roll";
+
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            displayAfterImage = true;
+                        }
                         break;
                     case RunState.Turning:
                         animationToPlay = "Strawberry Run Turn";
+
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            displayAfterImage = true;
+                        }
                         break;
                     case RunState.Stopping:
                         animationToPlay = "Strawberry Run Drift";
+
+                        if (currentSpeed >= maxRunSpeed)
+                        {
+                            displayAfterImage = true;
+                        }
                         break;
                     case RunState.WallRunning:
                         animationToPlay = "Strawberry Wall Run";
@@ -966,9 +990,11 @@ public class Strawberry : MonoBehaviour
                         break;
                     case RunState.Diving:
                         animationToPlay = "Strawberry Dive";
+                        displayAfterImage = true;
                         break;
                     case RunState.SuperJumping:
                         animationToPlay = "Strawberry Super Jump";
+                        displayAfterImage = true;
                         break;
                     case RunState.ChargingSuperJump:
                         if (horizontalInput == 0f || !grounded)
@@ -982,6 +1008,7 @@ public class Strawberry : MonoBehaviour
                         break;
                     case RunState.CancellingSuperJump:
                         animationToPlay = "Strawberry Run Jump";
+                        displayAfterImage = true;                      
                         break;
                 }
                 break;
@@ -1011,6 +1038,7 @@ public class Strawberry : MonoBehaviour
                 break;
             case MovementState.BellyFlopping:
                 animationToPlay = "Strawberry Flop";
+                displayAfterImage = true;
                 break;
             case MovementState.Stunned:
                 if (activeCollider == halfCollider)
@@ -1039,6 +1067,11 @@ public class Strawberry : MonoBehaviour
         {
             animator.Play(animationToPlay);
             currentAnimation = animationToPlay;
+        }
+
+        if (displayAfterImage)
+        {
+            afterImageEffect.Display(GetPlayerDirection() * -1f);
         }
     }
 

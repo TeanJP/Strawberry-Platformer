@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 6151032129827649328}
   - component: {fileID: 6151032129827649329}
   - component: {fileID: 2127565012179767498}
+  - component: {fileID: 4473204264500191778}
   m_Layer: 7
   m_Name: Strawberry
   m_TagString: Player
@@ -471,3 +472,27 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &4473204264500191778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6151032129827649289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e12b3016d7958a4691c2c038c3ca7db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  afterImage: {fileID: 6864789132400626530, guid: 0079ce5552e6c914da412e052cbdda1a, type: 3}
+  afterImageCount: 6
+  colours:
+  - {r: 0.99607843, g: 0.5921569, b: 0.77254903, a: 1}
+  - {r: 0.99607843, g: 0.70980394, b: 0.67058825, a: 1}
+  - {r: 0.99215686, g: 0.85490197, b: 0.67058825, a: 1}
+  - {r: 0.73333335, g: 0.85490197, b: 0.75686276, a: 1}
+  - {r: 0.73333335, g: 0.7607843, b: 0.92941177, a: 1}
+  - {r: 0.81960785, g: 0.5921569, b: 0.92941177, a: 1}
+  targetSpriteRenderer: {fileID: 6151032129827649290}
+  afterImageDuration: 0.5
+  delayDuration: 0.15

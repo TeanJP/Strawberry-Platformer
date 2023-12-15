@@ -48,6 +48,9 @@ TagManager:
   - name: Level Objects
     uniqueID: 1683095099
     locked: 0
+  - name: After Images
+    uniqueID: 817428049
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

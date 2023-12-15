@@ -153,5 +153,5 @@ MonoBehaviour:
   shockwaveDuration: 0.2
   platformMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 32832
   raycastLength: 0.02
