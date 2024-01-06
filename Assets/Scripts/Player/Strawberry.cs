@@ -327,7 +327,12 @@ public class Strawberry : MonoBehaviour
             ApplyInputs(grounded, hittingWall, hittingNonBreakableWall, hittingCeiling, hittingNonBreakableCeiling, hittingNonBreakableFloor);
             Move(grounded);
             Attack();
-            DecrementTimers(Time.deltaTime);
+
+            if (movementState != MovementState.Defeated)
+            {
+                DecrementTimers(Time.deltaTime);
+            }
+
             ApplyAnimation();
 
             //If the player is not stunned collect any nearby hearts.
