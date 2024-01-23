@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class DroppedHeart : Heart
 {
+    private SpriteRenderer spriteRenderer = null;
+
     [SerializeField]
     private float lifeSpanDuration = 8f;
     private float lifeSpanTimer = 0f;
@@ -15,13 +17,28 @@ public class DroppedHeart : Heart
 
     private Vector2 initialVelocity;
 
+    private Color initialColour;
+    private Color currentColour;
+
+    [SerializeField][Range(0f, 1f)]
+    private float fadeStart = 0.25f;
+    private float fadeDuration;
+    private float fadeTimer;
+
     protected override void Start()
     {
         base.Start();
 
+        spriteRenderer = GetComponent<SpriteRenderer>();
         physicsCollider = transform.GetChild(0).GetComponent<CircleCollider2D>();
 
         lifeSpanTimer = lifeSpanDuration;
+
+        fadeDuration = lifeSpanDuration * fadeStart;
+        fadeTimer = fadeDuration;
+
+        initialColour = spriteRenderer.color;
+        currentColour = initialColour;
 
         rb.velocity = initialVelocity;
     }
@@ -37,6 +54,13 @@ public class DroppedHeart : Heart
             if (lifeSpanTimer < 0f)
             {
                 Destroy(gameObject);
+            }
+            else if (lifeSpanTimer < fadeDuration)
+            {
+                fadeTimer -= Time.deltaTime;
+
+                currentColour.a = Mathf.Lerp(0f, initialColour.a, fadeTimer / fadeDuration);
+                spriteRenderer.color = currentColour;
             }
         }
 

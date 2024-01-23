@@ -11,10 +11,17 @@ public class Checkpoint : MonoBehaviour
     private GameManager gameManager = null;
     private CheckpointManager checkpointManager = null;
 
+    private ParticleSystem starEffect = null;
+
     void Start()
     {
         gameManager = GameManager.Instance;
         checkpointManager = gameManager.GetCheckpointManager();
+
+        if (starEffect == null)
+        {
+            SetStarEffect();
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -37,11 +44,18 @@ public class Checkpoint : MonoBehaviour
         }
     }
 
+    public void SetStarEffect()
+    {
+        starEffect = GetComponent<ParticleSystem>();
+    }
+
     public void ActivateCheckpoint()
     {
         activated = true;
 
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = activatedSprite;
+
+        starEffect.Play();
     }
 }

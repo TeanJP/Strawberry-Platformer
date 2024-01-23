@@ -32,6 +32,7 @@ public class CheckpointManager : MonoBehaviour
                 currentCheckpoint = 0;
             }
 
+            checkpoints[currentCheckpoint].SetStarEffect();
             checkpoints[currentCheckpoint].ActivateCheckpoint();
         }
     }
