@@ -237,6 +237,8 @@ public class Strawberry : MonoBehaviour
     private float heartActivationDistance = 1.5f;
     [SerializeField]
     private LayerMask heartMask;
+
+    private HeartDisplay heartDisplay = null;
     #endregion
 
     #region Attack Values
@@ -256,11 +258,6 @@ public class Strawberry : MonoBehaviour
     private int minimumDamage = 1;
     [SerializeField]
     private float minimumRepelStrength = 1f;
-    #endregion
-
-    #region HUD Elements
-    private TextMeshProUGUI heartsCounter = null;
-    private Image heartsLevel = null;
     #endregion
 
     void Start()
@@ -292,12 +289,9 @@ public class Strawberry : MonoBehaviour
         superJumpCancelDirection.Normalize();
         collisionRepelDirection.Normalize();
 
-        //Get the UI elements that display the player's health.
-        Transform heartsDisplay = gameManager.GetStrawberryHeartsDisplay().transform;
-        heartsCounter = heartsDisplay.GetChild(1).GetComponent<TextMeshProUGUI>();
-        heartsLevel = heartsDisplay.GetChild(2).GetChild(1).GetComponent<Image>();
-
-        UpdateHeartsDisplay();
+        //Get heart display and make it display the player's current hearts.
+        heartDisplay = gameManager.GetStrawberryHeartDisplay();
+        heartDisplay.Refresh(hearts, maxHearts);
 
         afterImageEffect = GetComponent<AfterImageEffect>();
     }
@@ -1545,7 +1539,7 @@ public class Strawberry : MonoBehaviour
             RepelPlayer(repelDirection, repelStrength);
 
             //Update the hearts UI.
-            UpdateHeartsDisplay();
+            heartDisplay.Refresh(hearts, maxHearts);
         }
     }
 
@@ -1772,7 +1766,7 @@ public class Strawberry : MonoBehaviour
             scoreManager.AddScore(score);
         }
 
-        UpdateHeartsDisplay();
+        heartDisplay.Refresh(hearts, maxHearts);
     }
 
     private void ActivateHearts()
@@ -1816,13 +1810,8 @@ public class Strawberry : MonoBehaviour
             dropDirection = rotation * dropDirection;
         }      
     }
-
-    private void UpdateHeartsDisplay()
-    {
-        heartsCounter.text = hearts.ToString();
-        heartsLevel.fillAmount = (float)hearts / (float)maxHearts;
-    }
     #endregion
+    
 
     #region Offscreen Checks
     public bool GetLyingDown()

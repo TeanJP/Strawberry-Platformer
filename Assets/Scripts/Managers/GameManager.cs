@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject lecheEnergyDisplay = null;
     [SerializeField]
-    private GameObject strawberryHeartsDisplay = null;
+    private HeartDisplay strawberryHeartDisplay = null;
     [SerializeField]
     private GameObject pauseScreen = null;
     private PauseMenuManager pauseMenuManager = null;
@@ -237,9 +237,9 @@ public class GameManager : MonoBehaviour
         return lecheEnergyDisplay;
     }
 
-    public GameObject GetStrawberryHeartsDisplay()
+    public HeartDisplay GetStrawberryHeartDisplay()
     {
-        return strawberryHeartsDisplay;
+        return strawberryHeartDisplay;
     }
 
     public bool GetGamePaused()

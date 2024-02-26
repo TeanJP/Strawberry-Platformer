@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Strawberry Milk Atlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 2
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 4
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 6194a535a3d3c9449ba955cc3885358b, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 02c9f4313bba0934eafd210057e9f2e5, type: 3}
+  - {fileID: 21300000, guid: 4453d181733ff474a8b10e230c859c82, type: 3}
+  - {fileID: 21300000, guid: e7689c22052df2448ac2be2ffb12ecb1, type: 3}
+  - {fileID: 21300000, guid: db4ca232f57f58146af26c250eda92cf, type: 3}
+  - {fileID: 21300000, guid: 04850ed2db526ff41a5a7c22b3e49efe, type: 3}
+  - {fileID: 21300000, guid: 6d4a2623f0d9809448e2ce5dfb6b45e9, type: 3}
+  - {fileID: 21300000, guid: 1678a863ccf25324392b3814c71df14d, type: 3}
+  - {fileID: 21300000, guid: 1a64de8389576b044a0a7cc3b61a29dc, type: 3}
+  - {fileID: 21300000, guid: 2d4c33043c3774d4881c203cd911909a, type: 3}
+  - {fileID: 21300000, guid: d5fa5205633abea47a10e36302bdbd1f, type: 3}
+  - {fileID: 21300000, guid: 9cf0ebb5ac3776e48a7da01466441eb6, type: 3}
+  - {fileID: 21300000, guid: 6bd9592783ccbd04385cd29b8c01e20c, type: 3}
+  - {fileID: 21300000, guid: 22b3edc70cf505944958bbdd5739042a, type: 3}
+  - {fileID: 21300000, guid: 41a261282c8059b4297a27f029d8b476, type: 3}
+  - {fileID: 21300000, guid: 8f4b3be84d8b0834e8d8f90a7a7ce1ad, type: 3}
+  - {fileID: 21300000, guid: 775280b979ee9634db7402542c0cc81d, type: 3}
+  - {fileID: 21300000, guid: 13404bc92ff8b9c43ab614e23d276c28, type: 3}
+  - {fileID: 21300000, guid: d1000cd9acb543049a33b3dadd5950a5, type: 3}
+  - {fileID: 21300000, guid: 37c38fea84952544b890e6940f16020e, type: 3}
+  - {fileID: 21300000, guid: 3c336b8b50788084e8ac2155a062c847, type: 3}
+  - {fileID: 21300000, guid: c7d3cebdfc4e82547a5c162061874938, type: 3}
+  - {fileID: 21300000, guid: 59d2fe4ed374df64f85f07d752b100e4, type: 3}
+  - {fileID: 21300000, guid: 9008926e9f25a174b91f0acce1f771de, type: 3}
+  - {fileID: 21300000, guid: 0f615b0fa1c785649a4412d0e7c1744e, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Strawberry Milk 3
+  - Strawberry Milk 8
+  - Strawberry Milk 20
+  - Strawberry Milk 5
+  - Strawberry Milk 9
+  - Strawberry Milk 19
+  - Strawberry Milk 18
+  - Strawberry Milk 14
+  - Strawberry Milk 23
+  - Strawberry Milk 21
+  - Strawberry Milk 13
+  - Strawberry Milk 24
+  - Strawberry Milk 2
+  - Strawberry Milk 11
+  - Strawberry Milk 22
+  - Strawberry Milk 10
+  - Strawberry Milk 16
+  - Strawberry Milk 1
+  - Strawberry Milk 6
+  - Strawberry Milk 15
+  - Strawberry Milk 7
+  - Strawberry Milk 12
+  - Strawberry Milk 4
+  - Strawberry Milk 17
+  m_RenderDataMap: {}
+  m_Tag: Strawberry Milk Atlas
+  m_IsVariant: 0
